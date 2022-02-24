@@ -368,11 +368,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			MultiSelectComboBox comboBox = sender as MultiSelectComboBox;
 			if (comboBox != null)
 			{
+				if (comboBox.IsDropDownOpen)
+					comboBox.IgnoreDropdownClosingFocusPlanUntil = DateTime.Now.AddSeconds(1);
 				comboBox.CloseDropdownMenu(comboBox.ClearFilterOnDropdownClosing, false);
 				comboBox.CaptureMouse();
 				comboBox.ReleaseMouseCapture();
 			}
 		}
+		private DateTime? IgnoreDropdownClosingFocusPlanUntil;
 
 		public override void OnApplyTemplate()
 		{
@@ -1234,6 +1237,8 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 		private void DropdownMenuClosed(object sender, System.EventArgs e)
 		{
+			if (IgnoreDropdownClosingFocusPlanUntil > DateTime.Now)
+				return;
 			FocusCursorOnFilterTextBox();
 		}
 
