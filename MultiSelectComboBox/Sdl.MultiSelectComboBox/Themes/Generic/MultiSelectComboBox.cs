@@ -1,4 +1,4 @@
-﻿using Sdl.MultiSelectComboBox.API;
+using Sdl.MultiSelectComboBox.API;
 using Sdl.MultiSelectComboBox.Controls;
 using Sdl.MultiSelectComboBox.EventArgs;
 using Sdl.MultiSelectComboBox.Services;
@@ -1238,7 +1238,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		private void DropdownMenuClosed(object sender, System.EventArgs e)
 		{
 			if (IgnoreDropdownClosingFocusPlanUntil > DateTime.Now)
+			{
+				IgnoreDropdownClosingFocusPlanUntil = null;//so only the first is ignored
 				return;
+			}
 			FocusCursorOnFilterTextBox();
 		}
 
