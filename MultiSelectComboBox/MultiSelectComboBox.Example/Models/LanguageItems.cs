@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,7 +32,7 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 		private bool _clearFilterOnDropdownClosing;
 		private bool _clearSelectionOnFilterChanged;
 		private string _selectionMode;
-        private List<LanguageItem> _allItems;
+        public List<LanguageItem> _allItems;
 
         public LanguageItems()
 		{
