@@ -521,6 +521,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			add => AddHandler(NewItemAddRequestEvent, value);
 			remove => RemoveHandler(NewItemAddRequestEvent, value);
 		}
+		public static readonly RoutedEvent ItemDeleteRequestEvent =
+			EventManager.RegisterRoutedEvent(nameof(ItemDeleteRequest), RoutingStrategy.Direct,
+				typeof(EventHandler<ItemDeleteRequestEventArgs>), typeof(MultiSelectComboBox));
+
+		public event EventHandler<NewItemAddRequestEventArgs> ItemDeleteRequest {
+			add => AddHandler(ItemDeleteRequestEvent, value);
+			remove => RemoveHandler(ItemDeleteRequestEvent, value);
+		}
 
 		public static readonly RoutedEvent FilterTextChangedEvent =
 			EventManager.RegisterRoutedEvent("FilterTextChanged", RoutingStrategy.Direct,
@@ -562,11 +570,25 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 		}
 
+
 		/// <summary>
-		/// Dependency property backing for the IsCreateNewEnabled property.
+		/// Dependency property backing for the EnableCreateNewItemUI property.
 		/// </summary>
 		public static readonly DependencyProperty EnableCreateNewItemUIProperty =
 			DependencyProperty.Register(nameof(EnableCreateNewItemUI), typeof(bool), typeof(MultiSelectComboBox));
+		/// <summary>
+		/// Get or set the value indicating whether the Create New Item button is visible in the drop down.
+		/// </summary>
+		public bool EnableDeleteItemUI {
+			get { return (bool)GetValue(EnableDeleteItemUIProperty); }
+			set { SetValue(EnableDeleteItemUIProperty, value); }
+		}
+
+		/// <summary>
+		/// Dependency property backing for the EnableCreateNewItemUI property.
+		/// </summary>
+		public static readonly DependencyProperty EnableDeleteItemUIProperty =
+			DependencyProperty.Register(nameof(EnableDeleteItemUI), typeof(bool), typeof(MultiSelectComboBox));
 		/// <summary>
 		/// Get or set the value indicating whether the Create New Item button is visible in the drop down.
 		/// </summary>
@@ -1057,6 +1079,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 					RaiseEvent(args);
 				}));
 		}
+		private void RaiseItemDeleteRequestEvent(ICollection items) {
+
+			Dispatcher.BeginInvoke(new Action(
+			delegate {
+				var args = new ItemDeleteRequestEventArgs(ItemDeleteRequestEvent, items);
+				RaiseEvent(args);
+			}));
+		}
 		private void RaiseFilterTextChangedEvent()
 		{
 			Dispatcher.BeginInvoke(new Action(
@@ -1214,9 +1244,15 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			{
 				if (IsEditable && IsRemoveItemButton(e))
 				{
+
+
 					var element = e.OriginalSource as FrameworkElement;
 					if (element?.DataContext is object item)
 					{
+						if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.LeftCtrl) && EnableDeleteItemUI) {
+							RaiseItemDeleteRequestEvent(new Collection<object>() { item });
+
+					}else
 						AttemptToRemoveSelectedItem(item);
 					}
 				}
