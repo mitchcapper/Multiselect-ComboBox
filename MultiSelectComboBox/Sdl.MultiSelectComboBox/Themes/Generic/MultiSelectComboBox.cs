@@ -547,7 +547,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			EventManager.RegisterRoutedEvent(nameof(ItemDeleteRequest), RoutingStrategy.Direct,
 				typeof(EventHandler<ItemDeleteRequestEventArgs>), typeof(MultiSelectComboBox));
 
-		public event EventHandler<NewItemAddRequestEventArgs> ItemDeleteRequest {
+		public event EventHandler<ItemDeleteRequestEventArgs> ItemDeleteRequest {
 			add => AddHandler(ItemDeleteRequestEvent, value);
 			remove => RemoveHandler(ItemDeleteRequestEvent, value);
 		}
