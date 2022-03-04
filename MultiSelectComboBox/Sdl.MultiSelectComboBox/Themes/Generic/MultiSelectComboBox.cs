@@ -1,4 +1,4 @@
-﻿using Sdl.MultiSelectComboBox.API;
+using Sdl.MultiSelectComboBox.API;
 using Sdl.MultiSelectComboBox.Controls;
 using Sdl.MultiSelectComboBox.EventArgs;
 using Sdl.MultiSelectComboBox.Services;
@@ -20,6 +20,8 @@ using System.Windows.Threading;
 
 namespace Sdl.MultiSelectComboBox.Themes.Generic
 {
+	
+
 	[TemplatePart(Name = PART_MultiSelectComboBox, Type = typeof(Grid))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_Dropdown, Type = typeof(Popup))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_Dropdown_ListBox, Type = typeof(ListBox))]
@@ -38,10 +40,13 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		private const string PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox = "PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox";
 		private const string PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox = "PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox";
 		private const string PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button = "PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button";
+		private const string PART_MultiSelectComboBox_Dropdown_NewItem_CreatedOkButton = "PART_MultiSelectComboBox_Dropdown_NewItem_CreatedOkButton";
+		private const string PART_MultiSelectComboBox_Dropdown_NewItem_TextBox = "PART_MultiSelectComboBox_Dropdown_NewItem_TextBox";
 
 		private const string MultiSelectComboBox_SelectedItems_ItemTemplate = "MultiSelectComboBox.SelectedItems.ItemTemplate";
 		private const string MultiSelectComboBox_SelectedItems_Searchable_ItemTemplate = "MultiSelectComboBox.SelectedItems.Searchable.ItemTemplate";
 		private const string MultiSelectComboBox_Dropdown_ListBox_ItemTemplate = "MultiSelectComboBox.Dropdown.ListBox.ItemTemplate";
+		
 
 		public MultiSelectComboBox()
 		{
@@ -406,8 +411,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 		}
 
+		private TextBox TextBoxNewItem;
 		private void InitializeInternalElements()
-		{
+		{		
 			if (SelectedItemsControl == null && MultiSelectComboBoxGrid != null)
 			{
 				SelectedItemsControl = VisualTreeService.FindVisualChild<ItemsControl>(MultiSelectComboBoxGrid, PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl);
@@ -423,6 +429,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 				if (DropdownMenu != null)
 				{
 					DropdownListBox = VisualTreeService.FindVisualChild<ListBox>(DropdownMenu.Child, PART_MultiSelectComboBox_Dropdown_ListBox);
+				}
+				var newItemCreated = VisualTreeService.FindVisualChild<Button>(DropdownMenu.Child, PART_MultiSelectComboBox_Dropdown_NewItem_CreatedOkButton);
+				if (newItemCreated != null) {
+					TextBoxNewItem = VisualTreeService.FindVisualChild<TextBox>(DropdownMenu.Child, PART_MultiSelectComboBox_Dropdown_NewItem_TextBox);
+					if (TextBoxNewItem != null) {
+						newItemCreated.Click += new RoutedEventHandler(NewItemCreated_Click);
+						TextBoxNewItem.KeyDown += (s, e) => { if (e.Key == Key.Enter) { e.Handled = true; NewItemCreated_Click(newItemCreated, null); } };
+					}
 				}
 			}
 
@@ -446,6 +460,11 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 					UpdateSelectedItemsContainer(ItemsSource);
 				}
 			}
+		}
+
+		private void NewItemCreated_Click(object sender, RoutedEventArgs e) {
+			RaiseNewItemAddRequestEvent(TextBoxNewItem.Text);
+			TextBoxNewItem.Text = "";
 		}
 
 		public enum SelectionModes
@@ -494,6 +513,15 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			set => SetValue(AutoCompleteMaxLengthProperty, value);
 		}
 
+		public static readonly RoutedEvent NewItemAddRequestEvent =
+			EventManager.RegisterRoutedEvent(nameof(NewItemAddRequest), RoutingStrategy.Direct,
+				typeof(EventHandler<NewItemAddRequestEventArgs>), typeof(MultiSelectComboBox));
+
+		public event EventHandler<NewItemAddRequestEventArgs> NewItemAddRequest {
+			add => AddHandler(NewItemAddRequestEvent, value);
+			remove => RemoveHandler(NewItemAddRequestEvent, value);
+		}
+
 		public static readonly RoutedEvent FilterTextChangedEvent =
 			EventManager.RegisterRoutedEvent("FilterTextChanged", RoutingStrategy.Direct,
 				typeof(EventHandler<FilterTextChangedEventArgs>), typeof(MultiSelectComboBox));
@@ -532,6 +560,19 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			{
 				control.ItemsCollectionViewSource = control.ItemsCollectionViewSource;
 			}
+		}
+
+		/// <summary>
+		/// Dependency property backing for the IsCreateNewEnabled property.
+		/// </summary>
+		public static readonly DependencyProperty EnableCreateNewItemUIProperty =
+			DependencyProperty.Register(nameof(EnableCreateNewItemUI), typeof(bool), typeof(MultiSelectComboBox));
+		/// <summary>
+		/// Get or set the value indicating whether the Create New Item button is visible in the drop down.
+		/// </summary>
+		public bool EnableCreateNewItemUI {
+			get { return (bool)GetValue(EnableCreateNewItemUIProperty); }
+			set { SetValue(EnableCreateNewItemUIProperty, value); }
 		}
 
 		public static readonly DependencyProperty EnableFilteringProperty =
@@ -1008,6 +1049,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 		}
 
+		private void RaiseNewItemAddRequestEvent(String TypedText) {
+			
+				Dispatcher.BeginInvoke(new Action(
+				delegate {
+					var args = new NewItemAddRequestEventArgs(NewItemAddRequestEvent, TypedText);
+					RaiseEvent(args);
+				}));
+		}
 		private void RaiseFilterTextChangedEvent()
 		{
 			Dispatcher.BeginInvoke(new Action(

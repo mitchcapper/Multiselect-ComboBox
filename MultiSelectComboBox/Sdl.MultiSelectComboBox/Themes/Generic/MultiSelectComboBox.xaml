@@ -14,8 +14,12 @@
     <SolidColorBrush x:Key="MultiSelectComboBox.DropDown.Button.MouseOver.Border" Color="#FF3C7FB1"/>
     <SolidColorBrush x:Key="MultiSelectComboBox.DropDown.Button.Pressed.Background" Color="#FFF4F4F4"/>
     <SolidColorBrush x:Key="MultiSelectComboBox.DropDown.Button.Pressed.Border" Color="#FF2C628B"/>
+	<SolidColorBrush x:Key="MultiSelectComboBox.DropDown.NewItem.Button.MouseOver.Background" Color="#FFF4F4F4"/>
+	<SolidColorBrush x:Key="MultiSelectComboBox.DropDown.NewItem.Button.MouseOver.Border" Color="#FF3C7FB1"/>
+	<SolidColorBrush x:Key="MultiSelectComboBox.DropDown.NewItem.Button.Pressed.Background" Color="#FFF4F4F4"/>
+	<SolidColorBrush x:Key="MultiSelectComboBox.DropDown.NewItem.Button.Pressed.Border" Color="#FF2C628B"/>
 
-    <SolidColorBrush x:Key="MultiSelectComboBox.DropDown.ListBox.GroupHeader.Background" Color="#f7f7f7"/>
+	<SolidColorBrush x:Key="MultiSelectComboBox.DropDown.ListBox.GroupHeader.Background" Color="#f7f7f7"/>
     <SolidColorBrush x:Key="MultiSelectComboBox.DropDown.ListBox.GroupHeader.Foreground" Color="Black"/>
 
     <SolidColorBrush x:Key="MultiSelectComboBox.DropDown.ListBoxItem.SelectedOrder.Foreground" Color="#5291DB"/>
@@ -97,8 +101,37 @@
             </Setter.Value>
         </Setter>
     </Style>
+	<Style x:Key="MultiSelectComboBox.DropDown.NewItem.Button.Style" TargetType="Button">
+		<Setter Property="OverridesDefaultStyle" Value="True" />
+		<Setter Property="FocusVisualStyle" Value="{StaticResource MultiSelectComboBox.FocusVisual}" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="TextBlock.FontSize" Value="10" />
+		<Setter Property="BorderBrush" Value="{x:Static SystemColors.WindowTextBrush}" />
+		<Setter Property="Template" >
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Border Padding="3,0" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True">
+						<ContentPresenter Content="{TemplateBinding Content}" />
+					</Border>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+		<Style.Triggers>
+			<Trigger Property="IsMouseOver" Value="True">
+				<Setter Property="Background" Value="{StaticResource MultiSelectComboBox.DropDown.Button.MouseOver.Background}"/>
+				<Setter Property="BorderBrush" Value="{StaticResource MultiSelectComboBox.DropDown.Button.MouseOver.Border}"/>
+			</Trigger>
+			<Trigger Property="IsPressed" Value="True">
+				<Setter Property="Background" Value="{StaticResource MultiSelectComboBox.DropDown.NewItem.Button.Pressed.Background}"/>
+				<Setter Property="BorderBrush" Value="{StaticResource MultiSelectComboBox.DropDown.NewItem.Button.Pressed.Border}"/>
+			</Trigger>
+		</Style.Triggers>
 
-    <Style x:Key="MultiSelectComboBox.DropDown.Button.Style" TargetType="{x:Type Button}">
+	</Style>
+	<Style x:Key="MultiSelectComboBox.DropDown.Button.Style" TargetType="{x:Type Button}">
         <Setter Property="Background" Value="{StaticResource MultiSelectComboBox.DropDown.Button.Background}"/>
         <Setter Property="BorderBrush" Value="{StaticResource MultiSelectComboBox.DropDown.Button.Border}"/>
         <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
@@ -365,45 +398,108 @@
         <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis"  Padding="7, 5" Margin="0,0,0,2" FontWeight="Bold" FontFamily="{StaticResource MultiSelectComboBox.Text.FontFamily}" Foreground="{StaticResource MultiSelectComboBox.DropDown.ListBox.GroupHeader.Foreground}" Background="{StaticResource MultiSelectComboBox.DropDown.ListBox.GroupHeader.Background}" />
     </DataTemplate>
 
-    <Style TargetType="{x:Type generic:MultiSelectComboBox}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type generic:MultiSelectComboBox}">
+	<Style TargetType="{x:Type generic:MultiSelectComboBox}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type generic:MultiSelectComboBox}">
+				
+					<Grid x:Name="PART_MultiSelectComboBox" Style="{StaticResource MultiSelectComboBox.Style}">
+						<ToggleButton KeyboardNavigation.TabNavigation="None" IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" IsTabStop="False">
+							<ToggleButton.Template>
+								<ControlTemplate TargetType="ToggleButton">
+									<ContentControl ContentTemplate="{StaticResource MultiSelectComboBox.SelectedItemsPanel.Template}"/>
+								</ControlTemplate>
+							</ToggleButton.Template>
+						</ToggleButton>
 
-                    <Grid x:Name="PART_MultiSelectComboBox" MaxHeight="{TemplateBinding ActualHeight}" MaxWidth="{TemplateBinding ActualWidth}" Style="{StaticResource MultiSelectComboBox.Style}">
-                        <ToggleButton KeyboardNavigation.TabNavigation="None" IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" IsTabStop="False">
-                            <ToggleButton.Template>
-                                <ControlTemplate TargetType="ToggleButton">
-                                    <ContentControl ContentTemplate="{StaticResource MultiSelectComboBox.SelectedItemsPanel.Template}"/>
-                                </ControlTemplate>
-                            </ToggleButton.Template>
-                        </ToggleButton>
+						<Popup x:Name="PART_MultiSelectComboBox_Dropdown" Margin="2" Grid.ColumnSpan="2" MinWidth="{Binding ActualWidth, ElementName=PART_MultiSelectComboBox}" MaxHeight="{Binding Path=MaxDropDownHeight, RelativeSource={RelativeSource TemplatedParent} }" PlacementTarget="{Binding ElementName=PART_MultiSelectComboBox}" IsOpen="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" MaxWidth="{TemplateBinding ActualWidth}" Placement="Bottom" AllowsTransparency="True" PopupAnimation="Slide">
+							<Border x:Name="dropDownBorder" Margin="0,1,0,0" BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" BorderThickness="0" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+								<Grid x:Name="grid" RenderOptions.ClearTypeHint="Enabled">
+									<Canvas x:Name="canvas" HorizontalAlignment="Left" Height="0" VerticalAlignment="Top" Width="0">
+										<Rectangle x:Name="opaqueRect" Fill="{Binding Background, ElementName=dropDownBorder}" Height="{Binding ActualHeight, ElementName=dropDownBorder}" Width="{Binding ActualWidth, ElementName=dropDownBorder}"/>
+									</Canvas>
+									<Grid>
+										<Grid.RowDefinitions>
+											<RowDefinition />
+											<RowDefinition Height="Auto"/>
+										</Grid.RowDefinitions>
+										<controls:ExtendedListBox x:Name="PART_MultiSelectComboBox_Dropdown_ListBox" Style="{StaticResource MultiSelectComboBox.Dropdown.ListBox.Style}">
+											<controls:ExtendedListBox.GroupStyle>
+												<GroupStyle HeaderTemplate="{StaticResource MultiSelectComboBox.Dropdown.ListBox.Header.Template}"/>
+											</controls:ExtendedListBox.GroupStyle>
+											<controls:ExtendedListBox.Resources>
+												<DataTemplate x:Key="MultiSelectComboBox.Dropdown.ListBox.ItemTemplate">
+													<TextBlock Text="{Binding}" Style="{StaticResource MultiSelectComboBox.DefaultTextBlock.Style}" Margin="2,2,2,3"/>
+												</DataTemplate>
+											</controls:ExtendedListBox.Resources>
+										</controls:ExtendedListBox>
+										<Grid Name="PART_MultiSelectComboBox_Dropdown_EditBoxGrid" Visibility="Collapsed" Grid.Row="1" Margin="5" >
+											<Button Name="PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton" HorizontalAlignment="Right" 
+                                         Style="{StaticResource MultiSelectComboBox.DropDown.NewItem.Button.Style}"
+                                        Content="Create New Item"
+                                        />
+											<Border Margin="3,0,3,3" Name="PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup" Visibility="Collapsed">
+												<Grid>
+													<Grid.ColumnDefinitions>
+														<ColumnDefinition Width="*"/>
+														<ColumnDefinition Width="Auto"/>
+													</Grid.ColumnDefinitions>
+													<TextBox Grid.Column="0" Background="White" Name="PART_MultiSelectComboBox_Dropdown_NewItem_TextBox"/>
+													<Button Name="PART_MultiSelectComboBox_Dropdown_NewItem_CreatedOkButton" 
+                                            Grid.Column="1" 
+                                            Margin="3" 
+                                            Content="Ok" Style="{StaticResource MultiSelectComboBox.DropDown.NewItem.Button.Style}"
+                                            
+                                            />
+												</Grid>
+											</Border>
+										</Grid>
+									</Grid>
+								</Grid>
+							</Border>
+						</Popup>
+					</Grid>
+					<ControlTemplate.Triggers>
+						<Trigger Property="EnableCreateNewItemUI" Value="True">
+							<Setter TargetName="PART_MultiSelectComboBox_Dropdown_EditBoxGrid" Property="Visibility" Value="Visible" />
+						</Trigger>
+						<EventTrigger SourceName="PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton" RoutedEvent="Button.Click">
+							<BeginStoryboard>
+								<Storyboard>
+									<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup" 
+                                                       Storyboard.TargetProperty="Visibility">
+										<DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Visible}" />
+									</ObjectAnimationUsingKeyFrames>
+									<DoubleAnimation Storyboard.TargetName="PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton" 
+                                         Storyboard.TargetProperty="Opacity" 
+                                         To="0" Duration="0:0:0"/>
+									<BooleanAnimationUsingKeyFrames Storyboard.TargetName="PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton" Storyboard.TargetProperty="IsTabStop">
+										<DiscreteBooleanKeyFrame Value="False" KeyTime="0:0:0" />
+									</BooleanAnimationUsingKeyFrames>
+								</Storyboard>
+							</BeginStoryboard>
+						</EventTrigger>
+						<EventTrigger SourceName="PART_MultiSelectComboBox_Dropdown_NewItem_CreatedOkButton" RoutedEvent="Button.Click">
+							<BeginStoryboard>
+								<Storyboard>
+									<ObjectAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup" Storyboard.TargetProperty="Visibility">
+										<DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Collapsed}" />
+									</ObjectAnimationUsingKeyFrames>
+									<DoubleAnimation Storyboard.TargetName="PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton" Storyboard.TargetProperty="Opacity" 
+                                             To="1" Duration="0:0:0"/>
+									<BooleanAnimationUsingKeyFrames Storyboard.TargetName="PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton" Storyboard.TargetProperty="IsTabStop">
+										<DiscreteBooleanKeyFrame Value="True" KeyTime="0:0:0" />
+									</BooleanAnimationUsingKeyFrames>
 
-                        <Popup x:Name="PART_MultiSelectComboBox_Dropdown" Margin="2" Grid.ColumnSpan="2" MinWidth="{Binding ActualWidth, ElementName=PART_MultiSelectComboBox}" MaxHeight="{Binding Path=MaxDropDownHeight, RelativeSource={RelativeSource TemplatedParent} }" PlacementTarget="{Binding ElementName=PART_MultiSelectComboBox}" IsOpen="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" MaxWidth="{TemplateBinding ActualWidth}" Placement="Bottom" AllowsTransparency="True" PopupAnimation="Slide">
-                            <Border x:Name="dropDownBorder" Margin="0,1,0,0" BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" BorderThickness="0" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
-                                <Grid x:Name="grid" RenderOptions.ClearTypeHint="Enabled">
-                                    <Canvas x:Name="canvas" HorizontalAlignment="Left" Height="0" VerticalAlignment="Top" Width="0">
-                                        <Rectangle x:Name="opaqueRect" Fill="{Binding Background, ElementName=dropDownBorder}" Height="{Binding ActualHeight, ElementName=dropDownBorder}" Width="{Binding ActualWidth, ElementName=dropDownBorder}"/>
-                                    </Canvas>
-                                    <controls:ExtendedListBox x:Name="PART_MultiSelectComboBox_Dropdown_ListBox" Style="{StaticResource MultiSelectComboBox.Dropdown.ListBox.Style}">
-                                        <controls:ExtendedListBox.GroupStyle>
-                                            <GroupStyle HeaderTemplate="{StaticResource MultiSelectComboBox.Dropdown.ListBox.Header.Template}"/>
-                                        </controls:ExtendedListBox.GroupStyle>
-                                        <controls:ExtendedListBox.Resources>
-                                            <DataTemplate x:Key="MultiSelectComboBox.Dropdown.ListBox.ItemTemplate">
-                                                <TextBlock Text="{Binding}" Style="{StaticResource MultiSelectComboBox.DefaultTextBlock.Style}" Margin="2,2,2,3"/>
-                                            </DataTemplate>
-                                        </controls:ExtendedListBox.Resources>
-                                    </controls:ExtendedListBox>
-                                </Grid>
-                            </Border>
-                        </Popup>
-                    </Grid>
+								</Storyboard>
+							</BeginStoryboard>
+						</EventTrigger>
+					</ControlTemplate.Triggers>
 
 
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 
 </ResourceDictionary>
