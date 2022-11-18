@@ -259,6 +259,8 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 				if (_selectedItemsControl != null)
 				{
+					AddFilterPlaceholderIfNeeded();
+
 					_selectedItemsControl.ItemsSource = SelectedItemsInternal;
 
 					if (SelectedItemTemplate == null)
@@ -717,9 +719,18 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 		}
 
+		public static readonly DependencyProperty AutoCompleteServiceProperty =
+			DependencyProperty.Register("AutoCompleteService", typeof(IAutoCompleteService), typeof(MultiSelectComboBox));
 
+		public IAutoCompleteService AutoCompleteService
+        {
+            get { return (IAutoCompleteService)GetValue(AutoCompleteServiceProperty); }
+            set { SetValue(AutoCompleteServiceProperty, value); }
+        }
 
-		public static readonly DependencyProperty IsDropDownOpenProperty =
+		private IAutoCompleteService CurrentAutoCompleteService => AutoCompleteService ?? DefaultAutoCompleteService.Instance;
+
+        public static readonly DependencyProperty IsDropDownOpenProperty =
 			DependencyProperty.Register("IsDropDownOpen", typeof(bool), typeof(MultiSelectComboBox),
 				new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
@@ -1099,11 +1110,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 				RaiseSelectedItemsChangedEvent(itemsAdded, itemsRemoved, selectedItems);
 			}
 
-			// Add a placeholder for the filter
-			if (!SelectedItemsInternal.Contains(null))
-			{
-				SelectedItemsInternal.Add(null);
-			}
+			AddFilterPlaceholderIfNeeded();
 		}
 
 		private void ConfigureSingleSelectionMode(ref Collection<object> itemsRemoved)
@@ -1285,6 +1292,24 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			get => (bool)GetValue(IsLoadingSuggestionsProperty);
 
 			set => SetValue(IsLoadingSuggestionsProperty, value);
+		}
+
+		public static readonly DependencyProperty SelectedItemsPanelBackgroundProperty =
+			DependencyProperty.Register("SelectedItemsPanelBackground", typeof(Brush), typeof(MultiSelectComboBox));
+
+		public Brush SelectedItemsPanelBackground
+		{
+			get => (Brush)GetValue(SelectedItemsPanelBackgroundProperty);
+			set => SetValue(SelectedItemsPanelBackgroundProperty, value);
+		}
+
+		public static readonly DependencyProperty DropDownPopupBackgroundProperty =
+			DependencyProperty.Register("DropDownPopupBackground", typeof(Brush), typeof(MultiSelectComboBox));
+
+		public Brush DropDownPopupBackground
+		{
+			get => (Brush)GetValue(DropDownPopupBackgroundProperty);
+			set => SetValue(DropDownPopupBackgroundProperty, value);
 		}
 
 		private void MultiSelectComboBoxOnPreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -1565,7 +1590,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 								if (DropdownListBox.Items[i] is object item)
 								{
 									var listBoxItem = GetListViewItem(item);
-									listBoxItem.IsChecked = !listBoxItem.IsChecked;
+									if (listBoxItem != null)
+									{
+										listBoxItem.IsChecked = !listBoxItem.IsChecked;
+									}
 								}
 							}
 						}
@@ -1576,7 +1604,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 								if (DropdownListBox.Items[i] is object item)
 								{
 									var listBoxItem = GetListViewItem(item);
-									listBoxItem.IsChecked = !listBoxItem.IsChecked;
+									if (listBoxItem != null)
+									{
+										listBoxItem.IsChecked = !listBoxItem.IsChecked;
+									}
 								}
 							}
 						}
@@ -1797,8 +1828,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		{
 			if (EnableAutoComplete && IsDropDownOpen && item != null && !IsSelectedItem(item) && SelectedItemsFilterAutoCompleteTextBox != null)
 			{
-				var index = criteria?.Length > 0 ? item.ToString().IndexOf(criteria, StringComparison.InvariantCultureIgnoreCase) : 0;
-				var autoCompleteText = index > -1 ? item.ToString().Substring(index + (criteria?.Length ?? 0)) : string.Empty;
+				string autoCompleteString = CurrentAutoCompleteService.GetAutoCompleteString(item) ?? string.Empty;
+				var index = criteria?.Length > 0 ? autoCompleteString.IndexOf(criteria, StringComparison.InvariantCultureIgnoreCase) : 0;
+				var autoCompleteText = index > -1 ? autoCompleteString.Substring(index + (criteria?.Length ?? 0)) : string.Empty;
 
 				if (AutoCompleteMaxLength > 0 && autoCompleteText.Length >= AutoCompleteMaxLength)
 				{
@@ -2065,6 +2097,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			foreach (var item in listItems)
 			{
 				item.IsChecked = isChecked;
+			}
+		}
+
+		private void AddFilterPlaceholderIfNeeded()
+		{
+			if (!SelectedItemsInternal.Contains(null))
+			{
+				SelectedItemsInternal.Add(null);
 			}
 		}
 	}
