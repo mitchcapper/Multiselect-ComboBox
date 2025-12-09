@@ -101,5 +101,20 @@ namespace Sdl.MultiSelectComboBox.Services
 
 			return foundFrameworkElement;
 		}
+
+		public static T FindVisualAncestor<T>(DependencyObject dependencyObject, string name = null) where T : DependencyObject
+		{
+			var parent = VisualTreeHelper.GetParent(dependencyObject);
+
+			if (parent == null) 
+				return default;
+
+			if (parent is T parentType && (string.IsNullOrEmpty(name) || (parent is FrameworkElement parentElement && parentElement.Name == name)))
+			{
+				return parentType;
+			}
+
+			return FindVisualAncestor<T>(parent, name);
+		}
 	}
 }

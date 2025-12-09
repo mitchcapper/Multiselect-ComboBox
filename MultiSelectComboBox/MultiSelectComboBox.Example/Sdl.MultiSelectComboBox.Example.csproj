@@ -43,7 +43,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(ProjectDir)Resources\Flags\*&quot; &quot;$(ProjectDir)$(OutDir)Flags\&quot; /c /s /y" />
+    <Exec Command="xcopy &quot;$(ProjectDir)Resources\Flags\*&quot; &quot;$(ProjectDir)$(OutDir)Flags\&quot; /c /s /y /d" />
   </Target>
 
 </Project>

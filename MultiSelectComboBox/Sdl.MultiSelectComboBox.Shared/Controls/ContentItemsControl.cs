@@ -14,5 +14,19 @@ namespace Sdl.MultiSelectComboBox.Controls
 		{
 			return new ContentControl();
 		}
+
+#if WINUI
+		protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
+		{
+			base.PrepareContainerForItemOverride(element, item);
+			
+			// If the item is null (Filter Placeholder), clear the Style to avoid the "X" button and border
+			// from the ItemContainerStyle applied by the ItemsControl.
+			if (item == null && element is Control control)
+			{
+				control.Style = null; 
+			}
+		}
+#endif
 	}
 }
