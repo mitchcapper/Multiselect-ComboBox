@@ -418,6 +418,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 					System.Diagnostics.Debug.WriteLine($"[WINUI] SearchableTemplate loaded: {searchableTemplate != null}");
 					
 					SelectedItemTemplateSelector = new SelectedItemTemplateService(SelectedItemTemplate, searchableTemplate);
+#if WINUI
+					_selectedItemsControl.ItemTemplateSelector = SelectedItemTemplateSelector;
+#endif
 
 #if WINUI
 					_selectedItemsControl.PointerPressed += SelectedItemsControl_OnPointerPressed;
@@ -684,9 +687,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 					System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownListBox (ListView): {(DropdownListBox != null ? "Found" : "NULL")}");
 					if (DropdownListBox != null)
 					{
-						DropdownListBox.SelectionChanged += DropdownListBoxSelectionChanged;
+						DropdownListBox.SelectionMode = ListViewSelectionMode.None; // We handle selection manually
+						DropdownListBox.IsItemClickEnabled = true;
+						DropdownListBox.ItemClick += DropdownListBoxItemClick;
 						DropdownListBox.KeyDown += DropdownListBoxKeyDown;
-						DropdownListBox.PointerReleased += DropdownListBoxPointerReleased;
 					}
 #else
 					DropdownListBox = VisualTreeService.FindVisualChild<ListBox>(DropdownMenu.Child, PART_MultiSelectComboBox_Dropdown_ListBox);
@@ -2324,29 +2328,27 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 		}
 
-		private void DropdownListBoxPointerReleased(object sender, PointerRoutedEventArgs e)
+		private void DropdownListBoxItemClick(object sender, ItemClickEventArgs e)
 		{
-			System.Diagnostics.Debug.WriteLine("[WINUI] DropdownListBoxPointerReleased");
-			var originalSource = e.OriginalSource as FrameworkElement;
-			if (originalSource?.DataContext is object comboBoxItem)
+			System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownListBoxItemClick - Item: {e.ClickedItem}");
+			if (e.ClickedItem != null)
 			{
-				var listBoxItem = GetListViewItem(comboBoxItem);
-				if (listBoxItem != null)
-				{
-					if (SelectionMode != SelectionModes.Single || !listBoxItem.IsChecked)
-					{
-						listBoxItem.IsChecked = !listBoxItem.IsChecked;
-						SetKeyBoardFocusOnItem(comboBoxItem);
-						UpdateSelectedItemsContainer(ItemsSource);
-					}
+				UpdateSelectedItems(e.ClickedItem);
 
-					if (SelectionMode == SelectionModes.Single)
-					{
-						CloseDropdownMenu(true, false);
-					}
+				// Force UI update for the item container
+				var container = DropdownListBox.ContainerFromItem(e.ClickedItem) as ExtendedListBoxItem;
+				if (container != null)
+				{
+					container.IsChecked = !container.IsChecked;
+				}
+
+				if (SelectionMode == SelectionModes.Single)
+				{
+					IsDropDownOpen = false;
 				}
 			}
 		}
+
 #else
 		private void DropdownListBoxPreviewKeyDown(object sender, KeyEventArgs e)
 		{
