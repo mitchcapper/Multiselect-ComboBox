@@ -38,6 +38,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
+	  <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" />
 	</ItemGroup>
 </Project>

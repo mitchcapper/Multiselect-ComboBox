@@ -1,13 +1,22 @@
-﻿using System.Windows;
+#if WINUI
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+#else
+using System.Windows;
 using System.Windows.Controls;
+#endif
 
 namespace Sdl.MultiSelectComboBox.Controls
 {
-	public class ExtendedListBoxItem: ListBoxItem
-	{		
+	public class ExtendedListBoxItem : ListBoxItem
+	{
 		public static readonly DependencyProperty IsCheckedProperty =
 			DependencyProperty.Register("IsChecked", typeof(bool), typeof(ExtendedListBoxItem),
+#if WINUI
+				new PropertyMetadata(false));
+#else
 				new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+#endif
 
 		public bool IsChecked
 		{

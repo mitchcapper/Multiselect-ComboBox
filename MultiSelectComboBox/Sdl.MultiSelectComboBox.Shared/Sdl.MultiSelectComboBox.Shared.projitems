@@ -16,11 +16,22 @@
     <Compile Include="$(MSBuildThisFileDirectory)API\IItemGroupAware.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API\IMultiSelectComboBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API\ISuggestionProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ContentItemsControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ExtendedListBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ExtendedListBoxItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\MultiSelectComboBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventArgs\FilterTextChangedEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs\FilterTextChangedEventArgsBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs\ItemDeleteRequestEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs\NewItemAddRequestEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventArgs\SelectedItemsChangedEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventArgs\SelectedItemsChangedEventArgsBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\SelectableItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\DefaultAutoCompleteService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\DefaultFilterService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\DropdownItemTemplateService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\GroupComparerService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\SelectedItemTemplateService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\VisualTreeService.cs" />
   </ItemGroup>
 </Project>

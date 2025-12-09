@@ -1,4 +1,3 @@
-using System;
 #if WINUI
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -16,10 +15,10 @@ namespace Sdl.MultiSelectComboBox.Services
 		{
 			if (parent == null)
 			{
-				return null;
+				return default;
 			}
 
-			T foundFrameworkElement = null;
+			T foundFrameworkElement = default;
 
 			var childrenCount = VisualTreeHelper.GetChildrenCount(parent);
 			for (var i = 0; i < childrenCount; i++)
@@ -30,7 +29,7 @@ namespace Sdl.MultiSelectComboBox.Services
 				{
 					foundFrameworkElement = FindVisualChild<T>(child, name);
 
-					if (foundFrameworkElement != null)
+					if (! foundFrameworkElement.Equals( default(T)))
 					{
 						break;
 					}
@@ -58,15 +57,15 @@ namespace Sdl.MultiSelectComboBox.Services
 			var source = dependencyObject as FrameworkElement;
 			var parent = source?.Parent;
 #if WINUI
-			// WinUI uses different approach for templated parent
-			var templatedParent = source?.Parent;
+			// WinUI doesn't have TemplatedParent - we walk up the visual tree instead
+			var templatedParent = VisualTreeHelper.GetParent(source);
 #else
 			var templatedParent = source?.TemplatedParent;
 #endif
 
 			if (source == null)
 			{
-				return null;
+				return default;
 			}
 
 			T foundFrameworkElement;

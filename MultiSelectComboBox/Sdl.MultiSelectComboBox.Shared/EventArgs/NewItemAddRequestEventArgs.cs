@@ -1,29 +1,46 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-
-namespace Sdl.MultiSelectComboBox.EventArgs {
-	public class NewItemAddRequestEventArgs :
 #if WINUI
-		System.EventArgs
+using Microsoft.UI.Xaml;
 #else
-		RoutedEventArgs
+using System.Windows;
 #endif
-{
 
+namespace Sdl.MultiSelectComboBox.EventArgs
+{
+#if WINUI
+	/// <summary>
+	/// Raised when user requests to add a new item (WinUI version)
+	/// </summary>
+	public class NewItemAddRequestEventArgs : System.EventArgs
+	{
+		/// <summary>
+		/// The text typed by the user
+		/// </summary>
 		public string TypedText { get; }
 
-		public NewItemAddRequestEventArgs(
-#if WINUI
-		System.EventArgs
-#else
-		RoutedEvent
-#endif
-			routedEvent, string TypedText)  {
-			this.TypedText = TypedText;
+		/// <summary>
+		/// Creates a new instance of NewItemAddRequestEventArgs
+		/// </summary>
+		public NewItemAddRequestEventArgs(string typedText)
+		{
+			TypedText = typedText;
 		}
 	}
+#else
+	/// <summary>
+	/// Raised when user requests to add a new item
+	/// </summary>
+	public class NewItemAddRequestEventArgs : RoutedEventArgs
+	{
+		/// <summary>
+		/// The text typed by the user
+		/// </summary>
+		public string TypedText { get; }
+
+		internal NewItemAddRequestEventArgs(RoutedEvent routedEvent, string typedText) : base(routedEvent)
+		{
+			TypedText = typedText;
+		}
+	}
+#endif
 }

@@ -4,9 +4,6 @@ using System.Linq;
 using System.Windows.Input;
 using Sdl.MultiSelectComboBox.EventArgs;
 using Sdl.MultiSelectComboBox.Example.Models;
-#if WINUI
-using Sdl.MultiSelectComboBox.WinUI.EventArgs;
-#endif
 
 namespace Sdl.MultiSelectComboBox.Example.Commands
 {

@@ -7,14 +7,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    xmlns:sdl="using:Sdl.MultiSelectComboBox.WinUI.Controls"
+    xmlns:sdl="using:Sdl.MultiSelectComboBox.Controls"
     xmlns:models="using:Sdl.MultiSelectComboBox.Example.Models"
     xmlns:converters="using:Sdl.MultiSelectComboBox.Example.WinUI.Converters"
     Title="Sdl.MultiSelectComboBox.Example.WinUI">
 
-    <Window.SystemBackdrop>
+    <!--<Window.SystemBackdrop>
         <MicaBackdrop />
-    </Window.SystemBackdrop>
+    </Window.SystemBackdrop>-->
 
             <!--<converters:BoolToVisibilityConverter x:Key="BoolToVis" />
 
@@ -57,14 +57,10 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Grid.Row="0" Text ="Items" Margin="0,5,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" Width="120" Height="21" VerticalAlignment="Top"/>
-                    <TextBlock Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" FontWeight="SemiBold" Margin="0,5,0,0" Height="21" VerticalAlignment="Top">
-                        <InlineUIContainer>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBox Text="{x:Bind ViewModel.SelectedItemsCount, Mode=OneWay}" HorizontalContentAlignment="Right" BorderThickness="0" Background="Transparent" IsTabStop="False"/>
-                                <TextBox Text="Selected" HorizontalContentAlignment="Right" BorderThickness="0" IsTabStop="False" />
-                            </StackPanel>
-                        </InlineUIContainer>
-                    </TextBlock>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,0,0" Height="21" VerticalAlignment="Top">
+                        <TextBlock Text="{x:Bind ViewModel.SelectedItemsCount, Mode=OneWay}" FontWeight="SemiBold"/>
+                        <TextBlock Text=" Selected" FontWeight="SemiBold"/>
+                    </StackPanel>
                 </Grid>
 
                 <Grid Margin="0,25,0,0">
@@ -92,7 +88,7 @@
                                                  />
 
                         <Button Command="{x:Bind ViewModel.ClearItemsCommand, Mode=OneWay}" Style="{StaticResource Custom.Button.Style}"  Width="128" Height="20">
-                            <Underline>Clear selected items</Underline>
+                            <TextBlock Text="Clear selected items" TextDecorations="Underline"/>
                         </Button>
                     </Grid>
 
@@ -165,7 +161,7 @@
                     <TextBox Text="{x:Bind ViewModel.EventLog, Mode=OneWay}" TextWrapping="NoWrap" IsReadOnly="True"/>
                 </ScrollViewer>
                 <Button Command="{x:Bind ViewModel.ClearLogCommand, Mode=OneWay}" Style="{StaticResource Custom.Button.Style}" Width="75" Height="24">
-                    <Underline>Clear log</Underline>
+                    <TextBlock Text="Clear log" TextDecorations="Underline"/>
                 </Button>
             </Grid>
         </Grid>

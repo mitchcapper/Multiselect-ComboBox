@@ -1,97 +1,96 @@
-<Project Sdk="Microsoft.NET.Sdk">  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-	  <TargetFramework>net10.0-windows10.0.22000.0</TargetFramework>
-	  <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>Sdl.MultiSelectComboBox.Example.WinUI</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Platforms>x64</Platforms>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
-    <UseWinUI>true</UseWinUI>
-    <LangVersion>preview</LangVersion>
-    <EnableMsixTooling>true</EnableMsixTooling>
-    <EnableDefaultPageItems>false</EnableDefaultPageItems>
-  </PropertyGroup>  <ItemGroup>
-  <None Remove="Styles\MultiSelectComboBox.Custom.ControlTemplate.xaml" />
-  <None Remove="Styles\MultiSelectComboBox.Custom.DropdownItemTemplate.xaml" />
-  <None Remove="Styles\MultiSelectComboBox.Custom.Image.Resources.xaml" />
-  <None Remove="Styles\MultiSelectComboBox.Custom.SelectedItemTemplate.xaml" />
-  <None Remove="Styles\MultiSelectComboBox.Custom.Tooltip.Resources.xaml" />
-  <None Remove="Styles\MultiSelectComboBox.Resources.xaml" />
-</ItemGroup><ItemGroup>
-    <Compile Include="..\MultiSelectComboBox.Example\API\IGroupIdentityService.cs" Link="API\IGroupIdentityService.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Commands\ClearLogCommand.cs" Link="Commands\ClearLogCommand.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Commands\ClearSelectedItemsCommand.cs" Link="Commands\ClearSelectedItemsCommand.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Commands\FilterTextChangedCommand.cs" Link="Commands\FilterTextChangedCommand.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Commands\SelectedItemsChangedCommand.cs" Link="Commands\SelectedItemsChangedCommand.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Commands\SelectRandomItemsCommand.cs" Link="Commands\SelectRandomItemsCommand.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Commands\StyleChangedCommand.cs" Link="Commands\StyleChangedCommand.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\MainWindow.xaml.cs" Link="MainWindow.xaml.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Models\LanguageItem.cs" Link="Models\LanguageItem.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Models\LanguageItemGroup.cs" Link="Models\LanguageItemGroup.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Models\LanguageItems.cs" Link="Models\LanguageItems.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Services\CustomFilterService.cs" Link="Services\CustomFilterService.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Services\CustomSuggestionProvider.cs" Link="Services\CustomSuggestionProvider.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Services\DefaultGroupService.cs" Link="Services\DefaultGroupService.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Services\ImageService.cs" Link="Services\ImageService.cs" />
-    <Compile Include="..\MultiSelectComboBox.Example\Services\RecentlyUsedService.cs" Link="Services\RecentlyUsedService.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Assets\SplashScreen.scale-200.png" />
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
-    <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-  </ItemGroup>  <ItemGroup>
-    <Page Include="MainWindow.xaml" />
-  </ItemGroup>
+<Project Sdk="Uno.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net10.0-desktop</TargetFrameworks>
+		<OutputType>Exe</OutputType>
+		<RootNamespace>Sdl.MultiSelectComboBox.Example.WinUI</RootNamespace>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<UnoSingleProject>true</UnoSingleProject>
+		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
+		<UseWinUI>true</UseWinUI>
+		<LangVersion>preview</LangVersion>
+		<EnableMsixTooling>true</EnableMsixTooling>
+		<EnableDefaultPageItems>false</EnableDefaultPageItems>
+		<!-- Enable x:Bind code generation -->
+		<UnoForceBackportXBindSourceGenParts>true</UnoForceBackportXBindSourceGenParts>
+	</PropertyGroup>
+	<PropertyGroup>
+		<UnoFeatures>
+			SkiaRenderer;
+		</UnoFeatures>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="Styles\MultiSelectComboBox.Custom.ControlTemplate.xaml" />
+		<None Remove="Styles\MultiSelectComboBox.Custom.DropdownItemTemplate.xaml" />
+		<None Remove="Styles\MultiSelectComboBox.Custom.Image.Resources.xaml" />
+		<None Remove="Styles\MultiSelectComboBox.Custom.SelectedItemTemplate.xaml" />
+		<None Remove="Styles\MultiSelectComboBox.Custom.Tooltip.Resources.xaml" />
+		<None Remove="Styles\MultiSelectComboBox.Resources.xaml" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\MultiSelectComboBox.Example\API\IGroupIdentityService.cs" Link="API\IGroupIdentityService.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Commands\ClearLogCommand.cs" Link="Commands\ClearLogCommand.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Commands\ClearSelectedItemsCommand.cs" Link="Commands\ClearSelectedItemsCommand.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Commands\FilterTextChangedCommand.cs" Link="Commands\FilterTextChangedCommand.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Commands\SelectedItemsChangedCommand.cs" Link="Commands\SelectedItemsChangedCommand.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Commands\SelectRandomItemsCommand.cs" Link="Commands\SelectRandomItemsCommand.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Commands\StyleChangedCommand.cs" Link="Commands\StyleChangedCommand.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\MainWindow.xaml.cs" Link="MainWindow.xaml.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Models\LanguageItem.cs" Link="Models\LanguageItem.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Models\LanguageItemGroup.cs" Link="Models\LanguageItemGroup.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Models\LanguageItems.cs" Link="Models\LanguageItems.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Services\CustomFilterService.cs" Link="Services\CustomFilterService.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Services\CustomSuggestionProvider.cs" Link="Services\CustomSuggestionProvider.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Services\DefaultGroupService.cs" Link="Services\DefaultGroupService.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Services\ImageService.cs" Link="Services\ImageService.cs" />
+		<Compile Include="..\MultiSelectComboBox.Example\Services\RecentlyUsedService.cs" Link="Services\RecentlyUsedService.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<Content Include="Assets\SplashScreen.scale-200.png" />
+		<Content Include="Assets\LockScreenLogo.scale-200.png" />
+		<Content Include="Assets\Square150x150Logo.scale-200.png" />
+		<Content Include="Assets\Square44x44Logo.scale-200.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+		<Content Include="Assets\StoreLogo.png" />
+		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Page Include="MainWindow.xaml" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Manifest Include="$(ApplicationManifest)" />
-  </ItemGroup>
+	<ItemGroup>
+		<Manifest Include="$(ApplicationManifest)" />
+	</ItemGroup>
 
-  <!--
-    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
-    Tools extension to be activated for this project even if the Windows App SDK Nuget
-    package has not yet been restored.
-  -->
-  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <ProjectCapability Include="Msix" />
-  </ItemGroup>
-  <ItemGroup>
-      <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250430001" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Sdl.MultiSelectComboBox.WinUI\Sdl.MultiSelectComboBox.WinUI.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="API\" />
-    <Folder Include="Commands\" />
-    <Folder Include="Services\" />
-    <Folder Include="Styles\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Models\" />
+		<Folder Include="API\" />
+		<Folder Include="Commands\" />
+		<Folder Include="Services\" />
+		<Folder Include="Styles\" />
+	</ItemGroup>
 
-  <!--
+	<ItemGroup>
+		<ProjectReference Include="..\Sdl.MultiSelectComboBox.WinUI\Sdl.MultiSelectComboBox.WinUI.csproj" />
+	</ItemGroup>
+
+	<!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
     Explorer "Package and Publish" context menu entry to be enabled for this project even if
     the Windows App SDK Nuget package has not yet been restored.
   -->
-  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+	</PropertyGroup>
 
-  <!-- Publish Properties -->
-  <PropertyGroup>
-    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-    <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
-    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DefineConstants>$(DefineConstants);WINUI</DefineConstants>
-  </PropertyGroup>
+	<!-- Publish Properties -->
+	<PropertyGroup>
+		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+	</PropertyGroup>
+	<PropertyGroup>
+		<DefineConstants>$(DefineConstants);WINUI</DefineConstants>
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
 </Project>

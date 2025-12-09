@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Sdl.MultiSelectComboBox.API;
 
 namespace Sdl.MultiSelectComboBox.Services
 {
-	public class DefaultFilterService: IFilterService
+	public class DefaultFilterService : IFilterService
 	{
 		private string _filterText;
 

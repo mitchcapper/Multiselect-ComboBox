@@ -1,5 +1,10 @@
-﻿using System.Windows;
+#if WINUI
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+#else
+using System.Windows;
 using System.Windows.Controls;
+#endif
 
 namespace Sdl.MultiSelectComboBox.Controls
 {

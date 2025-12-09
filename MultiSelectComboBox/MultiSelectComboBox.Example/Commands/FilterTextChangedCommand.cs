@@ -5,7 +5,7 @@ using System.Windows.Input;
 using Sdl.MultiSelectComboBox.EventArgs;
 using Sdl.MultiSelectComboBox.Example.Models;
 #if WINUI
-using Sdl.MultiSelectComboBox.WinUI.EventArgs;
+//using Sdl.MultiSelectComboBox.EventArgs;
 #endif
 namespace Sdl.MultiSelectComboBox.Example.Commands
 {
