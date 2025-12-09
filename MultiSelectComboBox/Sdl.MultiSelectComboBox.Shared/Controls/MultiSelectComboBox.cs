@@ -2334,9 +2334,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 			if (IsSelectedItem(item))
 			{
-				if (RemoveSelectedItem(SelectedItemsInternal, -1, SelectedItems)) // index -1 to use remove by object
+				if (SelectedItemsInternal.Contains(item))
 				{
-					SelectedItemsInternal.Remove(item); // Ensure removal
+					SelectedItemsInternal.Remove(item);
 					itemsRemoved.Add(item);
 				}
 			}
@@ -2771,7 +2771,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 				{
 					var item = DropdownListBox.Items[0];
 					System.Diagnostics.Debug.WriteLine($"[WINUI] First filtered item: {item}");
-					SetVisualFocusOnItem(item);
+					if (!IsEditMode)
+					{
+						SetVisualFocusOnItem(item);
+					}
 					UpdateAutoCompleteFilterText(criteria, item);
 				}
 				else
