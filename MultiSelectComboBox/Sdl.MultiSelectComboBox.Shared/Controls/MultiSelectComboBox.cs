@@ -261,8 +261,13 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 		}
 
+#if WINUI
+		private ListView _dropdownListBox;
+		private ListView DropdownListBox
+#else
 		private ListBox _dropdownListBox;
 		private ListBox DropdownListBox
+#endif
 		{
 			get => _dropdownListBox;
 			set
@@ -287,8 +292,8 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 				{
 #if WINUI
 					// WinUI/Uno uses ListView with Single selection mode - we manage multi-selection separately
-					((ListView)_dropdownListBox).SelectionMode = ListViewSelectionMode.Single;
-			_dropdownListBox.ItemsSource = ItemsCollectionViewSource?.View;
+					_dropdownListBox.SelectionMode = ListViewSelectionMode.Single;
+					_dropdownListBox.ItemsSource = ItemsSource;
 #else
 					if (DropdownItemTemplate == null)
 					{
@@ -483,6 +488,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		}
 
 		private object _previousSelectedValue;
+		private DateTime _suggestionProviderLastRequest;
 		private static void OneMouseLeave(object sender, MouseEventArgs e)
 		{
 			var comboBox = sender as MultiSelectComboBox;
@@ -518,7 +524,6 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		private DateTime? IgnoreDropdownClosingFocusPlanUntil;
 #else
 		private object _previousSelectedValue;
-		private DateTime _suggestionProviderLastRequest;
 #endif
 
 #if !WINUI
@@ -555,9 +560,11 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 #if WINUI
 		protected override void OnApplyTemplate()
 		{
+			System.Diagnostics.Debug.WriteLine("[WINUI] OnApplyTemplate called");
 			base.OnApplyTemplate();
 
 			MultiSelectComboBoxGrid = GetTemplateChild(PART_MultiSelectComboBox) as Grid;
+			System.Diagnostics.Debug.WriteLine($"[WINUI] MultiSelectComboBoxGrid: {(MultiSelectComboBoxGrid != null ? "Found" : "NULL")}");
 
 			if (MultiSelectComboBoxGrid != null)
 			{
@@ -570,8 +577,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			// Ensure initializing SelectedItems if it was not set
 			if (SelectedItems == null)
 			{
+				System.Diagnostics.Debug.WriteLine("[WINUI] Initializing SelectedItems collection");
 				SelectedItems = new ObservableCollection<object>();
 			}
+			System.Diagnostics.Debug.WriteLine("[WINUI] OnApplyTemplate completed");
 		}
 #else
 		public override void OnApplyTemplate()
@@ -620,9 +629,11 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 		private void InitializeInternalElements()
 		{
+			System.Diagnostics.Debug.WriteLine("[WINUI] InitializeInternalElements called");
 			if (SelectedItemsControl == null && MultiSelectComboBoxGrid != null)
 			{
 				SelectedItemsControl = VisualTreeService.FindVisualChild<ItemsControl>(MultiSelectComboBoxGrid, PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl);
+				System.Diagnostics.Debug.WriteLine($"[WINUI] SelectedItemsControl: {(SelectedItemsControl != null ? "Found" : "NULL")}");
 			}
 
 			if (DropdownListBox == null && MultiSelectComboBoxGrid != null)
@@ -630,12 +641,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 				if (DropdownMenu == null)
 				{
 					DropdownMenu = VisualTreeService.FindVisualChild<Popup>(MultiSelectComboBoxGrid, PART_MultiSelectComboBox_Dropdown);
+					System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownMenu: {(DropdownMenu != null ? "Found" : "NULL")}");
 				}
 
 				if (DropdownMenu != null)
 				{
 #if WINUI
-					DropdownListBox = VisualTreeService.FindVisualChild<ListBox>(DropdownMenu.Child as DependencyObject, PART_MultiSelectComboBox_Dropdown_ListBox);
+					DropdownListBox = VisualTreeService.FindVisualChild<ListView>(DropdownMenu.Child as DependencyObject, PART_MultiSelectComboBox_Dropdown_ListBox);
+					System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownListBox (ListView): {(DropdownListBox != null ? "Found" : "NULL")}");
 #else
 					DropdownListBox = VisualTreeService.FindVisualChild<ListBox>(DropdownMenu.Child, PART_MultiSelectComboBox_Dropdown_ListBox);
 #endif
@@ -688,9 +701,15 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 					DropdownListBox.ItemsSource = ItemsCollectionViewSource?.View;
 				}
 #else
+				System.Diagnostics.Debug.WriteLine($"[WINUI] ItemsSource count: {ItemsSource.Count}");
 				if (DropdownListBox != null)
 				{
 					DropdownListBox.ItemsSource = ItemsSource;
+					System.Diagnostics.Debug.WriteLine($"[WINUI] Set DropdownListBox.ItemsSource with {ItemsSource.Count} items");
+				}
+				else
+				{
+					System.Diagnostics.Debug.WriteLine("[WINUI] WARNING: DropdownListBox is NULL, cannot set ItemsSource!");
 				}
 #endif
 
@@ -701,6 +720,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 				UpdateItems(SelectedItemsFilterTextBox?.Text ?? string.Empty);
 			}
+#if WINUI
+			System.Diagnostics.Debug.WriteLine("[WINUI] InitializeInternalElements END");
+#endif
 		}
 
 		private void SelectAll_Click(object sender, RoutedEventArgs e)
@@ -2489,6 +2511,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 #if WINUI
 			var textBox = sender as TextBox;
 			var criteria = textBox?.Text;
+			System.Diagnostics.Debug.WriteLine($"[WINUI] TextChanged: '{criteria}' (TextBox: {textBox != null})");
 #else
 			var criteria = ((TextBox)e.OriginalSource).Text;
 #endif

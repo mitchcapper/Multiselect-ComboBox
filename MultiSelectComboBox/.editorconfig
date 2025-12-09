@@ -1,0 +1,15 @@
+root = true
+
+# Solution-wide EditorConfig
+# This file enforces formatting and diagnostic severity rules for the repository.
+
+[*.cs]
+charset = utf-8
+indent_style = tabs
+indent_size = 4
+insert_final_newline = true
+end_of_line = lf
+
+# Disable compiler warning CS0067 (event is never used) across the solution
+# See: https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules
+dotnet_diagnostic.CS0067.severity = none
