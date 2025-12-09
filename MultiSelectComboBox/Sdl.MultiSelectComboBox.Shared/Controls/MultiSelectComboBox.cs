@@ -2981,7 +2981,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		#endregion
 
 		#region IDisposable
-
+#if WINUI
+		new
+#endif
 		public void Dispose()
 		{
 #if WINUI
