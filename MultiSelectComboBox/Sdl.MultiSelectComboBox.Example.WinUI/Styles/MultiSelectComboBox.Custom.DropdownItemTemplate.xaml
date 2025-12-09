@@ -1,0 +1,54 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="using:Sdl.MultiSelectComboBox.Example.Models">
+
+    <DataTemplate x:Key="MultiSelectComboBox.Dropdown.ListBox.ItemTemplate">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="30"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Margin="2,2,2,3"/>
+
+            <TextBlock Grid.Column="1" Text="{Binding SelectedOrder}" Margin="5,0"
+                       Foreground="Orange"
+                       VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Setters>
+                            <Setter Property="Visibility" Value="Visible" />
+                        </Style.Setters>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="MultiSelectComboBox.Dropdown.ListBox.Custom.ItemTemplate">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="30"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                <Run Text="["/><Run FontWeight="Bold" Foreground="#FF4F68AA" Text="{Binding CultureInfo.Name}"/><Run Text="]"/>
+                <Run Text="{Binding Name}"/>
+            </TextBlock>
+
+            <TextBlock Grid.Column="1" Text="{Binding SelectedOrder}" Margin="5,0"
+                       Foreground="Orange"
+                       VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Setters>
+                            <Setter Property="Visibility" Value="Visible" />
+                        </Style.Setters>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+    </DataTemplate>
+
+</ResourceDictionary>

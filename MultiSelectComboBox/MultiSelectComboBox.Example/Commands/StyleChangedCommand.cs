@@ -1,6 +1,11 @@
-﻿using System;
+using System;
+#if ! WINUI
 using System.Windows.Controls;
+#else
+using Microsoft.UI.Xaml.Controls;
+#endif
 using System.Windows.Input;
+
 
 namespace Sdl.MultiSelectComboBox.Example.Commands
 {

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Sdl.MultiSelectComboBox.API;
 using Sdl.MultiSelectComboBox.Example.API;
 using Sdl.MultiSelectComboBox.Example.Models;
@@ -14,7 +14,7 @@ namespace Sdl.MultiSelectComboBox.Example.Services
 		public DefaultGroupService(IGroupIdentityService service)
 		{
 			_service = service;
-
+#if ! WINUI
 			_itemGroups = new List<IItemGroup> { new LanguageItemGroup(-1, StringResources.ItemsGroupService_AllItems) };
 
 			if (_service != null && !_itemGroups.Exists(a => a.Name == _service.Name))
@@ -34,6 +34,7 @@ namespace Sdl.MultiSelectComboBox.Example.Services
 					_itemGroups[index].Order = index;
 				}
 			}
+#endif
 		}
 
 		public IItemGroup GetItemGroup(string id)

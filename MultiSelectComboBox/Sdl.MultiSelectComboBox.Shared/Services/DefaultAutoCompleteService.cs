@@ -1,4 +1,4 @@
-﻿using Sdl.MultiSelectComboBox.API;
+using Sdl.MultiSelectComboBox.API;
 using System;
 
 namespace Sdl.MultiSelectComboBox.Services

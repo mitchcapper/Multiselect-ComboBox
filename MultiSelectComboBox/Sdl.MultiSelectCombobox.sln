@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29806.167
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11222.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.MultiSelectComboBox", "Sdl.MultiSelectComboBox\Sdl.MultiSelectComboBox.csproj", "{9B3DCB00-47E4-4DB5-A422-28D1733EF177}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.MultiSelectComboBox.Example", "MultiSelectComboBox.Example\Sdl.MultiSelectComboBox.Example.csproj", "{3DAA07EA-D94E-495A-8A58-DE907ABE6990}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.MultiSelectComboBox.WinUI", "Sdl.MultiSelectComboBox.WinUI\Sdl.MultiSelectComboBox.WinUI.csproj", "{E06B2ADA-8116-5F8D-07C9-F07AFDA9EDE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.MultiSelectComboBox.Example.WinUI", "Sdl.MultiSelectComboBox.Example.WinUI\Sdl.MultiSelectComboBox.Example.WinUI.csproj", "{0045A9D3-C994-476C-B48E-2FA43F5EB80B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sdl.MultiSelectComboBox.Shared", "Sdl.MultiSelectComboBox.Shared\Sdl.MultiSelectComboBox.Shared.shproj", "{B486F8B1-67B5-4EA4-BC0C-5E8C1BFA82E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,11 +27,25 @@ Global
 		{3DAA07EA-D94E-495A-8A58-DE907ABE6990}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DAA07EA-D94E-495A-8A58-DE907ABE6990}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DAA07EA-D94E-495A-8A58-DE907ABE6990}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E06B2ADA-8116-5F8D-07C9-F07AFDA9EDE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E06B2ADA-8116-5F8D-07C9-F07AFDA9EDE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E06B2ADA-8116-5F8D-07C9-F07AFDA9EDE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E06B2ADA-8116-5F8D-07C9-F07AFDA9EDE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0045A9D3-C994-476C-B48E-2FA43F5EB80B}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{0045A9D3-C994-476C-B48E-2FA43F5EB80B}.Debug|Any CPU.Build.0 = Debug|x64
+		{0045A9D3-C994-476C-B48E-2FA43F5EB80B}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{0045A9D3-C994-476C-B48E-2FA43F5EB80B}.Release|Any CPU.ActiveCfg = Release|x64
+		{0045A9D3-C994-476C-B48E-2FA43F5EB80B}.Release|Any CPU.Build.0 = Release|x64
+		{0045A9D3-C994-476C-B48E-2FA43F5EB80B}.Release|Any CPU.Deploy.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {39A7B59B-BAC0-4F37-8C98-06A9FA5ACC8A}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Sdl.MultiSelectComboBox.Shared\Sdl.MultiSelectComboBox.Shared.projitems*{9b3dcb00-47e4-4db5-a422-28d1733ef177}*SharedItemsImports = 5
+		Sdl.MultiSelectComboBox.Shared\Sdl.MultiSelectComboBox.Shared.projitems*{b486f8b1-67b5-4ea4-bc0c-5e8c1bfa82e8}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal

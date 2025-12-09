@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sdl.MultiSelectComboBox.Example.API;
@@ -12,8 +12,9 @@ namespace Sdl.MultiSelectComboBox.Example.Services
 		public RecentlyUsedService(IEnumerable<string> items)
 		{
 			Index = 0;
+#if ! WINUI
 			Name = StringResources.ItemsGroupService_RecentlyUsedItems;
-
+#endif
 			_items = items;
 		}
 

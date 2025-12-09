@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b486f8b1-67b5-4ea4-bc0c-5e8c1bfa82e8</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Sdl.MultiSelectComboBox.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)API\IAutoCompleteService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API\IFilterService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API\IItemEnabledAware.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API\IItemGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API\IItemGroupAware.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API\IMultiSelectComboBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API\ISuggestionProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventArgs\FilterTextChangedEventArgsBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventArgs\ItemDeleteRequestEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventArgs\NewItemAddRequestEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventArgs\SelectedItemsChangedEventArgsBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\SelectableItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\DefaultAutoCompleteService.cs" />
+  </ItemGroup>
+</Project>

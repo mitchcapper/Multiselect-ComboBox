@@ -1,9 +1,13 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+#if !WINUI
 using System.Windows.Media.Imaging;
+#else
+using Microsoft.UI.Xaml.Media.Imaging;
+#endif
 using Sdl.MultiSelectComboBox.API;
 
 namespace Sdl.MultiSelectComboBox.Example.Models

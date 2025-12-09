@@ -1,7 +1,12 @@
-﻿using System.Drawing;
+using System;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
+#if ! WINUI
 using System.Windows.Media.Imaging;
+#else
+using Microsoft.UI.Xaml.Media.Imaging;
+#endif
 
 namespace Sdl.MultiSelectComboBox.Example.Services
 {
@@ -18,7 +23,7 @@ namespace Sdl.MultiSelectComboBox.Example.Services
 				{
 					return null;
 				}
-
+#if ! WINUI
 				Icon icon;
 				using (var stream = new FileStream(filePath, FileMode.Open))
 				{
@@ -28,16 +33,27 @@ namespace Sdl.MultiSelectComboBox.Example.Services
 				}
 
 				var bitmap = icon.ToBitmap();
+
 				bitmap.MakeTransparent();
 
 				return Convert(bitmap);
+#else
+				var bitmapImage = new BitmapImage();
+
+				bitmapImage.UriSource = new Uri(filePath, UriKind.Absolute);
+				bitmapImage.DecodePixelWidth = imageSize.Width;
+				bitmapImage.DecodePixelHeight = imageSize.Height;
+				return bitmapImage;
+#endif
+
+
 			}
 			catch
 			{
 				return null;
 			}
 		}
-
+#if ! WINUI
 		private static BitmapImage Convert(object value)
 		{
 			if (value != null && value is Image image)
@@ -57,5 +73,6 @@ namespace Sdl.MultiSelectComboBox.Example.Services
 
 			return null;
 		}
+#endif
 	}
 }

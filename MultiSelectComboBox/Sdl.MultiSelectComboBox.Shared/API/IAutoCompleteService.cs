@@ -1,4 +1,4 @@
-﻿namespace Sdl.MultiSelectComboBox.API
+namespace Sdl.MultiSelectComboBox.API
 {
 	/// <summary>
 	/// Service used to determine auto-complete values for items in the collection.

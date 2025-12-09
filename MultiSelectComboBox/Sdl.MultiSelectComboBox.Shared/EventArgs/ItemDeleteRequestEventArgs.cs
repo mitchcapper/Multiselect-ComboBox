@@ -7,11 +7,23 @@ using System.Threading.Tasks;
 using System.Windows;
 
 namespace Sdl.MultiSelectComboBox.EventArgs {
-	public class ItemDeleteRequestEventArgs : RoutedEventArgs {
+	public class ItemDeleteRequestEventArgs :
+#if WINUI
+		System.EventArgs
+#else
+		RoutedEventArgs
+#endif
+		{
 		public ICollection ItemsRemoveRequestedOn { get; }
-		internal ItemDeleteRequestEventArgs(RoutedEvent routedEvent,
+		public ItemDeleteRequestEventArgs(
+#if WINUI
+		System.EventArgs
+#else
+		RoutedEvent
+#endif
+			routedEvent,
 			ICollection items
-			) : base(routedEvent) {
+			)  {
 			ItemsRemoveRequestedOn = items;
 		}
 	}

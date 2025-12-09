@@ -1,0 +1,129 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
+    xmlns:local="using:Sdl.MultiSelectComboBox.WinUI.Controls">
+
+    <Style TargetType="local:MultiSelectComboBox">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:MultiSelectComboBox">
+                    <Grid x:Name="PART_MultiSelectComboBox" Background="{TemplateBinding Background}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" BorderBrush="{ThemeResource TextControlBorderBrush}"
+                                    BorderThickness="1" CornerRadius="2" Padding="2">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <ItemsControl x:Name="PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl"
+                                                Grid.Column="0"
+                                                Margin="0">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <toolkit:WrapPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{ThemeResource SystemListLowColor}"
+                                                        BorderBrush="{ThemeResource SystemBaseMediumColor}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="2"
+                                                        Margin="2">
+                                                    <TextBlock Text="{Binding}" Margin="5,2" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button x:Name="PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button"
+                                                Content="×"
+                                                ToolTipService.ToolTip="Clear all items"
+                                                Height="20" Width="20"
+                                                Padding="0"
+                                                VerticalAlignment="Center"
+                                                Visibility="Visible" />
+                                    </StackPanel>
+
+                                    <TextBox x:Name="PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox"
+                                             Grid.Column="0"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             Margin="2"
+                                             VerticalAlignment="Center" />
+
+                                    <TextBox x:Name="PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox"
+                                             Grid.Column="0"
+                                             Background="Transparent"
+                                             Foreground="Gray"
+                                             BorderThickness="0"
+                                             IsHitTestVisible="False"
+                                             Margin="2"
+                                             IsReadOnly="True"
+                                             VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Button x:Name="PART_MultiSelectComboBox_Dropdown_Button"
+                                    Grid.Column="1"
+                                    Content="▼"
+                                    Width="20"
+                                    Margin="2,0,0,0"
+                                    VerticalAlignment="Stretch" />
+                        </Grid>
+
+                        <Popup x:Name="PART_MultiSelectComboBox_Dropdown"
+                               IsOpen="{TemplateBinding IsDropDownOpen}">
+                            <Border Background="{ThemeResource SystemChromeMediumColor}"
+                                    BorderBrush="{ThemeResource SystemBaseMediumColor}"
+                                    BorderThickness="1"
+                                    Padding="2"
+                                    CornerRadius="3">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <ListBox x:Name="PART_MultiSelectComboBox_Dropdown_ListBox"
+                                             Grid.Row="0"
+                                             SelectionMode="Multiple"
+                                             MaxHeight="300"
+                                             BorderThickness="0"
+                                             Margin="0" />
+
+                                    <StackPanel Grid.Row="1"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                Margin="0,5,0,0">
+                                        <Button x:Name="PART_MultiSelectComboBox_Dropdown_SelectAllButton"
+                                                Content="Select All"
+                                                Margin="5,0" />
+                                        <Button x:Name="PART_MultiSelectComboBox_Dropdown_ClearAllButton"
+                                                Content="Clear All"
+                                                Margin="0,0,5,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

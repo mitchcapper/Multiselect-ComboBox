@@ -4,9 +4,15 @@
     <TargetFrameworks>net48;net6-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
+		<LangVersion>preview</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>SdlCommunity.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
+    <RootNamespace>Sdl.MultiSelectComboBox</RootNamespace>
   </PropertyGroup>
+
+  <Import Project="..\Sdl.MultiSelectComboBox.Shared\Sdl.MultiSelectComboBox.Shared.projitems" Label="Shared" />
+
+  
 
 </Project>
