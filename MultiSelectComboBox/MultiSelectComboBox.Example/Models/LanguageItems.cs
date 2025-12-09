@@ -530,6 +530,9 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 		{
 			var imageSize24 = new Size(24, 24);
 			var items = new List<LanguageItem>();
+#if WINUI
+			System.Diagnostics.Debug.WriteLine($"[WINUI] InitializeItemsCollection starting...");
+#endif
 
 			foreach (var ci in CultureInfo.GetCultures(CultureTypes.AllCultures))
 			{
@@ -561,6 +564,9 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 			}
 
             _allItems = new List<LanguageItem>(items.OrderBy(x => x.Group.Order).ThenBy(a => a.Name));
+#if WINUI
+			System.Diagnostics.Debug.WriteLine($"[WINUI] InitializeItemsCollection completed. _allItems count: {_allItems.Count}");
+#endif
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

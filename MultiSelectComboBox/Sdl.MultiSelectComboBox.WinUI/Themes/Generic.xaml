@@ -175,10 +175,13 @@
                                                 <controls:ContentItemsControl.Resources>
                                                     <!-- Default item template for selected items -->
                                                     <DataTemplate x:Key="MultiSelectComboBox.SelectedItems.ItemTemplate">
-                                                        <TextBlock Text="{Binding}"
-                                                                   Foreground="{StaticResource MultiSelectComboBox.Text.Foreground}"
-                                                                   FontSize="11"
-                                                                   VerticalAlignment="Center"/>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Image Source="{Binding Image}" Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center" Stretch="Uniform"/>
+                                                            <TextBlock Text="{Binding}"
+                                                                       Foreground="{StaticResource MultiSelectComboBox.Text.Foreground}"
+                                                                       FontSize="11"
+                                                                       VerticalAlignment="Center"/>
+                                                        </StackPanel>
                                                     </DataTemplate>
                                                     <!-- Searchable item template with TextBox -->
                                                     <DataTemplate x:Key="MultiSelectComboBox.SelectedItems.Searchable.ItemTemplate">
@@ -259,10 +262,18 @@
                                                               ItemContainerStyle="{StaticResource MultiSelectComboBox.Dropdown.ListBox.ItemContainerStyle}">
                                         <controls:ExtendedListBox.Resources>
                                             <DataTemplate x:Key="MultiSelectComboBox.Dropdown.ListBox.ItemTemplate">
-                                                <TextBlock Text="{Binding}"
-                                                           Foreground="{StaticResource MultiSelectComboBox.Text.Foreground}"
-                                                           FontSize="11"
-                                                           Margin="2,2,2,3"/>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Image Grid.Column="0" Source="{Binding Image}" Width="16" Height="16" Margin="2,2,4,2" VerticalAlignment="Center" Stretch="Uniform"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding}"
+                                                               Foreground="{StaticResource MultiSelectComboBox.Text.Foreground}"
+                                                               FontSize="11"
+                                                               Margin="2,2,2,3"
+                                                               VerticalAlignment="Center"/>
+                                                </Grid>
                                             </DataTemplate>
                                         </controls:ExtendedListBox.Resources>
                                     </controls:ExtendedListBox>

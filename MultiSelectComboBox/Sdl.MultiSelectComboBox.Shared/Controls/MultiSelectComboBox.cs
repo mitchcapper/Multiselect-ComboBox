@@ -272,6 +272,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			get => _dropdownListBox;
 			set
 			{
+#if WINUI
+				System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownListBox set: {(value != null ? "Found" : "NULL")}");
+#endif
 				if (_dropdownListBox != null)
 				{
 					_dropdownListBox.SelectionChanged -= DropdownListBoxSelectionChanged;
@@ -371,6 +374,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			get => _selectedItemsControl;
 			set
 			{
+#if WINUI
+				System.Diagnostics.Debug.WriteLine($"[WINUI] SelectedItemsControl set: {(value != null ? "Found" : "NULL")}");
+#endif
 				if (_selectedItemsControl != null)
 				{
 #if WINUI
@@ -391,13 +397,13 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 					_selectedItemsControl.ItemsSource = SelectedItemsInternal;
 
-#if !WINUI
 					if (SelectedItemTemplate == null)
 					{
 						SelectedItemTemplate = _selectedItemsControl.FindResource(MultiSelectComboBox_SelectedItems_ItemTemplate) as DataTemplate;
 					}
 
 					SelectedItemTemplateSelector = new SelectedItemTemplateService(SelectedItemTemplate, _selectedItemsControl.FindResource(MultiSelectComboBox_SelectedItems_Searchable_ItemTemplate) as DataTemplate);
+#if !WINUI
 					_selectedItemsControl.Items.CurrentChanged += SelectedItemsControl_CurrentChanged;
 					_selectedItemsControl.PreviewMouseDown += SelectedItemsControl_OnPreviewMouseDown;
 #else
@@ -613,9 +619,11 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			if (parent == null)
 				return;
 
-#if !WINUI
-			parent.ApplyTemplate();
-#endif
+			if (parent == null)
+				return;
+
+			// Ensure template is applied so we can traverse the visual tree (critical for WinUI ScrollViewer content)
+			//parent.ApplyTemplate();
 
 			int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
 			for (int i = 0; i < childrenCount; i++)
@@ -630,17 +638,26 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		private void InitializeInternalElements()
 		{
 			System.Diagnostics.Debug.WriteLine("[WINUI] InitializeInternalElements called");
-			if (SelectedItemsControl == null && MultiSelectComboBoxGrid != null)
+			if (SelectedItemsControl == null)
 			{
-				SelectedItemsControl = VisualTreeService.FindVisualChild<ItemsControl>(MultiSelectComboBoxGrid, PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl);
-				System.Diagnostics.Debug.WriteLine($"[WINUI] SelectedItemsControl: {(SelectedItemsControl != null ? "Found" : "NULL")}");
+				SelectedItemsControl = GetTemplateChild(PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl) as ItemsControl;
+				if (SelectedItemsControl == null && MultiSelectComboBoxGrid != null)
+				{
+					// Fallback
+					SelectedItemsControl = VisualTreeService.FindVisualChild<ItemsControl>(MultiSelectComboBoxGrid, PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl);
+				}
+				System.Diagnostics.Debug.WriteLine($"[WINUI] SelectedItemsControl set: {(SelectedItemsControl != null ? "Found" : "NULL")}");
 			}
 
-			if (DropdownListBox == null && MultiSelectComboBoxGrid != null)
+			if (DropdownListBox == null)
 			{
 				if (DropdownMenu == null)
 				{
-					DropdownMenu = VisualTreeService.FindVisualChild<Popup>(MultiSelectComboBoxGrid, PART_MultiSelectComboBox_Dropdown);
+					DropdownMenu = GetTemplateChild(PART_MultiSelectComboBox_Dropdown) as Popup;
+					if (DropdownMenu == null && MultiSelectComboBoxGrid != null)
+					{
+						DropdownMenu = VisualTreeService.FindVisualChild<Popup>(MultiSelectComboBoxGrid, PART_MultiSelectComboBox_Dropdown);
+					}
 					System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownMenu: {(DropdownMenu != null ? "Found" : "NULL")}");
 				}
 
@@ -1037,6 +1054,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			if (d is MultiSelectComboBox control && control._dropdownMenu != null)
 			{
 				control._dropdownMenu.IsOpen = (bool)e.NewValue;
+				if ((bool)e.NewValue)
+				{
+					control.UpdateDropdownPosition();
+				}
 				System.Diagnostics.Debug.WriteLine($"[WINUI] Set Popup.IsOpen = {e.NewValue}");
 			}
 			else if (d is MultiSelectComboBox ctrl)
@@ -1396,6 +1417,18 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			return DropdownListBox?.ContainerFromItem(item) as ExtendedListBoxItem;
 #else
 			return DropdownListBox?.ItemContainerGenerator.ContainerFromItem(item) as ExtendedListBoxItem;
+#endif
+		}
+
+		private void UpdateDropdownPosition()
+		{
+#if WINUI
+			if (DropdownMenu == null || MultiSelectComboBoxGrid == null) return;
+			
+			if (DropdownMenu.IsOpen)
+			{
+			    DropdownMenu.VerticalOffset = MultiSelectComboBoxGrid.ActualHeight;
+			}
 #endif
 		}
 
@@ -2586,6 +2619,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 			var suggestionProviderToken = _suggestionProviderToken = new CancellationTokenSource();
 			var items = await suggestionProvider.GetSuggestionsAsync(criteria, _suggestionProviderToken.Token);
+#if WINUI
+			System.Diagnostics.Debug.WriteLine($"[WINUI] LoadSuggestionsAsync: Got {items?.Count ?? 0} items from provider");
+#endif
 #if WINUI
 			DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() =>
 			{

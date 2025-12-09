@@ -5,7 +5,12 @@
       "Bash(dir /s \"C:\\software\\Multiselect-ComboBox\\MultiSelectComboBox\\Sdl.MultiSelectComboBox.Shared\" /ad)",
       "Bash(tree:*)",
       "Bash(powershell -Command:*)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(cat:*)",
+      "Bash(if [ -f MultiSelectComboBox.cs.bak ])",
+      "Bash(then mv MultiSelectComboBox.cs.bak MultiSelectComboBox.cs)",
+      "Bash(else echo \"No backup found\")",
+      "Bash(fi)"
     ],
     "deny": [],
     "ask": []

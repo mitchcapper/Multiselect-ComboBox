@@ -26,26 +26,19 @@ namespace Sdl.MultiSelectComboBox.Services
 			{
 				var child = VisualTreeHelper.GetChild(parent, i);
 
-				if (!(child is T))
+				if (child is T childType)
 				{
-					foundFrameworkElement = FindVisualChild<T>(child, name);
+					if (string.IsNullOrEmpty(name) || (child is FrameworkElement frameworkElement && frameworkElement.Name == name))
+					{
+						foundFrameworkElement = childType;
+						break;
+					}
+				}
 
-					if (!EqualityComparer<T>.Default.Equals(foundFrameworkElement,default))
-					{
-						break;
-					}
-				}
-				else if (!string.IsNullOrEmpty(name))
+				foundFrameworkElement = FindVisualChild<T>(child, name);
+
+				if (!EqualityComparer<T>.Default.Equals(foundFrameworkElement, default))
 				{
-					if (child is FrameworkElement frameworkElement && frameworkElement.Name == name)
-					{
-						foundFrameworkElement = (T)child;
-						break;
-					}
-				}
-				else
-				{
-					foundFrameworkElement = (T)child;
 					break;
 				}
 			}

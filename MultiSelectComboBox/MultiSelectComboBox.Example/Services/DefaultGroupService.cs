@@ -34,6 +34,27 @@ namespace Sdl.MultiSelectComboBox.Example.Services
 					_itemGroups[index].Order = index;
 				}
 			}
+#else
+			// WinUI specific initialization if needed, or share the above if compatible
+			_itemGroups = new List<IItemGroup> { new LanguageItemGroup(-1, "All Items") };
+			
+			if (_service != null && !_itemGroups.Exists(a => a.Name == _service.Name))
+			{
+				if (_service.Index < _itemGroups.Count)
+				{
+					_itemGroups.Insert(_service.Index, new LanguageItemGroup(_service.Index, _service.Name));
+				}
+				else
+				{
+					_service.Index = _itemGroups.Count;
+					_itemGroups.Add(new LanguageItemGroup(_service.Index, _service.Name));
+				}
+
+				for (var index = 0; index < _itemGroups.Count; index++)
+				{
+					_itemGroups[index].Order = index;
+				}
+			}
 #endif
 		}
 
