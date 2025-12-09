@@ -1,0 +1,700 @@
+From a85abc8b78edf5a074593860b7c1daaea385a71d Mon Sep 17 00:00:00 2001
+From: Mitch Capper <mitch.capper@gmail.com>
+Date: Tue, 9 Dec 2025 09:18:25 -0800
+Subject: [PATCH 1/4] bef
+
+---
+ .../Controls/MultiSelectComboBox.cs           | 153 +++++++++++-------
+ 1 file changed, 93 insertions(+), 60 deletions(-)
+
+diff --git a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+index 1794503..472a50e 100644
+--- a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
++++ b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+@@ -279,7 +279,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 				{
+ 					_dropdownListBox.SelectionChanged -= DropdownListBoxSelectionChanged;
+ #if WINUI
+-					_dropdownListBox.PointerReleased -= DropdownListBoxPointerReleased;
++					_dropdownListBox.ItemClick -= DropdownListBoxItemClick;
+ 					_dropdownListBox.KeyDown -= DropdownListBoxKeyDown;
+ #else
+ 					_dropdownListBox.PreviewMouseUp -= DropdownListBoxPreviewMouseUp;
+@@ -297,6 +297,16 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 					// WinUI/Uno uses ListView with Single selection mode - we manage multi-selection separately
+ 					_dropdownListBox.SelectionMode = ListViewSelectionMode.Single;
+ 					_dropdownListBox.ItemsSource = ItemsSource;
++					
++					if (DropdownItemTemplate == null && _dropdownListBox.Resources.ContainsKey(MultiSelectComboBox_Dropdown_ListBox_ItemTemplate))
++					{
++						DropdownItemTemplate = _dropdownListBox.Resources[MultiSelectComboBox_Dropdown_ListBox_ItemTemplate] as DataTemplate;
++					}
++					
++					if (DropdownItemTemplate != null)
++					{
++						_dropdownListBox.ItemTemplate = DropdownItemTemplate;
++					}
+ #else
+ 					if (DropdownItemTemplate == null)
+ 					{
+@@ -315,7 +325,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 
+ 					_dropdownListBox.SelectionChanged += DropdownListBoxSelectionChanged;
+ #if WINUI
+-					_dropdownListBox.PointerReleased += DropdownListBoxPointerReleased;
++					_dropdownListBox.ItemClick += DropdownListBoxItemClick;
+ 					_dropdownListBox.KeyDown += DropdownListBoxKeyDown;
+ #else
+ 					_dropdownListBox.PreviewMouseUp += DropdownListBoxPreviewMouseUp;
+@@ -691,6 +701,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 						DropdownListBox.IsItemClickEnabled = true;
+ 						DropdownListBox.ItemClick += DropdownListBoxItemClick;
+ 						DropdownListBox.KeyDown += DropdownListBoxKeyDown;
++						DropdownListBox.ContainerContentChanging += DropdownListBox_ContainerContentChanging;
+ 					}
+ #else
+ 					DropdownListBox = VisualTreeService.FindVisualChild<ListBox>(DropdownMenu.Child, PART_MultiSelectComboBox_Dropdown_ListBox);
+@@ -1663,61 +1674,30 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 			}
+ 		}
+ 
+-		private void UpdateSelectedItemsContainer(IList comboBoxItems)
+-		{
+-			if (comboBoxItems == null)
+-			{
+-				return;
+-			}
+-
+-			if (DropdownListBox?.SelectedItem != null)
+-			{
+-				UpdateAutoCompleteFilterText(FilterTextApplied, null);
+-			}
++		private void UpdateSelectedItemsContainer(IList comboBoxItems) 
++        {
++            // Renamed internal logic to SyncContainersFromSelection but kept this method signature for compatibility if needed.
++            // But logic is now: sync visuals FROM selection.
++            SyncContainersFromSelection();
++        }
+ 
+-			var itemsAdded = new Collection<object>();
+-			var itemsRemoved = new Collection<object>();
++		private void SyncContainersFromSelection()
++		{
++			if (DropdownListBox == null || ItemsSource == null) return;
+ 
+-			foreach (var comboBoxItem in comboBoxItems)
++			foreach (var item in ItemsSource)
+ 			{
+-				var listBoxItem = GetListViewItem(comboBoxItem);
+-				var isSelectedItem = IsSelectedItem(comboBoxItem);
+-				var enableAwareItem = comboBoxItem as IItemEnabledAware;
+-
+-				if (enableAwareItem == null || enableAwareItem.IsEnabled)
++				var container = GetListViewItem(item); // This will be null for off-screen items
++				if (container != null)
+ 				{
+-					if (isSelectedItem && listBoxItem != null && !listBoxItem.IsChecked)
++					bool isSelected = IsSelectedItem(item);
++					if (container.IsChecked != isSelected)
+ 					{
+-						SelectedItemsInternal.Remove(comboBoxItem);
+-						itemsRemoved.Add(comboBoxItem);
++						container.IsChecked = isSelected;
+ 					}
+-					else if (!isSelectedItem && listBoxItem != null && listBoxItem.IsChecked)
+-					{
+-						if (AddSelectedItem(SelectedItemsInternal, comboBoxItem))
+-						{
+-							itemsAdded.Add(comboBoxItem);
+-						}
+-					}
+-				}
+-				else if (isSelectedItem)
+-				{
+-					SelectedItemsInternal.Remove(comboBoxItem);
+-					itemsRemoved.Add(comboBoxItem);
+ 				}
+ 			}
+-
+-			ConfigureSingleSelectionMode(ref itemsRemoved);
+-
+-			var selectedItems = SelectedItemsInternal.Where(a => a != null).ToList();
+-
+-			UpdateSelectedItems(selectedItems);
+-
+-			if (itemsAdded.Count > 0 || itemsRemoved.Count > 0)
+-			{
+-				RaiseSelectedItemsChangedEvent(itemsAdded, itemsRemoved, selectedItems);
+-			}
+-
+-			AddFilterPlaceholderIfNeeded();
++            AddFilterPlaceholderIfNeeded();
+ 		}
+ 
+ 		private void ConfigureSingleSelectionMode(ref Collection<object> itemsRemoved)
+@@ -2248,10 +2228,15 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 			{
+ 				SetVisualFocusOnItem(SelectedItems[0]);
+ 			}
+-			else if (DropdownListBox?.Items.Count > 0)
+-			{
+-				SetVisualFocusOnItem(DropdownListBox.Items[0]);
+-			}
++			
++			if (DropdownListBox?.Items.Count > 0)
++				{
++					// Only set focus if we are NOT editing text (filter mode)
++					if (!IsEditMode)
++					{
++						SetVisualFocusOnItem(DropdownListBox.Items[0]);
++					}
++				}
+ #if !WINUI
+ 			Mouse.Capture(this, CaptureMode.SubTree);
+ #endif
+@@ -2333,21 +2318,69 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 			System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownListBoxItemClick - Item: {e.ClickedItem}");
+ 			if (e.ClickedItem != null)
+ 			{
+-				UpdateSelectedItems(e.ClickedItem);
++				ToggleItemSelection(e.ClickedItem);
+ 
+-				// Force UI update for the item container
+-				var container = DropdownListBox.ContainerFromItem(e.ClickedItem) as ExtendedListBoxItem;
+-				if (container != null)
++				if (SelectionMode == SelectionModes.Single)
+ 				{
+-					container.IsChecked = !container.IsChecked;
++					IsDropDownOpen = false;
+ 				}
++			}
++		}
++
++		private void ToggleItemSelection(object item)
++		{
++			var itemsAdded = new Collection<object>();
++			var itemsRemoved = new Collection<object>();
+ 
++			if (IsSelectedItem(item))
++			{
++				if (RemoveSelectedItem(SelectedItemsInternal, -1, SelectedItems)) // index -1 to use remove by object
++				{
++					SelectedItemsInternal.Remove(item); // Ensure removal
++					itemsRemoved.Add(item);
++				}
++			}
++			else
++			{
+ 				if (SelectionMode == SelectionModes.Single)
+ 				{
+-					IsDropDownOpen = false;
++					// Clear others
++					foreach (var selected in SelectedItemsInternal.ToList())
++					{
++						if (selected != item) 
++						{
++							SelectedItemsInternal.Remove(selected);
++							itemsRemoved.Add(selected);
++						}
++					}
++				}
++
++				if (AddSelectedItem(SelectedItemsInternal, item))
++				{
++					itemsAdded.Add(item);
+ 				}
+ 			}
++
++			// Update Visuals
++			SyncContainersFromSelection();
++
++			if (itemsAdded.Count > 0 || itemsRemoved.Count > 0)
++			{
++				RaiseSelectedItemsChangedEvent(itemsAdded, itemsRemoved, SelectedItemsInternal.Where(a => a != null).ToList());
++				UpdateSelectedItems(SelectedItemsInternal); // Sync public property
++			}
++            
++            AddFilterPlaceholderIfNeeded();
+ 		}
++#if WINUI
++		private void DropdownListBox_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
++		{
++			if (args.Item != null && args.ItemContainer is ExtendedListBoxItem container)
++			{
++				container.IsChecked = IsSelectedItem(args.Item);
++			}
++		}
++#endif
+ 
+ #else
+ 		private void DropdownListBoxPreviewKeyDown(object sender, KeyEventArgs e)
+@@ -3204,7 +3237,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 			{
+ 				DropdownListBox.SelectionChanged -= DropdownListBoxSelectionChanged;
+ #if WINUI
+-				DropdownListBox.PointerReleased -= DropdownListBoxPointerReleased;
++				DropdownListBox.ItemClick -= DropdownListBoxItemClick;
+ 				DropdownListBox.KeyDown -= DropdownListBoxKeyDown;
+ #else
+ 				DropdownListBox.PreviewMouseUp -= DropdownListBoxPreviewMouseUp;
+-- 
+2.50.0.windows.1
+
+
+From 2665e82c257f30c22a839bfb104d69c5bac2dd82 Mon Sep 17 00:00:00 2001
+From: Mitch Capper <mitch.capper@gmail.com>
+Date: Tue, 9 Dec 2025 09:18:30 -0800
+Subject: [PATCH 2/4] def broken wpf
+
+---
+ .../Controls/MultiSelectComboBox.cs                      | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+index 472a50e..b4fb1ab 100644
+--- a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
++++ b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+@@ -2334,9 +2334,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 
+ 			if (IsSelectedItem(item))
+ 			{
+-				if (RemoveSelectedItem(SelectedItemsInternal, -1, SelectedItems)) // index -1 to use remove by object
++				if (SelectedItemsInternal.Contains(item))
+ 				{
+-					SelectedItemsInternal.Remove(item); // Ensure removal
++					SelectedItemsInternal.Remove(item);
+ 					itemsRemoved.Add(item);
+ 				}
+ 			}
+@@ -2771,7 +2771,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 				{
+ 					var item = DropdownListBox.Items[0];
+ 					System.Diagnostics.Debug.WriteLine($"[WINUI] First filtered item: {item}");
+-					SetVisualFocusOnItem(item);
++					if (!IsEditMode)
++					{
++						SetVisualFocusOnItem(item);
++					}
+ 					UpdateAutoCompleteFilterText(criteria, item);
+ 				}
+ 				else
+-- 
+2.50.0.windows.1
+
+
+From 7fcd9f3240c400306289c564139bb80fb995d34f Mon Sep 17 00:00:00 2001
+From: Mitch Capper <mitch.capper@gmail.com>
+Date: Tue, 9 Dec 2025 11:04:54 -0800
+Subject: [PATCH 3/4] hh
+
+---
+ .../Sdl.MultiSelectComboBox.Example.csproj    |   2 +-
+ .../Controls/ContentItemsControl.cs           |  14 ++
+ .../Controls/MultiSelectComboBox.cs           | 183 ++++++++++--------
+ .../Services/VisualTreeService.cs             |  15 ++
+ 4 files changed, 132 insertions(+), 82 deletions(-)
+
+diff --git a/MultiSelectComboBox/MultiSelectComboBox.Example/Sdl.MultiSelectComboBox.Example.csproj b/MultiSelectComboBox/MultiSelectComboBox.Example/Sdl.MultiSelectComboBox.Example.csproj
+index 29db61d..0f486a3 100644
+--- a/MultiSelectComboBox/MultiSelectComboBox.Example/Sdl.MultiSelectComboBox.Example.csproj
++++ b/MultiSelectComboBox/MultiSelectComboBox.Example/Sdl.MultiSelectComboBox.Example.csproj
+@@ -43,7 +43,7 @@
+   </ItemGroup>
+ 
+   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+-    <Exec Command="xcopy &quot;$(ProjectDir)Resources\Flags\*&quot; &quot;$(ProjectDir)$(OutDir)Flags\&quot; /c /s /y" />
++    <Exec Command="xcopy &quot;$(ProjectDir)Resources\Flags\*&quot; &quot;$(ProjectDir)$(OutDir)Flags\&quot; /c /s /y /d" />
+   </Target>
+ 
+ </Project>
+\ No newline at end of file
+diff --git a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/ContentItemsControl.cs b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/ContentItemsControl.cs
+index 3738873..0cf7801 100644
+--- a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/ContentItemsControl.cs
++++ b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/ContentItemsControl.cs
+@@ -14,5 +14,19 @@ namespace Sdl.MultiSelectComboBox.Controls
+ 		{
+ 			return new ContentControl();
+ 		}
++
++#if WINUI
++		protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
++		{
++			base.PrepareContainerForItemOverride(element, item);
++			
++			// If the item is null (Filter Placeholder), clear the Style to avoid the "X" button and border
++			// from the ItemContainerStyle applied by the ItemsControl.
++			if (item == null && element is Control control)
++			{
++				control.Style = null; 
++			}
++		}
++#endif
+ 	}
+ }
+diff --git a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+index b4fb1ab..2adaae8 100644
+--- a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
++++ b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+@@ -65,6 +65,8 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 		private const string PART_MultiSelectComboBox_Dropdown_ClearAllButton = "PART_MultiSelectComboBox_Dropdown_ClearAllButton";
+ 
+ 		private const string PART_MultiSelectComboBox_Dropdown_NewItem_TextBox = "PART_MultiSelectComboBox_Dropdown_NewItem_TextBox";
++		private const string PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup = "PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup";
++		private const string PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton = "PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton";
+ 		private const string MultiSelectComboBox_SelectedItems_Searchable_ItemTemplate = "MultiSelectComboBox.SelectedItems.Searchable.ItemTemplate";
+ 		private const string MultiSelectComboBox_Dropdown_ListBox_ItemTemplate = "MultiSelectComboBox.Dropdown.ListBox.ItemTemplate";
+ 
+@@ -729,6 +731,30 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ #endif
+ 						}
+ 					}
++					
++					var editGroup = VisualTreeService.FindVisualChild<Border>(popupChild, PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup);
++					var showEditBoxBtn = VisualTreeService.FindVisualChild<Button>(popupChild, PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton);
++					if (showEditBoxBtn != null)
++					{
++						showEditBoxBtn.Visibility = IsEditable && editGroup != null ? Visibility.Visible : Visibility.Collapsed;
++						if (editGroup != null)
++						{
++							showEditBoxBtn.Click += (s, e) => 
++							{
++								editGroup.Visibility = Visibility.Visible;
++								showEditBoxBtn.Visibility = Visibility.Collapsed;
++								if (TextBoxNewItem != null)
++								{
++#if WINUI
++									TextBoxNewItem.Focus(FocusState.Programmatic);
++#else
++									TextBoxNewItem.Focus();
++#endif
++								}
++							};
++						}
++					}
++
+ 					var selectAllBtn = VisualTreeService.FindVisualChild<Button>(popupChild, PART_MultiSelectComboBox_Dropdown_SelectAllButton);
+ 					if (selectAllBtn != null)
+ 						selectAllBtn.Click += SelectAll_Click;
+@@ -1935,18 +1961,22 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ #endif
+ 				SetVisualFocusOnItem(DropdownListBox.SelectedItem);
+ 
+-#if WINUI
+-				DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() =>
++				// Only move keyboard focus if we are NOT in edit mode (i.e. not typing)
++				if (!IsEditMode)
+ 				{
+-					SetKeyBoardFocusOnItem(DropdownListBox.SelectedItem);
+-				});
+-#else
+-				Dispatcher.BeginInvoke(DispatcherPriority.Input,
+-					new Action(delegate
++#if WINUI
++					DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() =>
+ 					{
+ 						SetKeyBoardFocusOnItem(DropdownListBox.SelectedItem);
+-					}));
++					});
++#else
++					Dispatcher.BeginInvoke(DispatcherPriority.Input,
++						new Action(delegate
++						{
++							SetKeyBoardFocusOnItem(DropdownListBox.SelectedItem);
++						}));
+ #endif
++				}
+ 			}
+ 		}
+ 
+@@ -2277,6 +2307,53 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 			}
+ 		}
+ 
++		private void ToggleItemSelection(object item)
++		{
++			var itemsAdded = new Collection<object>();
++			var itemsRemoved = new Collection<object>();
++
++			if (IsSelectedItem(item))
++			{
++				if (SelectedItemsInternal.Contains(item))
++				{
++					SelectedItemsInternal.Remove(item);
++					itemsRemoved.Add(item);
++				}
++			}
++			else
++			{
++				if (SelectionMode == SelectionModes.Single)
++				{
++					// Clear others
++					foreach (var selected in SelectedItemsInternal.ToList())
++					{
++						if (selected != item) 
++						{
++							SelectedItemsInternal.Remove(selected);
++							itemsRemoved.Add(selected);
++						}
++					}
++				}
++
++				if (AddSelectedItem(SelectedItemsInternal, item))
++				{
++					itemsAdded.Add(item);
++				}
++			}
++
++			// Update Visuals
++			SyncContainersFromSelection();
++
++			if (itemsAdded.Count > 0 || itemsRemoved.Count > 0)
++			{
++				RaiseSelectedItemsChangedEvent(itemsAdded, itemsRemoved, SelectedItemsInternal.Where(a => a != null).ToList());
++				UpdateSelectedItems(SelectedItemsInternal); // Sync public property
++			}
++            
++            AddFilterPlaceholderIfNeeded();
++		}
++
++
+ #if WINUI
+ 		private void DropdownListBoxKeyDown(object sender, KeyRoutedEventArgs e)
+ 		{
+@@ -2327,51 +2404,6 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 			}
+ 		}
+ 
+-		private void ToggleItemSelection(object item)
+-		{
+-			var itemsAdded = new Collection<object>();
+-			var itemsRemoved = new Collection<object>();
+-
+-			if (IsSelectedItem(item))
+-			{
+-				if (SelectedItemsInternal.Contains(item))
+-				{
+-					SelectedItemsInternal.Remove(item);
+-					itemsRemoved.Add(item);
+-				}
+-			}
+-			else
+-			{
+-				if (SelectionMode == SelectionModes.Single)
+-				{
+-					// Clear others
+-					foreach (var selected in SelectedItemsInternal.ToList())
+-					{
+-						if (selected != item) 
+-						{
+-							SelectedItemsInternal.Remove(selected);
+-							itemsRemoved.Add(selected);
+-						}
+-					}
+-				}
+-
+-				if (AddSelectedItem(SelectedItemsInternal, item))
+-				{
+-					itemsAdded.Add(item);
+-				}
+-			}
+-
+-			// Update Visuals
+-			SyncContainersFromSelection();
+-
+-			if (itemsAdded.Count > 0 || itemsRemoved.Count > 0)
+-			{
+-				RaiseSelectedItemsChangedEvent(itemsAdded, itemsRemoved, SelectedItemsInternal.Where(a => a != null).ToList());
+-				UpdateSelectedItems(SelectedItemsInternal); // Sync public property
+-			}
+-            
+-            AddFilterPlaceholderIfNeeded();
+-		}
+ #if WINUI
+ 		private void DropdownListBox_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+ 		{
+@@ -2382,22 +2414,22 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 		}
+ #endif
+ 
++
++
++
+ #else
+ 		private void DropdownListBoxPreviewKeyDown(object sender, KeyEventArgs e)
+ 		{
++
+ 			if (DropdownListBox != null && DropdownListBox.SelectedItem is object item)
+ 			{
+ 				switch (e.Key)
+ 				{
+ 					case Key.Space:
+-						var listBoxItem = GetListViewItem(item);
+-						listBoxItem.IsChecked = !listBoxItem.IsChecked;
+-
+-						UpdateSelectedItemsContainer(ItemsSource);
+-
++						ToggleItemSelection(item);
+ 						break;
+ 					case Key.Return:
+-						SelectComboBoxItem();
++						ToggleItemSelection(item);
+ 						IsDropDownOpen = false;
+ 
+ 						if (SelectedItemsFilterTextBox != null)
+@@ -2405,7 +2437,6 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 						FilterTextApplied = string.Empty;
+ 
+ 						UpdateItems(string.Empty);
+-
+ 						break;
+ 					case Key.Escape:
+ 						if (ClearFilterOnDropdownClosing && DropdownListBox != null && DropdownListBox.IsKeyboardFocusWithin)
+@@ -2487,24 +2518,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 				}
+ 			}
+ 
+-			if (originalSource?.DataContext is object comboBoxItem)
++			if (originalSource?.DataContext is object clickedItem)
+ 			{
+-				var listBoxItem = GetListViewItem(comboBoxItem);
+-				if (listBoxItem != null)
+-				{
+-					if (SelectionMode != SelectionModes.Single || !listBoxItem.IsChecked)
+-					{
+-						listBoxItem.IsChecked = !listBoxItem.IsChecked;
+-
+-						SetKeyBoardFocusOnItem(comboBoxItem);
+-						UpdateSelectedItemsContainer(ItemsSource);
+-					}
+-
+-					if (SelectionMode == SelectionModes.Single)
+-					{
+-						CloseDropdownMenu(true, false);
+-					}
+-				}
++				ToggleItemSelection(clickedItem);
+ 			}
+ 		}
+ 
+@@ -2562,9 +2578,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 			}
+ 		}
+ 
+-		private void SetVisualFocusOnItem(object comboBoxItem)
++		private void SetVisualFocusOnItem(object comboBoxItem, bool setFocus = true)
+ 		{
+-			if (DropdownListBox?.Items.Count > 0)
++			if (DropdownListBox?.Items.Count > 0 && setFocus)
+ 			{
+ #if WINUI
+ 				DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() =>
+@@ -2773,7 +2789,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 					System.Diagnostics.Debug.WriteLine($"[WINUI] First filtered item: {item}");
+ 					if (!IsEditMode)
+ 					{
+-						SetVisualFocusOnItem(item);
++						SetVisualFocusOnItem(item, false);
+ 					}
+ 					UpdateAutoCompleteFilterText(criteria, item);
+ 				}
+@@ -3053,7 +3069,12 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 
+ 		private bool IsRemoveItemButton(RoutedEventArgs e)
+ 		{
+-			var button = VisualTreeService.FindVisualTemplatedParent<Button>(e.OriginalSource as FrameworkElement, PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button);
++			var originalSource = e.OriginalSource as FrameworkElement;
++			if (originalSource is Button btn && btn.Name == PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button)
++			{
++				return true;
++			}
++			var button = VisualTreeService.FindVisualAncestor<Button>(originalSource, PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button);
+ 			return button != null;
+ 		}
+ 
+diff --git a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Services/VisualTreeService.cs b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Services/VisualTreeService.cs
+index 1972e96..702fec7 100644
+--- a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Services/VisualTreeService.cs
++++ b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Services/VisualTreeService.cs
+@@ -101,5 +101,20 @@ namespace Sdl.MultiSelectComboBox.Services
+ 
+ 			return foundFrameworkElement;
+ 		}
++
++		public static T FindVisualAncestor<T>(DependencyObject dependencyObject, string name = null) where T : DependencyObject
++		{
++			var parent = VisualTreeHelper.GetParent(dependencyObject);
++
++			if (parent == null) 
++				return default;
++
++			if (parent is T parentType && (string.IsNullOrEmpty(name) || (parent is FrameworkElement parentElement && parentElement.Name == name)))
++			{
++				return parentType;
++			}
++
++			return FindVisualAncestor<T>(parent, name);
++		}
+ 	}
+ }
+-- 
+2.50.0.windows.1
+
+
+From 7ece9cfaed6a47e79fe3c1ca9440bc79beb6ebf0 Mon Sep 17 00:00:00 2001
+From: Mitch Capper <mitch.capper@gmail.com>
+Date: Tue, 9 Dec 2025 11:55:11 -0800
+Subject: [PATCH 4/4] quite broken still
+
+---
+ .../Controls/MultiSelectComboBox.cs             | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+index 2adaae8..9d55771 100644
+--- a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
++++ b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+@@ -1788,6 +1788,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 
+ 				foreach (var item in selectedItems)
+ 				{
++                    // Skip null items (filter placeholders) to prevent adding them to strongly-typed collections
++                    if (item == null) continue;
++
+ 					if (!SelectedItems.Contains(item))
+ 					{
+ 						SelectedItems.Add(item);
+@@ -2309,6 +2312,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 
+ 		private void ToggleItemSelection(object item)
+ 		{
++            if (item == null) return;
++
++#if WINUI
++            if (item is ICollectionViewGroup) return;
++#else
++            if (item is CollectionViewGroup) return;
++#endif
++
+ 			var itemsAdded = new Collection<object>();
+ 			var itemsRemoved = new Collection<object>();
+ 
+@@ -2362,13 +2373,11 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 			{
+ 				if (e.Key == VirtualKey.Space)
+ 				{
+-					var listBoxItem = GetListViewItem(item);
+-					listBoxItem.IsChecked = !listBoxItem.IsChecked;
+-					UpdateSelectedItemsContainer(ItemsSource);
++					ToggleItemSelection(item);
+ 				}
+ 				else if (e.Key == VirtualKey.Enter)
+ 				{
+-					SelectComboBoxItem();
++					ToggleItemSelection(item);
+ 					IsDropDownOpen = false;
+ 
+ 					if (SelectedItemsFilterTextBox != null)
+-- 
+2.50.0.windows.1
+

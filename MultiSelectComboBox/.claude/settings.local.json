@@ -10,7 +10,8 @@
       "Bash(if [ -f MultiSelectComboBox.cs.bak ])",
       "Bash(then mv MultiSelectComboBox.cs.bak MultiSelectComboBox.cs)",
       "Bash(else echo \"No backup found\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(Select-Object -First 100)"
     ],
     "deny": [],
     "ask": []

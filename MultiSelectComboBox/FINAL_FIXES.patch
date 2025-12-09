@@ -1,0 +1,109 @@
+diff --git a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+index xxx..xxx 100644
+--- a/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
++++ b/MultiSelectComboBox/Sdl.MultiSelectComboBox.Shared/Controls/MultiSelectComboBox.cs
+@@ -1754,19 +1754,17 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 		private void AttemptToRemoveSelectedItem(object comboBoxItem)
+ 		{
++			System.Diagnostics.Debug.WriteLine($"[WINUI] AttemptToRemoveSelectedItem called for: {comboBoxItem}");
++
+ 			var listBoxItem = GetListViewItem(comboBoxItem);
+ 			if (listBoxItem != null)
+ 			{
+ 				listBoxItem.IsChecked = false;
+ 			}
+
+-			if (IsDropDownOpen && listBoxItem != null)
+-			{
+-				UpdateSelectedItemsContainer(ItemsSource);
+-			}
+-			else
++			// Remove from selection regardless of dropdown state
++			if (SelectedItemsInternal.Contains(comboBoxItem))
+ 			{
+ 				SelectedItemsInternal.Remove(comboBoxItem);
+
+ 				var selectedItems = SelectedItemsInternal.Where(a => a != null).ToList();
+ 				UpdateSelectedItems(selectedItems);
+
+ 				RaiseSelectedItemsChangedEvent(new List<object>(), new List<object> { comboBoxItem }, selectedItems);
++				System.Diagnostics.Debug.WriteLine($"[WINUI] Removed item, SelectedItems.Count now: {SelectedItems.Count}");
+ 			}
+ 		}
+
+@@ -1911,11 +1909,32 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 			KeyRoutedEventArgs e)
+ 		{
+ 			System.Diagnostics.Debug.WriteLine($"[WINUI] KeyUp: {e.Key}, IsDropDownOpen: {IsDropDownOpen}");
+ 			if (e.Key != VirtualKey.Down && e.Key != VirtualKey.Up)
+ #else
+ 			KeyEventArgs e)
+ 		{
++			System.Diagnostics.Debug.WriteLine($"[WPF] KeyUp: {e.Key}, IsDropDownOpen: {IsDropDownOpen}");
+ 			if (e.Key != Key.Down && e.Key != Key.Up)
+ #endif
+ 			{
+ 				return;
+ 			}
+
+-			System.Diagnostics.Debug.WriteLine($"[WINUI] Calling OpenDropDownList");
+-			OpenDropDownList();
++			// Only open dropdown if it's not already open
++			// If already open, let dropdown's key handler navigate
++			if (!IsDropDownOpen)
++			{
++				System.Diagnostics.Debug.WriteLine($"[WINUI] Calling OpenDropDownList");
++				OpenDropDownList();
++			}
++			else
++			{
++#if !WINUI
++				// For WPF: Set focus to dropdown so arrow keys work for navigation
++				if (DropdownListBox != null && !DropdownListBox.IsKeyboardFocusWithin)
++				{
++					System.Diagnostics.Debug.WriteLine($"[WPF] Setting focus to dropdown for navigation");
++					DropdownListBox.Focus();
++					if (DropdownListBox.Items.Count > 0 && DropdownListBox.SelectedIndex < 0)
++					{
++						DropdownListBox.SelectedIndex = 0;
++					}
++				}
++#endif
++			}
+ 		}
+
+@@ -2109,8 +2132,32 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
+ 		private void SelectedItemsControl_OnPointerPressed(object sender, PointerRoutedEventArgs e)
+ 		{
+ 			if (IsEditMode)
+ 			{
+-				IsDropDownOpen = !IsDropDownOpen;
++				// Check if user clicked the X button to remove an item
++				if (IsEditable && IsRemoveItemButton(e))
++				{
++					var element = e.OriginalSource as FrameworkElement;
++					if (element?.DataContext is object item)
++					{
++						System.Diagnostics.Debug.WriteLine($"[WINUI] Remove button clicked for item: {item}");
++
++						// Check for Ctrl+Click to delete (if enabled)
++						var ctrlPressed = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
++
++						if (ctrlPressed && EnableDeleteItemUI)
++						{
++							RaiseItemDeleteRequestEvent(new Collection<object>() { item });
++							e.Handled = true;
++						}
++						else
++						{
++							AttemptToRemoveSelectedItem(item);
++						}
++					}
++				}
++				else
++				{
++					IsDropDownOpen = !IsDropDownOpen;
++				}
+ 			}
+
+ 			AssignIsEditMode();
