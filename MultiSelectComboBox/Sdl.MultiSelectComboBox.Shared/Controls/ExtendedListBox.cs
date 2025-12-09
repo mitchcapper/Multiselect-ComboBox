@@ -9,9 +9,13 @@ using System.Windows.Controls;
 namespace Sdl.MultiSelectComboBox.Controls
 {
 	/// <summary>
-	/// Extended ListBox that uses ExtendedListBoxItem as the item container
+	/// Extended ListBox/ListView that uses ExtendedListBoxItem as the item container
 	/// </summary>
+#if WINUI
+	public class ExtendedListBox : ListView
+#else
 	public class ExtendedListBox : ListBox
+#endif
 	{
 		protected override DependencyObject GetContainerForItemOverride()
 		{

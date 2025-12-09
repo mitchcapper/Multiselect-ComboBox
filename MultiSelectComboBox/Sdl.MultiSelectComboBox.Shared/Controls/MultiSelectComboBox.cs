@@ -40,7 +40,11 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 {
 	[TemplatePart(Name = PART_MultiSelectComboBox, Type = typeof(Grid))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_Dropdown, Type = typeof(Popup))]
+#if WINUI
+	[TemplatePart(Name = PART_MultiSelectComboBox_Dropdown_ListBox, Type = typeof(ListView))]
+#else
 	[TemplatePart(Name = PART_MultiSelectComboBox_Dropdown_ListBox, Type = typeof(ListBox))]
+#endif
 	[TemplatePart(Name = PART_MultiSelectComboBox_Dropdown_Button, Type = typeof(Button))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl, Type = typeof(ItemsControl))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox, Type = typeof(TextBox))]
@@ -282,8 +286,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 				if (_dropdownListBox != null)
 				{
 #if WINUI
-					// WinUI uses Single selection mode - we manage multi-selection separately
-					//_dropdownListBox.SelectionMode = ListViewSelectionMode.Single;
+					// WinUI/Uno uses ListView with Single selection mode - we manage multi-selection separately
+					((ListView)_dropdownListBox).SelectionMode = ListViewSelectionMode.Single;
+			_dropdownListBox.ItemsSource = ItemsCollectionViewSource?.View;
 #else
 					if (DropdownItemTemplate == null)
 					{
@@ -513,9 +518,8 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		private DateTime? IgnoreDropdownClosingFocusPlanUntil;
 #else
 		private object _previousSelectedValue;
-#endif
-
 		private DateTime _suggestionProviderLastRequest;
+#endif
 
 #if !WINUI
 		private void DropDownListBoxScrolled(object sender, RoutedEventArgs e)

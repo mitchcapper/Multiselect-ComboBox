@@ -8,7 +8,11 @@ using System.Windows.Controls;
 
 namespace Sdl.MultiSelectComboBox.Controls
 {
+#if WINUI
+	public class ExtendedListBoxItem : ListViewItem
+#else
 	public class ExtendedListBoxItem : ListBoxItem
+#endif
 	{
 		public static readonly DependencyProperty IsCheckedProperty =
 			DependencyProperty.Register("IsChecked", typeof(bool), typeof(ExtendedListBoxItem),
