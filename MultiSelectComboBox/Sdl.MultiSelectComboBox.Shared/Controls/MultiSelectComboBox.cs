@@ -399,15 +399,31 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 					if (SelectedItemTemplate == null)
 					{
+#if WINUI
+						if (_selectedItemsControl.Resources.ContainsKey(MultiSelectComboBox_SelectedItems_ItemTemplate))
+							SelectedItemTemplate = _selectedItemsControl.Resources[MultiSelectComboBox_SelectedItems_ItemTemplate] as DataTemplate;
+#else
 						SelectedItemTemplate = _selectedItemsControl.FindResource(MultiSelectComboBox_SelectedItems_ItemTemplate) as DataTemplate;
+#endif
+						System.Diagnostics.Debug.WriteLine($"[WINUI] SelectedItemTemplate loaded: {SelectedItemTemplate != null}");
 					}
 
-					SelectedItemTemplateSelector = new SelectedItemTemplateService(SelectedItemTemplate, _selectedItemsControl.FindResource(MultiSelectComboBox_SelectedItems_Searchable_ItemTemplate) as DataTemplate);
-#if !WINUI
+					DataTemplate searchableTemplate = null;
+#if WINUI
+					if (_selectedItemsControl.Resources.ContainsKey(MultiSelectComboBox_SelectedItems_Searchable_ItemTemplate))
+						searchableTemplate = _selectedItemsControl.Resources[MultiSelectComboBox_SelectedItems_Searchable_ItemTemplate] as DataTemplate;
+#else
+					searchableTemplate = _selectedItemsControl.FindResource(MultiSelectComboBox_SelectedItems_Searchable_ItemTemplate) as DataTemplate;
+#endif
+					System.Diagnostics.Debug.WriteLine($"[WINUI] SearchableTemplate loaded: {searchableTemplate != null}");
+					
+					SelectedItemTemplateSelector = new SelectedItemTemplateService(SelectedItemTemplate, searchableTemplate);
+
+#if WINUI
+					_selectedItemsControl.PointerPressed += SelectedItemsControl_OnPointerPressed;
+#else
 					_selectedItemsControl.Items.CurrentChanged += SelectedItemsControl_CurrentChanged;
 					_selectedItemsControl.PreviewMouseDown += SelectedItemsControl_OnPreviewMouseDown;
-#else
-					_selectedItemsControl.PointerPressed += SelectedItemsControl_OnPointerPressed;
 #endif
 					_selectedItemsControl.KeyUp += SelectedItemsControl_OnKeyUp;
 				}
@@ -666,6 +682,12 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 #if WINUI
 					DropdownListBox = VisualTreeService.FindVisualChild<ListView>(DropdownMenu.Child as DependencyObject, PART_MultiSelectComboBox_Dropdown_ListBox);
 					System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownListBox (ListView): {(DropdownListBox != null ? "Found" : "NULL")}");
+					if (DropdownListBox != null)
+					{
+						DropdownListBox.SelectionChanged += DropdownListBoxSelectionChanged;
+						DropdownListBox.KeyDown += DropdownListBoxKeyDown;
+						DropdownListBox.PointerReleased += DropdownListBoxPointerReleased;
+					}
 #else
 					DropdownListBox = VisualTreeService.FindVisualChild<ListBox>(DropdownMenu.Child, PART_MultiSelectComboBox_Dropdown_ListBox);
 #endif
@@ -1417,6 +1439,26 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			return DropdownListBox?.ContainerFromItem(item) as ExtendedListBoxItem;
 #else
 			return DropdownListBox?.ItemContainerGenerator.ContainerFromItem(item) as ExtendedListBoxItem;
+#endif
+		}
+
+
+
+		private void DumpVisualTree(DependencyObject parent, int indent = 0)
+		{
+#if WINUI
+			if (parent == null) return;
+			var prefix = new string(' ', indent * 2);
+			var name = (parent as FrameworkElement)?.Name ?? "Unnamed";
+			var type = parent.GetType().Name;
+			System.Diagnostics.Debug.WriteLine($"[WINUI] VTDump: {prefix}{type} ({name})");
+
+			var count = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent);
+			for (int i = 0; i < count; i++)
+			{
+				var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
+				DumpVisualTree(child, indent + 1);
+			}
 #endif
 		}
 
@@ -2249,6 +2291,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 #if WINUI
 		private void DropdownListBoxKeyDown(object sender, KeyRoutedEventArgs e)
 		{
+			System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownListBoxKeyDown Key={e.Key}");
 			if (DropdownListBox != null && DropdownListBox.SelectedItem is object item)
 			{
 				if (e.Key == VirtualKey.Space)
@@ -2283,6 +2326,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 		private void DropdownListBoxPointerReleased(object sender, PointerRoutedEventArgs e)
 		{
+			System.Diagnostics.Debug.WriteLine("[WINUI] DropdownListBoxPointerReleased");
 			var originalSource = e.OriginalSource as FrameworkElement;
 			if (originalSource?.DataContext is object comboBoxItem)
 			{
@@ -2741,8 +2785,39 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			System.Diagnostics.Debug.WriteLine($"[WINUI] UpdateAutoCompleteFilterText called - Criteria: '{criteria}', Item: {item != null}, IsDropDownOpen: {IsDropDownOpen}");
 			if (SelectedItemsFilterAutoCompleteTextBox == null)
 			{
-				System.Diagnostics.Debug.WriteLine("[WINUI] SelectedItemsFilterAutoCompleteTextBox is NULL");
-				return;
+				System.Diagnostics.Debug.WriteLine("[WINUI] SelectedItemsFilterAutoCompleteTextBox is NULL. Retrying find...");
+				_selectedItemsFilterAutoCompleteTextBox = null; // Force re-find
+				if (SelectedItemsFilterAutoCompleteTextBox == null)
+				{
+					System.Diagnostics.Debug.WriteLine("[WINUI] SelectedItemsFilterAutoCompleteTextBox still NULL after retry.");
+					
+					// Force realization of the template if possible?
+					// In WinUI, we might need to wait for layout.
+					// Let's try to search the specific container if we can find it.
+					if (SelectedItemsControl != null && SelectedItems != null)
+					{
+						var lastItem = SelectedItems.Cast<object>().LastOrDefault();
+						if (lastItem == null) // This is our search item (null placeholder)
+						{
+#if ! WINUI
+							var container = SelectedItemsControl.ItemContainerGenerator.ContainerFromItem(lastItem);
+#else
+							var container = SelectedItemsControl.ContainerFromItem(lastItem); // This might be null if not generated yet
+#endif
+							if (container is DependencyObject depObj)
+							{
+								_selectedItemsFilterAutoCompleteTextBox = VisualTreeService.FindVisualChild<TextBox>(depObj, PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox);
+							}
+						}
+					}
+					
+					if (SelectedItemsFilterAutoCompleteTextBox == null)
+					{
+						System.Diagnostics.Debug.WriteLine("[WINUI] VTDUMP: Dumping SelectedItemsControl visual tree:");
+						DumpVisualTree(SelectedItemsControl);
+						return;
+					}
+				}
 			}
 
 			if (EnableAutoComplete && IsDropDownOpen)
