@@ -117,8 +117,8 @@ public partial class App : Application {
 				// builder.AddFilter("Windows.Storage", DefaultDebugLogLevel );
 
 				// Binding related messages
-				//builder.AddFilter("Microsoft.UI.Xaml.Data", DefaultDebugLogLevel);
-				builder.AddFilter("Microsoft.UI.Xaml.Data", LogLevel.Debug);
+				builder.AddFilter("Microsoft.UI.Xaml.Data", DefaultDebugLogLevel);
+				//builder.AddFilter("Microsoft.UI.Xaml.Data", LogLevel.Debug);
 
 				// Binder memory references tracking
 				builder.AddFilter("Uno.UI.DataBinding.BinderReferenceHolder", DefaultDebugLogLevel );

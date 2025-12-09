@@ -1033,9 +1033,15 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 #if WINUI
 		private static void OnIsDropDownOpenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
+			System.Diagnostics.Debug.WriteLine($"[WINUI] IsDropDownOpen changed: {e.OldValue} -> {e.NewValue}");
 			if (d is MultiSelectComboBox control && control._dropdownMenu != null)
 			{
 				control._dropdownMenu.IsOpen = (bool)e.NewValue;
+				System.Diagnostics.Debug.WriteLine($"[WINUI] Set Popup.IsOpen = {e.NewValue}");
+			}
+			else if (d is MultiSelectComboBox ctrl)
+			{
+				System.Diagnostics.Debug.WriteLine($"[WINUI] WARNING: _dropdownMenu is NULL!");
 			}
 		}
 #endif
@@ -1814,6 +1820,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 #if WINUI
 			KeyRoutedEventArgs e)
 		{
+			System.Diagnostics.Debug.WriteLine($"[WINUI] KeyUp: {e.Key}");
 			if (e.Key != VirtualKey.Down && e.Key != VirtualKey.Up)
 #else
 			KeyEventArgs e)
@@ -1824,6 +1831,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 				return;
 			}
 
+			System.Diagnostics.Debug.WriteLine($"[WINUI] Calling OpenDropDownList");
 			OpenDropDownList();
 		}
 
@@ -1844,18 +1852,28 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		private void OpenDropDownList()
 		{
 #if WINUI
+			System.Diagnostics.Debug.WriteLine($"[WINUI] OpenDropDownList - DropdownListBox: {(DropdownListBox != null ? $"Found with {DropdownListBox.Items.Count} items" : "NULL")}");
 			if (DropdownListBox == null)
 #else
 			if (DropdownListBox == null || DropdownListBox.IsKeyboardFocusWithin)
 #endif
 			{
+#if WINUI
+				System.Diagnostics.Debug.WriteLine("[WINUI] OpenDropDownList - Returning early, DropdownListBox is NULL");
+#endif
 				return;
 			}
 
 			IsDropDownOpen = true;
+#if WINUI
+			System.Diagnostics.Debug.WriteLine($"[WINUI] OpenDropDownList - Set IsDropDownOpen = true");
+#endif
 
 			if (DropdownListBox.Items.Count > 0)
 			{
+#if WINUI
+				System.Diagnostics.Debug.WriteLine($"[WINUI] OpenDropDownList - Setting focus on first item");
+#endif
 				SetVisualFocusOnItem(DropdownListBox.SelectedItem);
 
 #if WINUI
@@ -1876,12 +1894,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 #if WINUI
 		private void MultiSelectComboBoxOnPointerPressed(object sender, PointerRoutedEventArgs e)
 		{
+			System.Diagnostics.Debug.WriteLine($"[WINUI] PointerPressed - IsEditMode: {IsEditMode}, OpenDropDownListAlsoWhenNotInEditMode: {OpenDropDownListAlsoWhenNotInEditMode}");
 			if (!IsEditMode && OpenDropDownListAlsoWhenNotInEditMode == false)
 			{
 				e.Handled = true;
 			}
 			else
 			{
+				System.Diagnostics.Debug.WriteLine($"[WINUI] PointerPressed - Toggling IsDropDownOpen from {IsDropDownOpen} to {!IsDropDownOpen}");
 				IsDropDownOpen = !IsDropDownOpen;
 
 				if (!IsDropDownOpen)
@@ -1933,11 +1953,17 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 		private void MultiSelectComboBoxGotFocus(object sender, RoutedEventArgs e)
 		{
+#if WINUI
+			System.Diagnostics.Debug.WriteLine("[WINUI] MultiSelectComboBox GotFocus");
+#endif
 			MultiSelectComboBoxHasFocus = true;
 		}
 
 		private void MultiSelectComboBoxLostFocus(object sender, RoutedEventArgs e)
 		{
+#if WINUI
+			System.Diagnostics.Debug.WriteLine("[WINUI] MultiSelectComboBox LostFocus");
+#endif
 			MultiSelectComboBoxHasFocus = false;
 
 			if (IsEditable)
@@ -2541,6 +2567,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 		private void UpdateItems(string criteria)
 		{
+#if WINUI
+			System.Diagnostics.Debug.WriteLine($"[WINUI] UpdateItems called with criteria: '{criteria}', SuggestionProvider: {(SuggestionProvider != null ? "exists" : "NULL")}");
+#endif
 			if (SuggestionProvider == null)
 			{
 				ApplyItemsFilter(criteria);
@@ -2600,6 +2629,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 		private void ApplyItemsFilter(string criteria)
 		{
+			System.Diagnostics.Debug.WriteLine($"[WINUI] ApplyItemsFilter called - Criteria: '{criteria}', EnableFiltering: {EnableFiltering}");
 #if WINUI
 			// WinUI uses different filtering approach - direct filtering on ItemsSource or CollectionViewSource
 			if (EnableFiltering)
@@ -2615,16 +2645,23 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 						.ToList();
 
 					DropdownListBox.ItemsSource = filteredItems;
+					System.Diagnostics.Debug.WriteLine($"[WINUI] Filtered {ItemsSource.Count} items down to {filteredItems.Count} items");
+				}
+				else
+				{
+					System.Diagnostics.Debug.WriteLine($"[WINUI] WARNING: DropdownListBox={DropdownListBox != null}, ItemsSource={ItemsSource != null}");
 				}
 
 				if (DropdownListBox?.Items.Count > 0)
 				{
 					var item = DropdownListBox.Items[0];
+					System.Diagnostics.Debug.WriteLine($"[WINUI] First filtered item: {item}");
 					SetVisualFocusOnItem(item);
 					UpdateAutoCompleteFilterText(criteria, item);
 				}
 				else
 				{
+					System.Diagnostics.Debug.WriteLine("[WINUI] No items after filtering");
 					UpdateAutoCompleteFilterText(criteria, null);
 				}
 
@@ -2665,8 +2702,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 		private void UpdateAutoCompleteFilterText(string criteria, object item)
 		{
+			System.Diagnostics.Debug.WriteLine($"[WINUI] UpdateAutoCompleteFilterText called - Criteria: '{criteria}', Item: {item != null}, IsDropDownOpen: {IsDropDownOpen}");
 			if (SelectedItemsFilterAutoCompleteTextBox == null)
 			{
+				System.Diagnostics.Debug.WriteLine("[WINUI] SelectedItemsFilterAutoCompleteTextBox is NULL");
 				return;
 			}
 

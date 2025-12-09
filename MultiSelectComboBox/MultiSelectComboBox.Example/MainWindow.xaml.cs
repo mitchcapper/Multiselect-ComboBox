@@ -58,8 +58,8 @@ public partial class MainWindow : Window
 #if !WINUI
 		DataContext = model;
 		#else
-		//ViewModel = model;
-		
+		ViewModel = model;
+
 		#endif
 	}
 #if !WINUI
