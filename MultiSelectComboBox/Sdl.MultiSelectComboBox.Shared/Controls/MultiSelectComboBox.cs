@@ -1788,6 +1788,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 				foreach (var item in selectedItems)
 				{
+                    // Skip null items (filter placeholders) to prevent adding them to strongly-typed collections
+                    if (item == null) continue;
+
 					if (!SelectedItems.Contains(item))
 					{
 						SelectedItems.Add(item);
@@ -2309,6 +2312,14 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 		private void ToggleItemSelection(object item)
 		{
+            if (item == null) return;
+
+#if WINUI
+            if (item is ICollectionViewGroup) return;
+#else
+            if (item is CollectionViewGroup) return;
+#endif
+
 			var itemsAdded = new Collection<object>();
 			var itemsRemoved = new Collection<object>();
 
@@ -2362,13 +2373,11 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			{
 				if (e.Key == VirtualKey.Space)
 				{
-					var listBoxItem = GetListViewItem(item);
-					listBoxItem.IsChecked = !listBoxItem.IsChecked;
-					UpdateSelectedItemsContainer(ItemsSource);
+					ToggleItemSelection(item);
 				}
 				else if (e.Key == VirtualKey.Enter)
 				{
-					SelectComboBoxItem();
+					ToggleItemSelection(item);
 					IsDropDownOpen = false;
 
 					if (SelectedItemsFilterTextBox != null)
