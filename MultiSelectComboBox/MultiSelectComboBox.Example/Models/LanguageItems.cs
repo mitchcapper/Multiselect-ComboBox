@@ -14,6 +14,9 @@ using Size = System.Drawing.Size;
 
 namespace Sdl.MultiSelectComboBox.Example.Models
 {
+#if WINUI
+	[Microsoft.UI.Xaml.Data.Bindable]
+#endif
 	public class LanguageItems : INotifyPropertyChanged
 	{
 		private ObservableCollection<LanguageItem> _items;
@@ -426,7 +429,7 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 
 				_clearSelectionOnFilterChanged = value;
 				UpdateEventLog(nameof(ClearSelectionOnFilterChanged), _clearSelectionOnFilterChanged.ToString());
-				OnPropertyChanged(nameof(ClearSelectionOnFilterChanged));				
+				OnPropertyChanged(nameof(ClearSelectionOnFilterChanged));
 			}
 		}
 
@@ -503,7 +506,7 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 		}
 
 	private void UpdateSelectedItems(ICollection selected)
-	{			
+	{
 		foreach (var item in _items)
 		{
 			var selectedItemIndex = selected.Cast<LanguageItem>().ToList().IndexOf(item);
@@ -565,6 +568,6 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-		}		
+		}
 	}
 }

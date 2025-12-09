@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Media;
 using System.Windows;
 using System.Windows.Media;
 #endif
+using System.Collections.Generic;
 
 namespace Sdl.MultiSelectComboBox.Services
 {
@@ -29,7 +30,7 @@ namespace Sdl.MultiSelectComboBox.Services
 				{
 					foundFrameworkElement = FindVisualChild<T>(child, name);
 
-					if (! foundFrameworkElement.Equals( default(T)))
+					if (!EqualityComparer<T>.Default.Equals(foundFrameworkElement,default))
 					{
 						break;
 					}

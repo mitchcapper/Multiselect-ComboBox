@@ -4,6 +4,7 @@ using System.Reflection;
 #if WINUI
 namespace Sdl.MultiSelectComboBox.Example.WinUI;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Sdl.MultiSelectComboBox.Example.Models;
 #else
 using System.Windows;
@@ -16,39 +17,50 @@ namespace Sdl.MultiSelectComboBox.Example;
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
+#if WINUI
+[Microsoft.UI.Xaml.Data.Bindable]
+public partial class MainWindow : Page
+	#else
 public partial class MainWindow : Window
+	#endif
 {
 #if WINUI
-	public LanguageItems DataContext{get;set; }
-	public LanguageItems ViewModel => DataContext;
+	//public LanguageItems DataContext{get;set; }
+	public LanguageItems ViewModel {get;set; } = new LanguageItems();
 #endif
 	public MainWindow()
 	{
+		
 		InitializeComponent();
 #if !WINUI
 		if (Application.Current.MainWindow != null)
 		{
 			var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
-			
+
 			Application.Current.MainWindow.Title = Application.Current.MainWindow.Title + " (" + fileVersionInfo.FileVersion
 			                                       + " - " + GetTargetFramework() + ")";
 		}
 		Loaded += MainWindow_Loaded;
 #else
-		Activated += MainWindow_Loaded;
+		this.Loaded += MainWindow_Loaded;
+		
 #endif
 	}
 
 	private void MainWindow_Loaded(object sender,
-#if !WINUI
+
 		RoutedEventArgs e
-#else
-		WindowActivatedEventArgs e
-#endif
+
+
 		)
 	{
 		var model = new LanguageItems();
+#if !WINUI
 		DataContext = model;
+		#else
+		//ViewModel = model;
+		
+		#endif
 	}
 #if !WINUI
 	private void TextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)

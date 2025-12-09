@@ -7,7 +7,7 @@ namespace Sdl.MultiSelectComboBox.Example.WinUI.Platforms.Desktop {
 		[STAThread]
 		public static void Main(string[] args) {
 			
-
+			App.InitializeLogging();
 			var host = UnoPlatformHostBuilder.Create()
 				.App(() => new App())
 				.UseX11()

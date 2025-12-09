@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s \"C:\\software\\Multiselect-ComboBox\\MultiSelectComboBox\\Sdl.MultiSelectComboBox.WinUI\" /ad)",
+      "Bash(dir /s \"C:\\software\\Multiselect-ComboBox\\MultiSelectComboBox\\Sdl.MultiSelectComboBox.Shared\" /ad)",
+      "Bash(tree:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(dotnet build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
