@@ -5,7 +5,10 @@ using FlaUI.Core.Capturing;
 using FlaUI.UIA3;
 using TUnit.Core;
 
+[assembly: NotInParallel]
+
 namespace Sdl.MultiSelectComboBox.UI.Tests.Helpers;
+
 
 /// <summary>
 /// Base class for UI tests providing application lifecycle management
@@ -28,7 +31,7 @@ public class UITestBase : IDisposable
         App = Application.Launch(exePath);
 
         // Get main window with timeout
-        MainWindow = App.GetMainWindow(Automation, TimeSpan.FromSeconds(15));
+        MainWindow = App.GetMainWindow(Automation, TimeSpan.FromSeconds(60));
 
         if (MainWindow == null)
         {
