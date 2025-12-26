@@ -1847,6 +1847,16 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			AssignIsEditMode();
 		}
 #else
+
+		private bool IsRemoveItemButton(PointerRoutedEventArgs e) {
+			var originalSource = e.OriginalSource as FrameworkElement;
+			if (originalSource is Button btn && btn.Name == PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button) {
+				return true;
+			}
+			var button = VisualTreeService.FindVisualAncestor<Button>(originalSource, PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button);
+			return button != null;
+		}
+
 		private void SelectedItemsControl_OnPointerPressed(object sender, PointerRoutedEventArgs e) {
 			if (IsEditMode) {
 				// Check if user clicked the X button to remove an item
