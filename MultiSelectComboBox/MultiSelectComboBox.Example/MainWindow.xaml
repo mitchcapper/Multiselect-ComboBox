@@ -77,7 +77,7 @@
                         <TextBlock Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" FontWeight="DemiBold" Margin="0,5,0,0" Height="21" VerticalAlignment="Top">
                             <InlineUIContainer>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBox Text="{Binding SelectedItemsCount, FallbackValue=0}" HorizontalContentAlignment="Right" BorderThickness="0" Background="Transparent" IsTabStop="False"/>
+                                    <TextBox AutomationProperties.AutomationId="SelectedItemsCountTextBox" Text="{Binding SelectedItemsCount, FallbackValue=0}" HorizontalContentAlignment="Right" BorderThickness="0" Background="Transparent" IsTabStop="False"/>
                                     <TextBox Text="Selected" HorizontalContentAlignment="Right" BorderThickness="0" IsTabStop="False" />
                                 </StackPanel>
                             </InlineUIContainer>

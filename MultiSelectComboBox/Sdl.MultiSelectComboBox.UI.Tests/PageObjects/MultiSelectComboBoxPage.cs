@@ -157,12 +157,50 @@ public class MultiSelectComboBoxPage : IDisposable {
 	public int DisplayedSelectedCount {
 		get {
 			// Find the TextBox showing "X Selected" at the top of the window
-			var countTextBox = _window.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Edit));
+			var countTextBox = _window.FindFirstDescendant(cf => cf.ByAutomationId("SelectedItemsCountTextBox"));
+            if (countTextBox == null) {
+                // FALLBACK: Try to find by name or other properties if ID fails
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("SelectedItemsCountTextBox not found by ID. Dumping window elements:");
+                
+                var all = _window.FindAllDescendants();
+	            foreach (var child in all) {
+		            var classNameAdd = "";
+		            if (child.Properties.ClassName.IsSupported) {
+			            classNameAdd = $" {child.ClassName} - ";
+		            }
+		            sb.AppendLine($"Element: {classNameAdd}{child.Name} - {child.ControlType} (ID: {child.AutomationId})");
+	            }
+
+                var dump = sb.ToString(); 
+                // Look for edits specifically to highlight
+                 var txts = _window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Edit));
+                 foreach(var t in txts) {
+                    sb.AppendLine($"Found Edit: Name='{t.Name}', AutoId='{t.AutomationId}', Text='{t.AsTextBox().Text}'");
+                    if (t.Name == "SelectedItemsCountTextBox") countTextBox = t;
+                 }
+                
+                if (countTextBox == null)
+                    throw new Exception(sb.ToString());
+            }
+
 			if (countTextBox != null) {
-				var text = countTextBox.AsTextBox().Text;
-				if (int.TryParse(text, out var count)) {
-					return count;
-				}
+                // Retry reading a few times in case of binding delay
+                string lastText = "";
+                for (int i = 0; i < 10; i++) {
+				    var text = countTextBox.AsTextBox().Text;
+                    lastText = text;
+				    if (int.TryParse(text, out var count)) {
+                        if (count > 0) return count; 
+				    }
+                    System.Threading.Thread.Sleep(100);
+                }
+                
+                var finalText = countTextBox.AsTextBox().Text;
+                if (int.TryParse(finalText, out var finalCount)) return finalCount;
+                
+                // If we are here, we parsed 0 or failed to parse.
+                // If the test expects >0, it will fail.
 			}
 			return 0;
 		}
@@ -437,7 +475,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 			if (child.Properties.ClassName.IsSupported) {
 				classNameAdd = $" {child.ClassName} - ";
 			}
-			System.Diagnostics.Debug.WriteLine($"Element: {classNameAdd}{child.Name} - {child.ControlType}");
+			Console.WriteLine($"Element: {classNameAdd}{child.Name} - {child.ControlType} (ID: {child.AutomationId})");
 		}
 	}
 

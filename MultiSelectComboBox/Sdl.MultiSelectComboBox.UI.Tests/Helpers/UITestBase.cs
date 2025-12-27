@@ -27,8 +27,9 @@ public class UITestBase : IDisposable
         Automation = new UIA3Automation();
 
         // Launch application
+        // Launch application
         var exePath = GetApplicationPath();
-        App = Application.Launch(exePath);
+        App = Application.Launch(exePath, "--AutoExit 20");
 
         // Get main window with timeout
         MainWindow = App.GetMainWindow(Automation, TimeSpan.FromSeconds(60));
