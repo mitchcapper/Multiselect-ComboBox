@@ -12,8 +12,7 @@ namespace Sdl.MultiSelectComboBox.UI.Tests.Tests;
 public class TextEditingTests : UITestBase
 {
     private MainWindowPage _mainPage = null!;
-
-    [Before(HookType.Test)]
+    
     public override void Setup()
     {
         base.Setup();
@@ -177,7 +176,6 @@ public class TextEditingTests : UITestBase
         await Assert.That(selectedCountAfter).IsEqualTo(selectedCountBefore);
     }
 
-    [After(HookType.Test)]
     public override void TearDown()
     {
         _mainPage?.Dispose();

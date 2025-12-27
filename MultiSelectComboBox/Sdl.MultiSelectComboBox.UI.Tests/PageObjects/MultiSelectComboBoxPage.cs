@@ -119,6 +119,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public IReadOnlyList<string> AllDropdownItems {
 		get {
+			if (!IsDropdownOpen) return Array.Empty<string>();
 			var listBox = DropdownListBox;
 			if (listBox == null) return Array.Empty<string>();
 

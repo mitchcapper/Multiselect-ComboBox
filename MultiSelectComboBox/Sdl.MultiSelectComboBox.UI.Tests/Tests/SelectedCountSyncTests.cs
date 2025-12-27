@@ -13,14 +13,10 @@ public class SelectedCountSyncTests : UITestBase
 {
     private MainWindowPage _mainPage = null!;
 
-    [Before(HookType.Test)]
     public override void Setup()
     {
         base.Setup();
         _mainPage = new MainWindowPage(MainWindow!, Automation!);
-        // Clear any existing selections
-        _mainPage.ClearSelectedItems();
-        Thread.Sleep(200);
     }
 
     [Test]
@@ -225,7 +221,6 @@ public class SelectedCountSyncTests : UITestBase
         await Assert.That(finalCount).IsEqualTo(initialCount - 1);
     }
 
-    [After(HookType.Test)]
     public override void TearDown()
     {
         _mainPage?.Dispose();

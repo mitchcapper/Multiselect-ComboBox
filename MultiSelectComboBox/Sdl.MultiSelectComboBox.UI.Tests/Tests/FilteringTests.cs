@@ -13,7 +13,6 @@ public class FilteringTests : UITestBase
 {
     private MainWindowPage _mainPage = null!;
 
-    [Before(HookType.Test)]
     public override void Setup()
     {
         base.Setup();
@@ -140,7 +139,7 @@ public class FilteringTests : UITestBase
 
         // Act - Clear the filter
         comboBox.ClearFilterText();
-        Thread.Sleep(300);
+        await Task.Delay(300);
         comboBox.OpenDropdown();
 
         // Assert - Should show more items than when filtered
@@ -196,7 +195,6 @@ public class FilteringTests : UITestBase
         await Assert.That(upperCaseResults.Count).IsGreaterThan(0);
     }
 
-    [After(HookType.Test)]
     public override void TearDown()
     {
         _mainPage?.Dispose();

@@ -13,7 +13,6 @@ public class RemoveItemTests : UITestBase
 {
     private MainWindowPage _mainPage = null!;
 
-    [Before(HookType.Test)]
     public override void Setup()
     {
         base.Setup();
@@ -173,7 +172,6 @@ public class RemoveItemTests : UITestBase
         await Assert.That(finalCount).IsEqualTo(initialCount - 1);
     }
 
-    [After(HookType.Test)]
     public override void TearDown()
     {
         _mainPage?.Dispose();

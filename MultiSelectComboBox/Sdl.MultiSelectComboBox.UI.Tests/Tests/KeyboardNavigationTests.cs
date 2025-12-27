@@ -15,13 +15,10 @@ public class KeyboardNavigationTests : UITestBase
 {
     private MainWindowPage _mainPage = null!;
 
-    [Before(HookType.Test)]
     public override void Setup()
     {
         base.Setup();
         _mainPage = new MainWindowPage(MainWindow!, Automation!);
-        _mainPage.ClearSelectedItems();
-        Thread.Sleep(200);
     }
 
     [Test]
@@ -273,7 +270,6 @@ public class KeyboardNavigationTests : UITestBase
         await Assert.That(selectedCount).IsGreaterThanOrEqualTo(0);
     }
 
-    [After(HookType.Test)]
     public override void TearDown()
     {
         _mainPage?.Dispose();
