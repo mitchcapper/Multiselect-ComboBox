@@ -109,7 +109,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 			var items = listBox.Items;
 			return items
 				.Where(item => !item.IsOffscreen)
-				.Select(item => item.Name ?? item.FindFirstChild()?.Name ?? string.Empty)
+				.Select(item => item.Name ?? string.Empty)
 				.Where(name => !string.IsNullOrWhiteSpace(name))
 				.ToList();
 		}
@@ -125,7 +125,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 			if (listBox == null) return Array.Empty<string>();
 
 			return listBox.Items
-				.Select(item => item.Name ?? item.FindFirstChild()?.Name ?? string.Empty)
+				.Select(item => item.Name ?? string.Empty)
 				.Where(name => !string.IsNullOrWhiteSpace(name))
 				.ToList();
 		}
@@ -354,7 +354,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 		var focused = listBox.Items.FirstOrDefault(item =>
 			item.Patterns.SelectionItem?.Pattern?.IsSelected.Value == true);
 
-		return focused?.Name ?? focused?.FindFirstChild()?.Name;
+		return focused?.Name;
 	}
 
 	#endregion

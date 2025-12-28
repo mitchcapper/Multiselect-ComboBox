@@ -48,12 +48,6 @@ public class MainWindowPage : IDisposable {
 	/// </summary>
 	public void ClearSelectedItems() {
 		var clearButton = _window.FindFirstDescendant(cf => cf.ByName("Clear selected items"))?.AsButton();
-		if (clearButton == null) {
-			// Try finding by content
-			var buttons = _window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button));
-			clearButton = buttons.FirstOrDefault(b =>
-				(b.Name ?? string.Empty).Contains("Clear", StringComparison.OrdinalIgnoreCase))?.AsButton();
-		}
 
 		clearButton?.Click();
 		Thread.Sleep(200);
@@ -98,11 +92,6 @@ public class MainWindowPage : IDisposable {
 	/// </summary>
 	public void ClearEventLog() {
 		var clearLogButton = _window.FindFirstDescendant(cf => cf.ByName("Clear log"))?.AsButton();
-		if (clearLogButton == null) {
-			var buttons = _window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button));
-			clearLogButton = buttons.FirstOrDefault(b =>
-				(b.Name ?? string.Empty).Contains("Clear log", StringComparison.OrdinalIgnoreCase))?.AsButton();
-		}
 		clearLogButton?.Click();
 		Thread.Sleep(100);
 	}
