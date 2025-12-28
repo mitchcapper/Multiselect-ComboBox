@@ -5,6 +5,7 @@ using FlaUI.Core.Identifiers;
 using FlaUI.Core.Input;
 using FlaUI.Core.Tools;
 using FlaUI.Core.WindowsAPI;
+using Sdl.MultiSelectComboBox.Themes.Generic;
 
 namespace Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
 
@@ -39,9 +40,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	private TextBox? FilterTextBox {
 		get {
 			var control = MultiSelectComboBoxControl;
-			return control?.FindFirstDescendant(cf => cf.ByName("PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox"))?.AsTextBox()
-				?? control?.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Edit))
-					.FirstOrDefault(e => e.IsEnabled && e.IsOffscreen == false)?.AsTextBox();
+			return control?.FindFirstDescendant(cf => cf.ByName("PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox"))?.AsTextBox();
 		}
 	}
 
@@ -52,8 +51,9 @@ public class MultiSelectComboBoxPage : IDisposable {
 		get {
 			var control = MultiSelectComboBoxControl;
 			// Find the toggle/dropdown button
-			return control?.FindFirstDescendant(cf => cf.ByName("PART_MultiSelectComboBox_Dropdown_Button"))?.AsButton()
-				?? control?.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button))?.AsButton();
+			//return control?.FindFirstDescendant(cf => cf.ByName("PART_MultiSelectComboBox_Dropdown_Button"))?.AsButton();
+
+			return control?.FindFirstDescendant(cf => cf.ByAutomationId(MultiSelectComboBox.Themes.Generic.MultiSelectComboBox.PART_MultiSelectComboBox_ToggleButton))?.AsButton();
 		}
 	}
 
@@ -65,8 +65,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 			// The dropdown is a popup, need to find it from desktop
 			var desktop = _automation.GetDesktop();
 			var popup = desktop.FindFirstDescendant(cf => cf.ByClassName("Popup"));
-			return popup?.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.List))?.AsListBox()
-				?? MultiSelectComboBoxControl?.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.List))?.AsListBox();
+			return popup?.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.List))?.AsListBox();
 		}
 	}
 
@@ -74,8 +73,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// Gets the selected items panel (ItemsControl containing selected item tags)
 	/// </summary>
 	private AutomationElement? SelectedItemsPanel =>
-		MultiSelectComboBoxControl?.FindFirstDescendant(cf => cf.ByName("PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl"))
-		?? MultiSelectComboBoxControl?.FindFirstDescendant(cf => cf.ByClassName("ContentItemsControl"));
+		MultiSelectComboBoxControl?.FindFirstDescendant(cf => cf.ByName("PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl"));
 
 	#endregion
 
@@ -91,8 +89,13 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public bool IsDropdownOpen {
 		get {
+
+			var expectedState = DropdownButton!.Patterns.Toggle.Pattern.ToggleState.Value == FlaUI.Core.Definitions.ToggleState.On;
 			var listBox = DropdownListBox;
-			return listBox != null && !listBox.IsOffscreen;
+			var listState = listBox?.IsOffscreen == false;
+			if (expectedState != listState)
+				throw new DataMisalignedException($"Dropdown open state mismatch: between ToggleButton is: {expectedState} and listbox Onscreen: {listState}");
+			return listState;
 		}
 	}
 
@@ -247,7 +250,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 		ClickToFocus();
 		var currentText = FilterText;
 		for (int i = 0; i < currentText.Length + 5; i++) {
-			Keyboard.Press(VirtualKeyShort.BACK);
+			Keyboard.Type(VirtualKeyShort.BACK);
 			Thread.Sleep(50);
 		}
 		Thread.Sleep(200);

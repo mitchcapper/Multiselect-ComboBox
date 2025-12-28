@@ -132,7 +132,7 @@ public class FilteringTests : UITestBase
         var comboBox = _mainPage.MultiSelectComboBox;
 
         // First filter to a subset
-        comboBox.TypeFilterText("Unit");
+        comboBox.TypeFilterText("Zim"); //important to be  a small number as the default open is going to only show the frequent/recent item set
         comboBox.OpenDropdown();
         var filteredCount = comboBox.VisibleDropdownItems.Count;
         await Assert.That(filteredCount).IsGreaterThan(0);

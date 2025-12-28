@@ -10,6 +10,8 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+
 #if WINUI
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -31,6 +33,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 #endif
+[assembly: InternalsVisibleTo("Sdl.MultiSelectComboBox.UI.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100a5c57746da40d5b3e66dd6033d677cd8c5bf5443e93cb60d45fc0e6490836c7e90d663a04536454ce75534138e50f6411d1fa22cb46ee2969524efb6b6b28943639aeaf979e69cce5c7fa93036262b4b957bb570dfc04254134406acc1f5a20564690c6c8420f30a15f6b47a0e08e64817c6c5961aef42d92fc4aad444a13ddf")]
 
 #if WINUI
 namespace Sdl.MultiSelectComboBox.Controls
@@ -38,6 +41,7 @@ namespace Sdl.MultiSelectComboBox.Controls
 namespace Sdl.MultiSelectComboBox.Themes.Generic
 #endif
 {
+
 	[TemplatePart(Name = PART_MultiSelectComboBox, Type = typeof(Grid))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_Dropdown, Type = typeof(Popup))]
 #if WINUI
@@ -46,6 +50,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 	[TemplatePart(Name = PART_MultiSelectComboBox_Dropdown_ListBox, Type = typeof(ListBox))]
 #endif
 	[TemplatePart(Name = PART_MultiSelectComboBox_Dropdown_Button, Type = typeof(Button))]
+	[TemplatePart(Name = PART_MultiSelectComboBox_ToggleButton, Type = typeof(ToggleButton))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl, Type = typeof(ItemsControl))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox, Type = typeof(TextBox))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox, Type = typeof(TextBox))]
@@ -53,6 +58,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 	public class MultiSelectComboBox : Control, IDisposable {
 		private const string PART_MultiSelectComboBox = "PART_MultiSelectComboBox";
 		private const string PART_MultiSelectComboBox_Dropdown = "PART_MultiSelectComboBox_Dropdown";
+		internal const string PART_MultiSelectComboBox_ToggleButton = "PART_MultiSelectComboBox_ToggleButton";
 		private const string PART_MultiSelectComboBox_Dropdown_ListBox = "PART_MultiSelectComboBox_Dropdown_ListBox";
 		private const string PART_MultiSelectComboBox_Dropdown_Button = "PART_MultiSelectComboBox_Dropdown_Button";
 		private const string PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl = "PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl";
@@ -602,7 +608,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 				}
 				System.Diagnostics.Debug.WriteLine($"[WINUI] SelectedItemsControl set: {(SelectedItemsControl != null ? "Found" : "NULL")}");
 			}
-
+			//if (ToggleButton == null){
+			//	PART_MultiSelectComboBox_ToggleButton = GetTemplateChild(PART_MultiSelectComboBox_ToggleButton) as ToggleButton;
+			//}
 			if (DropdownListBox == null) {
 				if (DropdownMenu == null) {
 					DropdownMenu = GetTemplateChild(PART_MultiSelectComboBox_Dropdown) as Popup;
@@ -2095,6 +2103,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 
 			// Update Visuals
+			System.Diagnostics.Debug.WriteLine($"[WINUI] ToggleItemSelection: About to call SyncContainersFromSelection, item now {(IsSelectedItem(item) ? "SELECTED" : "NOT SELECTED")}");
+			var itemContainer = GetListViewItem(item);
+			System.Diagnostics.Debug.WriteLine($"[WINUI] ToggleItemSelection: Container for item = {(itemContainer != null ? $"FOUND (IsChecked={itemContainer.IsChecked})" : "NULL")}");
+
 			SyncContainersFromSelection();
 
 			if (itemsAdded.Count > 0 || itemsRemoved.Count > 0) {
@@ -2230,10 +2242,15 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 
 			if (originalSource?.DataContext is object clickedItem) {
-				System.Diagnostics.Debug.WriteLine($"[WPF] Mouse click - calling ToggleItemSelection for {clickedItem}");
-				ToggleItemSelection(clickedItem);
-				if (SelectionMode == SelectionModes.Single) {
-					IsDropDownOpen = false;
+				// Only process if it's actually an item from our ItemsSource (not the collection itself or other objects)
+				if (ItemsSource != null && ItemsSource.Contains(clickedItem)) {
+					System.Diagnostics.Debug.WriteLine($"[WPF] Mouse click - calling ToggleItemSelection for {clickedItem}");
+					ToggleItemSelection(clickedItem);
+					if (SelectionMode == SelectionModes.Single) {
+						IsDropDownOpen = false;
+					}
+				} else {
+					System.Diagnostics.Debug.WriteLine($"[WPF] Mouse click on non-item object: {clickedItem?.GetType().Name}");
 				}
 			}
 		}

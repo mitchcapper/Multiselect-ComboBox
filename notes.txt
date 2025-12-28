@@ -1,0 +1,2 @@
+todo:
+ToggleBox for the primary xaml is probably not the best thing to have to be clicked to open/close etc the box as next set for keyboard focus.   The smaller button on the right is similar but it dismisses actions if not in edit mode.
