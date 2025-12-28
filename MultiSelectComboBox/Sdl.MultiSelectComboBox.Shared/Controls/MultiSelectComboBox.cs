@@ -174,7 +174,26 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 #if !WINUI
 		private void MultiSelectComboBox_PreviewKeyDown(object sender, KeyEventArgs e) {
-			if (e.Key != Key.Tab || !IsDropDownOpen)
+			if (!IsDropDownOpen)
+				return;
+
+			// For WPF: Set focus to dropdown so arrow keys work for navigation
+			if ((e.Key == Key.Down || e.Key == Key.Up) && DropdownListBox != null && !DropdownListBox.IsKeyboardFocusWithin) {
+				if (DropdownListBox.SelectedItem != null) {
+					var container = DropdownListBox.ItemContainerGenerator.ContainerFromItem(DropdownListBox.SelectedItem) as IInputElement;
+					if (container != null) {
+						container.Focus();
+					} else {
+						DropdownListBox.Focus();
+					}
+				} else {
+					DropdownListBox.Focus();
+				}
+				e.Handled = true;
+				return;
+			}
+
+			if (e.Key != Key.Tab)
 				return;
 
 			if (Keyboard.Modifiers == ModifierKeys.None)
@@ -1700,17 +1719,6 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			if (!IsDropDownOpen) {
 				System.Diagnostics.Debug.WriteLine($"[WINUI] Calling OpenDropDownList");
 				OpenDropDownList();
-			} else {
-#if !WINUI
-				// For WPF: Set focus to dropdown so arrow keys work for navigation
-				if (DropdownListBox != null && !DropdownListBox.IsKeyboardFocusWithin) {
-					System.Diagnostics.Debug.WriteLine($"[WPF] Setting focus to dropdown for navigation");
-					DropdownListBox.Focus();
-					if (DropdownListBox.Items.Count > 0 && DropdownListBox.SelectedIndex < 0) {
-						DropdownListBox.SelectedIndex = 0;
-					}
-				}
-#endif
 			}
 		}
 

@@ -116,8 +116,6 @@ public class KeyboardNavigationTests : UITestBase {
 		var selectedItems = comboBox.SelectedItems;
 		await Assert.That(selectedItems.Count).IsEqualTo(1);
 	}
-
-
 	[Test]
 	[Category("KeyboardNavigation")]
 	public async Task ArrowDownThenEnter_SelectsCorrectItem() {
@@ -138,6 +136,30 @@ public class KeyboardNavigationTests : UITestBase {
 		// Assert - Should have selected an English-related item
 		var selectedItems = comboBox.SelectedItems;
 		await Assert.That(selectedItems.Count).IsGreaterThan(0);
+	}
+
+	[Test]
+	[Category("KeyboardNavigation")]
+	public async Task ArrowDownTwiceThenEnter_SelectsCorrectItem() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
+
+		// Filter to show specific items
+		comboBox.TypeFilterText("Tan");
+		//comboBox.OpenDropdown();
+		Thread.Sleep(300);
+
+		// Act - Navigate down and select
+		comboBox.NavigateDown(2); //down two should select Asu (Tanzania)
+		Thread.Sleep(100);
+		comboBox.PressEnter();
+		Thread.Sleep(300);
+
+		// Assert - Should have selected an English-related item
+		var selectedItems = comboBox.SelectedItems;
+		await Assert.That(selectedItems.Count).IsEqualTo(1);
+		await Assert.That(selectedItems.First()).Contains("Asu");
+
 	}
 
 	[Test]
