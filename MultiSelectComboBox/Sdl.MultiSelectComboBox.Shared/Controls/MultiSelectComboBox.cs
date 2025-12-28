@@ -1506,17 +1506,23 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		}
 
 		private void SyncContainersFromSelection() {
-			if (DropdownListBox == null || ItemsSource == null) return;
+			System.Diagnostics.Debug.WriteLine($"[WPF] SyncContainersFromSelection: syncing {(ItemsSource as IList)?.Count ?? 0} items");
 
+			int syncedCount = 0;
+			int changedCount = 0;
 			foreach (var item in ItemsSource) {
 				var container = GetListViewItem(item); // This will be null for off-screen items
 				if (container != null) {
+					syncedCount++;
 					bool isSelected = IsSelectedItem(item);
 					if (container.IsChecked != isSelected) {
+						System.Diagnostics.Debug.WriteLine($"[WPF] SyncContainersFromSelection: Changing {item} from IsChecked={container.IsChecked} to {isSelected}");
 						container.IsChecked = isSelected;
+						changedCount++;
 					}
 				}
 			}
+			System.Diagnostics.Debug.WriteLine($"[WPF] SyncContainersFromSelection: synced {syncedCount} containers, changed {changedCount}");
 			AddFilterPlaceholderIfNeeded();
 		}
 
