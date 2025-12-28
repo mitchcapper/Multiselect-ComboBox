@@ -9,176 +9,166 @@ namespace Sdl.MultiSelectComboBox.UI.Tests.Tests;
 /// <summary>
 /// Tests for text editing (backspace, delete) in the MultiSelectComboBox filter
 /// </summary>
-public class TextEditingTests : UITestBase
-{
-    private MainWindowPage _mainPage = null!;
-    
-    public override void Setup()
-    {
-        base.Setup();
-        _mainPage = new MainWindowPage(MainWindow!, Automation!);
-    }
+public class TextEditingTests : UITestBase {
+	private MainWindowPage _mainPage = null!;
 
-    [Test]
-    [Category("TextEditing")]
-    public async Task BackspaceKey_ErasesCharacters()
-    {
-        // Arrange
-        var comboBox = _mainPage.MultiSelectComboBox;
-        comboBox.TypeFilterText("United");
-        Thread.Sleep(200);
+	public override void Setup() {
+		base.Setup();
+		_mainPage = new MainWindowPage(MainWindow!, Automation!);
+	}
 
-        var initialText = comboBox.FilterText;
-        await Assert.That(initialText.Length).IsGreaterThan(0);
+	[Test]
+	[Category("TextEditing")]
+	public async Task BackspaceKey_ErasesCharacters() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
+		comboBox.TypeFilterText("United");
+		Thread.Sleep(200);
 
-        // Act - Press backspace 3 times
-        comboBox.PressBackspace(3);
-        Thread.Sleep(200);
+		var initialText = comboBox.FilterText;
+		await Assert.That(initialText.Length).IsGreaterThan(0);
 
-        // Assert - Filter text should be shorter
-        var newText = comboBox.FilterText;
-        await Assert.That(newText.Length).IsLessThan(initialText.Length);
-    }
+		// Act - Press backspace 3 times
+		comboBox.PressBackspace(3);
+		Thread.Sleep(200);
 
-    [Test]
-    [Category("TextEditing")]
-    public async Task BackspaceKey_ErasesEntireFilterText()
-    {
-        // Arrange
-        var comboBox = _mainPage.MultiSelectComboBox;
-        var textToType = "Test";
-        comboBox.TypeFilterText(textToType);
-        Thread.Sleep(200);
+		// Assert - Filter text should be shorter
+		var newText = comboBox.FilterText;
+		await Assert.That(newText.Length).IsLessThan(initialText.Length);
+	}
 
-        // Act - Press backspace for each character plus a few extra
-        comboBox.PressBackspace(textToType.Length + 2);
-        Thread.Sleep(200);
+	[Test]
+	[Category("TextEditing")]
+	public async Task BackspaceKey_ErasesEntireFilterText() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
+		var textToType = "Test";
+		comboBox.TypeFilterText(textToType);
+		Thread.Sleep(200);
 
-        // Assert - Filter text should be empty
-        var finalText = comboBox.FilterText;
-        await Assert.That(finalText.Length).IsEqualTo(0);
-    }
+		// Act - Press backspace for each character plus a few extra
+		comboBox.PressBackspace(textToType.Length + 2);
+		Thread.Sleep(200);
 
-    [Test]
-    [Category("TextEditing")]
-    public async Task TypeText_ThenBackspace_ThenTypeMore_Works()
-    {
-        // Arrange
-        var comboBox = _mainPage.MultiSelectComboBox;
+		// Assert - Filter text should be empty
+		var finalText = comboBox.FilterText;
+		await Assert.That(finalText.Length).IsEqualTo(0);
+	}
 
-        // Act
-        comboBox.TypeFilterText("Germ");
-        Thread.Sleep(200);
-        comboBox.PressBackspace(2); // Remove "rm"
-        Thread.Sleep(200);
+	[Test]
+	[Category("TextEditing")]
+	public async Task TypeText_ThenBackspace_ThenTypeMore_Works() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
 
-        // Type something else
-        comboBox.TypeFilterText("rman"); // Now should be "German"
-        comboBox.OpenDropdown();
-        Thread.Sleep(300);
+		// Act
+		comboBox.TypeFilterText("Germ");
+		Thread.Sleep(200);
+		comboBox.PressBackspace(2); // Remove "rm"
+		Thread.Sleep(200);
 
-        // Assert
-        var visibleItems = comboBox.VisibleDropdownItems;
-        var hasGerman = visibleItems.Any(item =>
-            item.Contains("German", StringComparison.OrdinalIgnoreCase));
-        await Assert.That(hasGerman).IsTrue();
-    }
+		// Type something else
+		comboBox.TypeFilterText("rman"); // Now should be "German"
+		comboBox.OpenDropdown();
+		Thread.Sleep(300);
 
-    [Test]
-    [Category("TextEditing")]
-    public async Task BackspaceOnEmptyFilter_DoesNotCrash()
-    {
-        // Arrange
-        var comboBox = _mainPage.MultiSelectComboBox;
-        comboBox.ClickToFocus();
+		// Assert
+		var visibleItems = comboBox.VisibleDropdownItems;
+		var hasGerman = visibleItems.Any(item =>
+			item.Contains("German", StringComparison.OrdinalIgnoreCase));
+		await Assert.That(hasGerman).IsTrue();
+	}
 
-        // Act - Press backspace multiple times on empty filter
-        comboBox.PressBackspace(5);
-        Thread.Sleep(200);
+	[Test]
+	[Category("TextEditing")]
+	public async Task BackspaceOnEmptyFilter_DoesNotCrash() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
+		comboBox.ClickToFocus();
 
-        // Assert - Should not crash and dropdown should still work
-        comboBox.OpenDropdown();
-        Thread.Sleep(200);
+		// Act - Press backspace multiple times on empty filter
+		comboBox.PressBackspace(5);
+		Thread.Sleep(200);
 
-        await Assert.That(comboBox.IsDropdownOpen).IsTrue();
-    }
+		// Assert - Should not crash and dropdown should still work
+		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 
-    [Test]
-    [Category("TextEditing")]
-    public async Task FilterTextUpdatesAsUserTypes()
-    {
-        // Arrange
-        var comboBox = _mainPage.MultiSelectComboBox;
-        comboBox.ClickToFocus();
+		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
+	}
 
-        // Act & Assert - Type character by character and verify filter updates
-        comboBox.TypeFilterText("U");
-        Thread.Sleep(100);
-        var afterU = comboBox.FilterText;
+	[Test]
+	[Category("TextEditing")]
+	public async Task FilterTextUpdatesAsUserTypes() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
+		comboBox.ClickToFocus();
 
-        comboBox.TypeFilterText("n");
-        Thread.Sleep(100);
-        var afterUn = comboBox.FilterText;
+		// Act & Assert - Type character by character and verify filter updates
+		comboBox.TypeFilterText("U");
+		Thread.Sleep(100);
+		var afterU = comboBox.FilterText;
 
-        comboBox.TypeFilterText("i");
-        Thread.Sleep(100);
-        var afterUni = comboBox.FilterText;
+		comboBox.TypeFilterText("n");
+		Thread.Sleep(100);
+		var afterUn = comboBox.FilterText;
 
-        // Assert
-        await Assert.That(afterU.Length).IsGreaterThanOrEqualTo(1);
-        await Assert.That(afterUn.Length).IsGreaterThanOrEqualTo(2);
-        await Assert.That(afterUni.Length).IsGreaterThanOrEqualTo(3);
-    }
+		comboBox.TypeFilterText("i");
+		Thread.Sleep(100);
+		var afterUni = comboBox.FilterText;
 
-    [Test]
-    [Category("TextEditing")]
-    public async Task ClearFilterText_RemovesAllText()
-    {
-        // Arrange
-        var comboBox = _mainPage.MultiSelectComboBox;
-        comboBox.TypeFilterText("SomeFilterText");
-        Thread.Sleep(200);
+		// Assert
+		await Assert.That(afterU.Length).IsGreaterThanOrEqualTo(1);
+		await Assert.That(afterUn.Length).IsGreaterThanOrEqualTo(2);
+		await Assert.That(afterUni.Length).IsGreaterThanOrEqualTo(3);
+	}
 
-        await Assert.That(comboBox.FilterText.Length).IsGreaterThan(0);
+	[Test]
+	[Category("TextEditing")]
+	public async Task ClearFilterText_RemovesAllText() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
+		comboBox.TypeFilterText("SomeFilterText");
+		Thread.Sleep(200);
 
-        // Act
-        comboBox.ClearFilterText();
-        Thread.Sleep(200);
+		await Assert.That(comboBox.FilterText.Length).IsGreaterThan(0);
 
-        // Assert
-        await Assert.That(comboBox.FilterText.Length).IsEqualTo(0);
-    }
+		// Act
+		comboBox.ClearFilterText();
+		Thread.Sleep(200);
 
-    [Test]
-    [Category("TextEditing")]
-    public async Task BackspaceAfterSelection_AffectsFilterNotSelection()
-    {
-        // Arrange
-        var comboBox = _mainPage.MultiSelectComboBox;
+		// Assert
+		await Assert.That(comboBox.FilterText.Length).IsEqualTo(0);
+	}
 
-        // Select an item first
-        comboBox.TypeFilterText("English");
-        comboBox.OpenDropdown();
-        Thread.Sleep(200);
-        comboBox.SelectItemByKeyboard(1);
-        Thread.Sleep(200);
+	[Test]
+	[Category("TextEditing")]
+	public async Task BackspaceAfterSelection_AffectsFilterNotSelection() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
 
-        var selectedCountBefore = comboBox.SelectedItemsCount;
+		// Select an item first
+		comboBox.TypeFilterText("English");
+		comboBox.OpenDropdown();
+		Thread.Sleep(200);
+		comboBox.SelectItemByKeyboard(1);
+		Thread.Sleep(200);
 
-        // Now type some filter text and backspace
-        comboBox.TypeFilterText("test");
-        Thread.Sleep(200);
-        comboBox.PressBackspace(4);
-        Thread.Sleep(200);
+		var selectedCountBefore = comboBox.SelectedItemsCount;
 
-        // Assert - Selected items should not be affected by backspace on filter
-        var selectedCountAfter = comboBox.SelectedItemsCount;
-        await Assert.That(selectedCountAfter).IsEqualTo(selectedCountBefore);
-    }
+		// Now type some filter text and backspace
+		comboBox.TypeFilterText("test");
+		Thread.Sleep(200);
+		comboBox.PressBackspace(4);
+		Thread.Sleep(200);
 
-    public override void TearDown()
-    {
-        _mainPage?.Dispose();
-        base.TearDown();
-    }
+		// Assert - Selected items should not be affected by backspace on filter
+		var selectedCountAfter = comboBox.SelectedItemsCount;
+		await Assert.That(selectedCountAfter).IsEqualTo(selectedCountBefore);
+	}
+
+	public override void TearDown() {
+		_mainPage?.Dispose();
+		base.TearDown();
+	}
 }

@@ -56,26 +56,26 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 	[TemplatePart(Name = PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox, Type = typeof(TextBox))]
 	[TemplatePart(Name = PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button, Type = typeof(Button))]
 	public class MultiSelectComboBox : Control, IDisposable {
-		private const string PART_MultiSelectComboBox = "PART_MultiSelectComboBox";
-		private const string PART_MultiSelectComboBox_Dropdown = "PART_MultiSelectComboBox_Dropdown";
-		internal const string PART_MultiSelectComboBox_ToggleButton = "PART_MultiSelectComboBox_ToggleButton";
-		private const string PART_MultiSelectComboBox_Dropdown_ListBox = "PART_MultiSelectComboBox_Dropdown_ListBox";
-		private const string PART_MultiSelectComboBox_Dropdown_Button = "PART_MultiSelectComboBox_Dropdown_Button";
-		private const string PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl = "PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl";
-		private const string PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox = "PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox";
-		private const string PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox = "PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox";
-		private const string PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button = "PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button";
-		private const string PART_MultiSelectComboBox_Dropdown_NewItem_CreatedOkButton = "PART_MultiSelectComboBox_Dropdown_NewItem_CreatedOkButton";
-		private const string PART_MultiSelectComboBox_Dropdown_SelectAllButton = "PART_MultiSelectComboBox_Dropdown_SelectAllButton";
-		private const string PART_MultiSelectComboBox_Dropdown_ClearAllButton = "PART_MultiSelectComboBox_Dropdown_ClearAllButton";
+	internal const string PART_MultiSelectComboBox = "PART_MultiSelectComboBox";
+	internal const string PART_MultiSelectComboBox_Dropdown = "PART_MultiSelectComboBox_Dropdown";
+	internal const string PART_MultiSelectComboBox_ToggleButton = "PART_MultiSelectComboBox_ToggleButton";
+	internal const string PART_MultiSelectComboBox_Dropdown_ListBox = "PART_MultiSelectComboBox_Dropdown_ListBox";
+	internal const string PART_MultiSelectComboBox_Dropdown_Button = "PART_MultiSelectComboBox_Dropdown_Button";
+	internal const string PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl = "PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl";
+	internal const string PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox = "PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox";
+	internal const string PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox = "PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox";
+	internal const string PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button = "PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button";
+	internal const string PART_MultiSelectComboBox_Dropdown_NewItem_CreatedOkButton = "PART_MultiSelectComboBox_Dropdown_NewItem_CreatedOkButton";
+	internal const string PART_MultiSelectComboBox_Dropdown_SelectAllButton = "PART_MultiSelectComboBox_Dropdown_SelectAllButton";
+	internal const string PART_MultiSelectComboBox_Dropdown_ClearAllButton = "PART_MultiSelectComboBox_Dropdown_ClearAllButton";
 
-		private const string PART_MultiSelectComboBox_Dropdown_NewItem_TextBox = "PART_MultiSelectComboBox_Dropdown_NewItem_TextBox";
-		private const string PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup = "PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup";
-		private const string PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton = "PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton";
-		private const string MultiSelectComboBox_SelectedItems_Searchable_ItemTemplate = "MultiSelectComboBox.SelectedItems.Searchable.ItemTemplate";
-		private const string MultiSelectComboBox_Dropdown_ListBox_ItemTemplate = "MultiSelectComboBox.Dropdown.ListBox.ItemTemplate";
+	internal const string PART_MultiSelectComboBox_Dropdown_NewItem_TextBox = "PART_MultiSelectComboBox_Dropdown_NewItem_TextBox";
+	internal const string PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup = "PART_MultiSelectComboBox_Dropdown_NewItem_EditGroup";
+	internal const string PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton = "PART_MultiSelectComboBox_Dropdown_ShowEditBoxButton";
+	internal const string MultiSelectComboBox_SelectedItems_Searchable_ItemTemplate = "MultiSelectComboBox.SelectedItems.Searchable.ItemTemplate";
+	internal const string MultiSelectComboBox_Dropdown_ListBox_ItemTemplate = "MultiSelectComboBox.Dropdown.ListBox.ItemTemplate";
 
-		private const string MultiSelectComboBox_SelectedItems_ItemTemplate = "MultiSelectComboBox.SelectedItems.ItemTemplate";
+	internal const string MultiSelectComboBox_SelectedItems_ItemTemplate = "MultiSelectComboBox.SelectedItems.ItemTemplate";
 
 		public MultiSelectComboBox() {
 #if WINUI

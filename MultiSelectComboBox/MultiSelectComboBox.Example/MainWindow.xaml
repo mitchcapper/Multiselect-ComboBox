@@ -197,7 +197,7 @@
 
                 <Grid DockPanel.Dock="Right" Grid.Column="2" Width="Auto" MinWidth="150" Margin="2,0,0,0" >
                     <TextBlock Text="Events Log" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0,5,0,0" FontWeight="Medium" Height="26" />
-                    <TextBox Text="{Binding EventLog}" TextWrapping="NoWrap" IsReadOnly="True" Margin="0,25,0,24" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  TextChanged="TextBoxBase_OnTextChanged"/>
+                    <TextBox Text="{Binding EventLog}" AutomationProperties.AutomationId="txtEventLog" TextWrapping="NoWrap" IsReadOnly="True" Margin="0,25,0,24" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  TextChanged="TextBoxBase_OnTextChanged"/>
                     <Button Command="{Binding ClearLogCommand}" Style="{StaticResource Custom.Button.Style}" Width="75" Height="24">
                         <Underline>Clear log</Underline>
                     </Button>

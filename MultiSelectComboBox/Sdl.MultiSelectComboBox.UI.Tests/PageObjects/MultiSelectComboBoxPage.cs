@@ -5,7 +5,8 @@ using FlaUI.Core.Identifiers;
 using FlaUI.Core.Input;
 using FlaUI.Core.Tools;
 using FlaUI.Core.WindowsAPI;
-using Sdl.MultiSelectComboBox.Themes.Generic;
+
+using ControlConsts = Sdl.MultiSelectComboBox.Themes.Generic.MultiSelectComboBox;
 
 namespace Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
 
@@ -40,7 +41,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	private TextBox? FilterTextBox {
 		get {
 			var control = MultiSelectComboBoxControl;
-			return control?.FindFirstDescendant(cf => cf.ByName("PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox"))?.AsTextBox();
+			return control?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox))?.AsTextBox();
 		}
 	}
 
@@ -50,10 +51,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	private Button? DropdownButton {
 		get {
 			var control = MultiSelectComboBoxControl;
-			// Find the toggle/dropdown button
-			//return control?.FindFirstDescendant(cf => cf.ByName("PART_MultiSelectComboBox_Dropdown_Button"))?.AsButton();
-
-			return control?.FindFirstDescendant(cf => cf.ByAutomationId(MultiSelectComboBox.Themes.Generic.MultiSelectComboBox.PART_MultiSelectComboBox_ToggleButton))?.AsButton();
+			return control?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_ToggleButton))?.AsButton();
 		}
 	}
 
@@ -65,7 +63,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 			// The dropdown is a popup, need to find it from desktop
 			var desktop = _automation.GetDesktop();
 			var popup = desktop.FindFirstDescendant(cf => cf.ByClassName("Popup"));
-			return popup?.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.List))?.AsListBox();
+			return popup?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_Dropdown_ListBox))?.AsListBox();
 		}
 	}
 
@@ -73,7 +71,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// Gets the selected items panel (ItemsControl containing selected item tags)
 	/// </summary>
 	private AutomationElement? SelectedItemsPanel =>
-		MultiSelectComboBoxControl?.FindFirstDescendant(cf => cf.ByName("PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl"));
+		MultiSelectComboBoxControl?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_ItemsControl));
 
 	#endregion
 
@@ -162,49 +160,19 @@ public class MultiSelectComboBoxPage : IDisposable {
 		get {
 			// Find the TextBox showing "X Selected" at the top of the window
 			var countTextBox = _window.FindFirstDescendant(cf => cf.ByAutomationId("SelectedItemsCountTextBox"));
-            if (countTextBox == null) {
-                // FALLBACK: Try to find by name or other properties if ID fails
-                var sb = new System.Text.StringBuilder();
-                sb.AppendLine("SelectedItemsCountTextBox not found by ID. Dumping window elements:");
-                
-                var all = _window.FindAllDescendants();
-	            foreach (var child in all) {
-		            var classNameAdd = "";
-		            if (child.Properties.ClassName.IsSupported) {
-			            classNameAdd = $" {child.ClassName} - ";
-		            }
-		            sb.AppendLine($"Element: {classNameAdd}{child.Name} - {child.ControlType} (ID: {child.AutomationId})");
-	            }
-
-                var dump = sb.ToString(); 
-                // Look for edits specifically to highlight
-                 var txts = _window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Edit));
-                 foreach(var t in txts) {
-                    sb.AppendLine($"Found Edit: Name='{t.Name}', AutoId='{t.AutomationId}', Text='{t.AsTextBox().Text}'");
-                    if (t.Name == "SelectedItemsCountTextBox") countTextBox = t;
-                 }
-                
-                if (countTextBox == null)
-                    throw new Exception(sb.ToString());
-            }
 
 			if (countTextBox != null) {
-                // Retry reading a few times in case of binding delay
-                string lastText = "";
-                for (int i = 0; i < 10; i++) {
-				    var text = countTextBox.AsTextBox().Text;
-                    lastText = text;
-				    if (int.TryParse(text, out var count)) {
-                        if (count > 0) return count; 
-				    }
-                    System.Threading.Thread.Sleep(100);
-                }
-                
-                var finalText = countTextBox.AsTextBox().Text;
-                if (int.TryParse(finalText, out var finalCount)) return finalCount;
-                
-                // If we are here, we parsed 0 or failed to parse.
-                // If the test expects >0, it will fail.
+				// Retry reading a few times in case of binding delay
+				for (int i = 0; i < 10; i++) {
+					var text = countTextBox.AsTextBox().Text;
+					if (int.TryParse(text, out var count)) {
+						if (count > 0) return count;
+					}
+					System.Threading.Thread.Sleep(100);
+				}
+
+				var finalText = countTextBox.AsTextBox().Text;
+				if (int.TryParse(finalText, out var finalCount)) return finalCount;
 			}
 			return 0;
 		}
@@ -403,7 +371,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 		}
 
 		// Find all item containers with remove buttons
-		var buttons = panel.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button));
+		var buttons = panel.FindAllDescendants(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button));
 
 		foreach (var button in buttons) {
 			// Check if this button's parent container contains the item name
@@ -428,7 +396,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 		var panel = SelectedItemsPanel;
 		if (panel == null) return Array.Empty<Button>();
 
-		return panel.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button))
+		return panel.FindAllDescendants(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button))
 			.Select(e => e.AsButton())
 			.Where(b => b.IsEnabled)
 			.ToList();
