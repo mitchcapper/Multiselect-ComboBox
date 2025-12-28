@@ -103,13 +103,30 @@ public class KeyboardNavigationTests : UITestBase {
 
 	[Test]
 	[Category("KeyboardNavigation")]
+	public async Task HittingEnter_SelectsFirstItem() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
+
+		// Filter to show specific items
+		comboBox.TypeFilterText("E");
+		comboBox.PressEnter();
+		Thread.Sleep(300);
+
+		// Assert - Should have selected an English-related item
+		var selectedItems = comboBox.SelectedItems;
+		await Assert.That(selectedItems.Count).IsEqualTo(1);
+	}
+
+
+	[Test]
+	[Category("KeyboardNavigation")]
 	public async Task ArrowDownThenEnter_SelectsCorrectItem() {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 
 		// Filter to show specific items
 		comboBox.TypeFilterText("English");
-		comboBox.OpenDropdown();
+		//comboBox.OpenDropdown();
 		Thread.Sleep(300);
 
 		// Act - Navigate down and select

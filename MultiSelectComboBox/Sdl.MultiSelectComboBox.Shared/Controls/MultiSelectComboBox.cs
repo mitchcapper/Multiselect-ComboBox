@@ -1749,10 +1749,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 #if WINUI
 				System.Diagnostics.Debug.WriteLine($"[WINUI] OpenDropDownList - Setting focus on first item");
 #endif
-				// Only set visual focus if we are NOT in edit mode (i.e. not typing in the filter)
-				if (!IsEditMode) {
-					SetVisualFocusOnItem(DropdownListBox.SelectedItem);
-				}
+				SetVisualFocusOnItem(DropdownListBox.SelectedItem);
 
 				// Only move keyboard focus if we are NOT in edit mode (i.e. not typing)
 				if (!IsEditMode) {
@@ -2023,10 +2020,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 
 			if (DropdownListBox?.Items.Count > 0) {
-				// Only set focus if we are NOT editing text (filter mode)
-				if (!IsEditMode) {
-					SetVisualFocusOnItem(DropdownListBox.Items[0]);
-				}
+				SetVisualFocusOnItem(DropdownListBox.Items[0]);
 			}
 #if !WINUI
 			Mouse.Capture(this, CaptureMode.SubTree);
@@ -2490,10 +2484,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 				if (DropdownListBox?.Items.Count > 0) {
 					var item = DropdownListBox.Items[0];
-					// Only set visual focus if we are NOT in edit mode (i.e. not typing in the filter)
-					if (!IsEditMode) {
-						SetVisualFocusOnItem(item);
-					}
+					SetVisualFocusOnItem(item);
 
 					UpdateAutoCompleteFilterText(criteria, item);
 				} else {
@@ -2639,11 +2630,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			}
 
 			if (selectedItem != null) {
-				var listBoxItem = GetListViewItem(selectedItem);
-				if (listBoxItem != null)
-					listBoxItem.IsChecked = true;
-
-				UpdateSelectedItemsContainer(ItemsSource);
+				ToggleItemSelection(selectedItem);
 			}
 		}
 
