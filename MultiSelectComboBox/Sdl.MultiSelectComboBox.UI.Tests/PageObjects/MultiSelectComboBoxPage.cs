@@ -229,7 +229,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void PressBackspace(int times = 1) {
 		for (int i = 0; i < times; i++) {
-			Keyboard.Press(VirtualKeyShort.BACK);
+			Keyboard.Type(VirtualKeyShort.BACK);
 			Thread.Sleep(100);
 		}
 	}
@@ -254,7 +254,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void CloseDropdown() {
 		if (IsDropdownOpen) {
-			Keyboard.Press(VirtualKeyShort.ESCAPE);
+			Keyboard.Type(VirtualKeyShort.ESCAPE);
 			Thread.Sleep(200);
 		}
 	}
@@ -307,11 +307,11 @@ public class MultiSelectComboBoxPage : IDisposable {
 		Thread.Sleep(200);
 
 		for (int i = 0; i < arrowDownCount; i++) {
-			Keyboard.Press(VirtualKeyShort.DOWN);
+			Keyboard.Type(VirtualKeyShort.DOWN);
 			Thread.Sleep(100);
 		}
 
-		Keyboard.Press(VirtualKeyShort.ENTER);
+		Keyboard.Type(VirtualKeyShort.ENTER);
 		Thread.Sleep(200);
 	}
 
@@ -320,7 +320,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void NavigateDown(int times = 1) {
 		for (int i = 0; i < times; i++) {
-			Keyboard.Press(VirtualKeyShort.DOWN);
+			Keyboard.Type(VirtualKeyShort.DOWN);
 			Thread.Sleep(100);
 		}
 	}
@@ -330,7 +330,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void NavigateUp(int times = 1) {
 		for (int i = 0; i < times; i++) {
-			Keyboard.Press(VirtualKeyShort.UP);
+			Keyboard.Type(VirtualKeyShort.UP);
 			Thread.Sleep(100);
 		}
 	}
@@ -339,7 +339,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// Presses Enter to select the currently focused item
 	/// </summary>
 	public void PressEnter() {
-		Keyboard.Press(VirtualKeyShort.ENTER);
+		Keyboard.Type(VirtualKeyShort.ENTER);
 		Thread.Sleep(200);
 	}
 

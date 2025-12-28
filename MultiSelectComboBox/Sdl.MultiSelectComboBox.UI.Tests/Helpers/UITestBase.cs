@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
@@ -19,6 +21,31 @@ public class UITestBase : IDisposable {
 	protected Window? MainWindow { get; private set; }
 	private bool _disposed;
 
+	// Runs once before the entire test session starts
+	//[Before(TestSession)]
+	//[BeforeEvery(HookType.TestSession)]
+	//public static async Task LogCommitHash() {
+	//	//// Get the commit hash
+	//	//var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+	//	//var infoVersion = assembly.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+	//	//// Split to get just the hash if necessary (format is often 1.0.0+hash)
+	//	//var commitHash = infoVersion?.Split('+').LastOrDefault() ?? "Unknown";
+	//	//// Write it to the standard output
+	//	//TestSessionContext.Current.OutputWriter.WriteLine($"---------- BUILD INFO ----------");
+	//	//TestSessionContext.Current.OutputWriter.WriteLine($"Commit Hash: {commitHash}");
+	//	//TestSessionContext.Current.OutputWriter.WriteLine($"--------------------------------");
+	//	var process = new Process {
+	//		StartInfo = new ProcessStartInfo("git", "rev-parse HEAD") {
+	//			RedirectStandardOutput = true,
+	//			UseShellExecute = false
+	//		}
+	//	};
+	//	process.Start();
+	//	var commitId = process.StandardOutput.ReadToEnd().Trim();
+	//	Console.WriteLine($"Commit: {commitId}");
+	//}
+
 	[Before(HookType.Test)]
 	public virtual void Setup() {
 		// Initialize automation
@@ -29,7 +56,7 @@ public class UITestBase : IDisposable {
 		App = Application.Launch(exePath, $"--AutoExit {(System.Diagnostics.Debugger.IsAttached ? 60 * 10 : 20)}");
 
 		// Get main window with timeout
-		MainWindow = App.GetMainWindow(Automation, TimeSpan.FromSeconds(60));
+		MainWindow = App.GetMainWindow(Automation, TimeSpan.FromSeconds(15));
 
 		if (MainWindow == null) {
 			throw new InvalidOperationException("Could not find main window after 15 seconds");
