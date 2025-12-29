@@ -46,10 +46,18 @@ public class UITestBase : IDisposable {
 	//	Console.WriteLine($"Commit: {commitId}");
 	//}
 
+	public Task ShortDelay() => Delay(20);
+	public Task LongShortDelay() => Delay(200);
+	public async Task Delay(int milliseconds) {
+		await Task.Delay(milliseconds);
+	}
+
 	[Before(HookType.Test)]
 	public virtual void Setup() {
 		// Initialize automation
 		Automation = new UIA3Automation();
+		Automation.ConnectionTimeout = new TimeSpan(0, 0, 4);
+
 
 		// Launch application
 		var exePath = GetApplicationPath();

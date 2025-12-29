@@ -3,6 +3,7 @@ using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using Sdl.MultiSelectComboBox.UI.Tests.Helpers;
 using Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
+using FlaUI.Core.Input;
 
 namespace Sdl.MultiSelectComboBox.UI.Tests.Tests;
 
@@ -22,13 +23,13 @@ public class SelectedCountSyncTests : UITestBase {
 	public async Task SelectItem_CountIncreases() {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
+		_mainPage.ClearSelectedItems();
+		Thread.Sleep(200);
 		var initialCount = comboBox.SelectedItemsCount;
 		await Assert.That(initialCount).IsEqualTo(0);
 
 		// Act - Select an item
-		comboBox.TypeFilterText("English");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
+		comboBox.SelectItemsByFilter("English");
 		Thread.Sleep(300);
 
 		// Assert
@@ -41,25 +42,21 @@ public class SelectedCountSyncTests : UITestBase {
 	public async Task DeselectItem_CountDecreases() {
 		// Arrange - First select an item
 		var comboBox = _mainPage.MultiSelectComboBox;
-
-		comboBox.TypeFilterText("English");
+		_mainPage.ClearSelectedItems();
 		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
-		Thread.Sleep(300);
 
-		var countAfterSelect = comboBox.SelectedItemsCount;
-		await Assert.That(countAfterSelect).IsEqualTo(1);
-
-		// Act - Click on the same item again to deselect it
-		comboBox.ClearFilterText();
-		comboBox.TypeFilterText("English");
+		comboBox.SelectItemsByName("English (United States)");
 		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1); // Toggle selection
-		Thread.Sleep(300);
+		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(1);
+
+		// Act - Toggle the same item off
+		comboBox.SelectItemsByName("English (United States)");
+		Thread.Sleep(200);
 
 		// Assert
 		var countAfterDeselect = comboBox.SelectedItemsCount;
 		await Assert.That(countAfterDeselect).IsEqualTo(0);
+
 	}
 
 	[Test]
@@ -67,26 +64,10 @@ public class SelectedCountSyncTests : UITestBase {
 	public async Task SelectMultipleItems_CountMatchesActualSelection() {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
-
-		// Select first item
-		comboBox.TypeFilterText("English");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
+		_mainPage.ClearSelectedItems();
 		Thread.Sleep(200);
 
-		// Select second item
-		comboBox.ClearFilterText();
-		comboBox.TypeFilterText("Spanish");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
-		Thread.Sleep(200);
-
-		// Select third item
-		comboBox.ClearFilterText();
-		comboBox.TypeFilterText("French");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
-		Thread.Sleep(200);
+		comboBox.SelectItemsByName("English (United States)", "French (France)", "Spanish (Spain)");
 
 		comboBox.CloseDropdown();
 		Thread.Sleep(200);
@@ -96,36 +77,34 @@ public class SelectedCountSyncTests : UITestBase {
 		var selectedItems = comboBox.SelectedItems;
 
 		await Assert.That(actualCount).IsEqualTo(selectedItems.Count);
-		await Assert.That(actualCount).IsEqualTo(3);
+		await Assert.That(selectedItems).IsEquivalentTo(new[] { "English (United States)", "French (France)", "Spanish (Spain)" }, "Expected the three selected languages to be present");
 	}
 
 	[Test]
 	[Category("SelectedCount")]
 	public async Task DisplayedCount_MatchesActualSelectedItems() {
 		// Arrange
-		_mainPage.SelectRandomItems();
-		Thread.Sleep(500);
-
+		_mainPage.ClearSelectedItems();
+		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
-
-		// Assert
+		comboBox.SelectItemsByName("English (United States)", "French (France)", "Spanish (Spain)");
 		var actualSelectedItems = comboBox.SelectedItems;
+
 		var displayedCount = _mainPage.DisplayedSelectedCount;
 
 		// The displayed count should match the actual number of selected items
-		// Note: Due to virtualization, we check that they're at least close
-		await Assert.That(displayedCount).IsGreaterThan(0);
+		await Assert.That(displayedCount).IsEqualTo(actualSelectedItems.Count);
 	}
 
 	[Test]
 	[Category("SelectedCount")]
 	public async Task ClearAllItems_CountBecomesZero() {
 		// Arrange - Select some items
-		_mainPage.SelectRandomItems();
-		Thread.Sleep(500);
-
+		_mainPage.ClearSelectedItems();
+		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
-		await Assert.That(comboBox.SelectedItemsCount).IsGreaterThan(0);
+		comboBox.SelectItemsByName("English (United States)", "Spanish (Spain)");
+		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(2);
 
 		// Act
 		_mainPage.ClearSelectedItems();
@@ -146,8 +125,6 @@ public class SelectedCountSyncTests : UITestBase {
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
-
-		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("Spanish");
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
@@ -157,8 +134,6 @@ public class SelectedCountSyncTests : UITestBase {
 		var originalCount = comboBox.SelectedItemsCount;
 		await Assert.That(originalCount).IsEqualTo(2);
 
-		// Act - Toggle a third item on and off
-		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("French");
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1); // Select (count becomes 3)
@@ -167,7 +142,6 @@ public class SelectedCountSyncTests : UITestBase {
 		var afterSelect = comboBox.SelectedItemsCount;
 		await Assert.That(afterSelect).IsEqualTo(3);
 
-		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("French");
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1); // Deselect (count becomes 2)
@@ -187,14 +161,16 @@ public class SelectedCountSyncTests : UITestBase {
 
 		var comboBox = _mainPage.MultiSelectComboBox;
 		var initialCount = comboBox.SelectedItemsCount;
-		await Assert.That(initialCount).IsGreaterThan(0);
+		await Assert.That(initialCount).IsEqualTo(20);
 
+		comboBox.ClickToFocus();//must be focused to show remove buttons
+		Thread.Sleep(200);
 		// Act - Remove one item using the X button
 		var removeButtons = comboBox.GetRemoveButtons();
-		if (removeButtons.Count > 0) {
-			removeButtons[0].Click();
-			Thread.Sleep(200);
-		}
+		await Assert.That(removeButtons.Count).IsEqualTo(20);
+		var btn = removeButtons[0];
+		Thread.Sleep(200);
+
 
 		// Assert
 		var finalCount = comboBox.SelectedItemsCount;

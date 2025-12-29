@@ -21,53 +21,43 @@ public class RemoveItemTests : UITestBase {
 	[Category("RemoveItem")]
 	public async Task ClickRemoveButton_RemovesSelectedItem() {
 		// Arrange - Select some items
+		_mainPage.ClearSelectedItems();
+		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
-		comboBox.TypeFilterText("English");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1); // Select first matching item
-		Thread.Sleep(200);
+		comboBox.SelectItemsByFilter("English");
 
 		var initialCount = comboBox.SelectedItemsCount;
-		await Assert.That(initialCount).IsGreaterThan(0);
+		await Assert.That(initialCount).IsEqualTo(1);
+		var removeButtons = comboBox.GetRemoveButtons();
+		await Assert.That(removeButtons.Count).IsEqualTo(1);
 
 		// Act - Click the remove button
-		var removeButtons = comboBox.GetRemoveButtons();
-		if (removeButtons.Count > 0) {
-			removeButtons[0].Click();
-			Thread.Sleep(200);
-		}
+		removeButtons[0].Click();
+		Thread.Sleep(200);
 
 		// Assert - Selected count should decrease
 		var finalCount = comboBox.SelectedItemsCount;
-		await Assert.That(finalCount).IsLessThan(initialCount);
+		await Assert.That(finalCount).IsEqualTo(0);
 	}
 
 	[Test]
 	[Category("RemoveItem")]
 	public async Task RemoveAllItems_ResultsInEmptySelection() {
 		// Arrange - Select a couple of items
+		_mainPage.ClearSelectedItems();
+		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
-
-		comboBox.TypeFilterText("Eng");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
-		Thread.Sleep(200);
-
-		comboBox.ClearFilterText();
-		comboBox.TypeFilterText("Span");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
-		Thread.Sleep(200);
+		comboBox.SelectItemsByFilter("English", "Spanish");
 		comboBox.CloseDropdown();
 
 		var initialCount = comboBox.SelectedItemsCount;
-		await Assert.That(initialCount).IsGreaterThan(0);
+		await Assert.That(initialCount).IsEqualTo(2);
+		var removeButtons = comboBox.GetRemoveButtons();
+		await Assert.That(removeButtons.Count).IsEqualTo(2);
 
 		// Act - Remove all items by clicking remove buttons
-		while (true) {
+		while (comboBox.SelectedItemsCount > 0) {
 			var buttons = comboBox.GetRemoveButtons();
-			if (buttons.Count == 0) break;
-
 			buttons[0].Click();
 			Thread.Sleep(200);
 		}
@@ -79,32 +69,30 @@ public class RemoveItemTests : UITestBase {
 	[Test]
 	[Category("RemoveItem")]
 	public async Task RemoveButton_ExistsForEachSelectedItem() {
-		// Arrange - Use the random selection button to select multiple items
+		// Arrange - Select a known set of items
 		_mainPage.ClearSelectedItems();
 		Thread.Sleep(200);
-		_mainPage.SelectRandomItems();
-		Thread.Sleep(500);
-
 		var comboBox = _mainPage.MultiSelectComboBox;
+		comboBox.SelectItemsByFilter("English", "Spanish", "French");
 		var selectedCount = comboBox.SelectedItemsCount;
+		await Assert.That(selectedCount).IsEqualTo(3);
 
 		// Act - Get remove buttons
 		var removeButtons = comboBox.GetRemoveButtons();
 
 		// Assert - Should have a remove button for each selected item
-		// (might be slightly different due to virtualization, but should have some)
-		await Assert.That(removeButtons.Count).IsGreaterThan(0);
+		await Assert.That(removeButtons.Count).IsEqualTo(selectedCount);
 	}
 
 	[Test]
 	[Category("RemoveItem")]
 	public async Task ClearSelectedItemsButton_ClearsAllItems() {
 		// Arrange - Select some items
-		_mainPage.SelectRandomItems();
-		Thread.Sleep(500);
-
+		_mainPage.ClearSelectedItems();
+		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
-		await Assert.That(comboBox.SelectedItemsCount).IsGreaterThan(0);
+		comboBox.SelectItemsByFilter("English", "Spanish");
+		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(2);
 
 		// Act - Use the Clear selected items button
 		_mainPage.ClearSelectedItems();
@@ -119,37 +107,21 @@ public class RemoveItemTests : UITestBase {
 	public async Task RemoveButton_DoesNotAffectOtherItems() {
 		// Arrange - Select multiple items
 		var comboBox = _mainPage.MultiSelectComboBox;
+		_mainPage.ClearSelectedItems();
+		Thread.Sleep(200);
 
 		// Select first item
-		comboBox.TypeFilterText("Eng");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
-		Thread.Sleep(200);
-
-		// Select second item
-		comboBox.ClearFilterText();
-		comboBox.TypeFilterText("Span");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
-		Thread.Sleep(200);
-
-		// Select third item
-		comboBox.ClearFilterText();
-		comboBox.TypeFilterText("French");
-		Thread.Sleep(200);
-		comboBox.SelectItemByKeyboard(1);
-		Thread.Sleep(200);
+		comboBox.SelectItemsByFilter("English", "Spanish", "French");
 		comboBox.CloseDropdown();
 
 		var initialCount = comboBox.SelectedItemsCount;
-		await Assert.That(initialCount).IsGreaterThanOrEqualTo(3);
+		await Assert.That(initialCount).IsEqualTo(3);
 
 		// Act - Remove just one item
 		var removeButtons = comboBox.GetRemoveButtons();
-		if (removeButtons.Count > 0) {
-			removeButtons[0].Click();
-			Thread.Sleep(200);
-		}
+		await Assert.That(removeButtons.Count).IsEqualTo(3);
+		removeButtons[0].Click();
+		Thread.Sleep(200);
 
 		// Assert - Should have exactly one less item
 		var finalCount = comboBox.SelectedItemsCount;

@@ -29,15 +29,10 @@ public class FilteringTests : UITestBase {
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
-		await Assert.That(visibleItems.Count).IsGreaterThan(0);
-
-		// Should show items containing "Unit" like United States, United Kingdom, etc.
-		var hasUnitedStates = visibleItems.Any(item =>
-			item.Contains("United States", StringComparison.OrdinalIgnoreCase));
-		var hasUnitedKingdom = visibleItems.Any(item =>
-			item.Contains("United Kingdom", StringComparison.OrdinalIgnoreCase));
-
-		await Assert.That(hasUnitedStates || hasUnitedKingdom).IsTrue();
+		await Assert.That(visibleItems.Any(item =>
+			item.Contains("English (United States)", StringComparison.OrdinalIgnoreCase))).IsTrue();
+		await Assert.That(visibleItems.Any(item =>
+			item.Contains("English (United Kingdom)", StringComparison.OrdinalIgnoreCase))).IsTrue();
 	}
 
 	[Test]
@@ -52,15 +47,11 @@ public class FilteringTests : UITestBase {
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
-		await Assert.That(visibleItems.Count).IsGreaterThan(0);
-
-		// Should show items containing "geria" like Nigeria, Algeria
-		var hasNigeria = visibleItems.Any(item =>
-			item.Contains("Nigeria", StringComparison.OrdinalIgnoreCase));
-		var hasAlgeria = visibleItems.Any(item =>
-			item.Contains("Algeria", StringComparison.OrdinalIgnoreCase));
-
-		await Assert.That(hasNigeria || hasAlgeria).IsTrue();
+		Console.WriteLine($"Visible items: {String.}");
+		await Assert.That(visibleItems.Any(item =>
+			item.Contains("English (Nigeria)", StringComparison.OrdinalIgnoreCase))).IsTrue();
+		await Assert.That(visibleItems.Any(item =>
+			item.Contains("Arabic (Algeria)", StringComparison.OrdinalIgnoreCase))).IsTrue();
 	}
 
 	[Test]
@@ -75,11 +66,8 @@ public class FilteringTests : UITestBase {
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
-		await Assert.That(visibleItems.Count).IsGreaterThan(0);
-
-		var hasGerman = visibleItems.Any(item =>
-			item.Contains("German", StringComparison.OrdinalIgnoreCase));
-		await Assert.That(hasGerman).IsTrue();
+		await Assert.That(visibleItems.Any(item =>
+			item.Contains("German (Germany)", StringComparison.OrdinalIgnoreCase))).IsTrue();
 	}
 
 	[Test]
@@ -90,15 +78,11 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("French");
-		Thread.Sleep(200);
-
+		comboBox.WaitForDropdownOpen();
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
-		await Assert.That(visibleItems.Count).IsGreaterThan(0);
-
-		var hasFrench = visibleItems.Any(item =>
-			item.Contains("French", StringComparison.OrdinalIgnoreCase));
-		await Assert.That(hasFrench).IsTrue();
+		await Assert.That(visibleItems.Any(item =>
+			item.Contains("French (France)", StringComparison.OrdinalIgnoreCase))).IsTrue();
 	}
 
 	[Test]
@@ -126,17 +110,18 @@ public class FilteringTests : UITestBase {
 		// First filter to a subset
 		comboBox.TypeFilterText("Zim"); //important to be  a small number as the default open is going to only show the frequent/recent item set
 		Thread.Sleep(200);
-		var filteredCount = comboBox.VisibleDropdownItems.Count;
-		await Assert.That(filteredCount).IsGreaterThan(0);
+		var filteredItems = comboBox.VisibleDropdownItems.ToList();
+		await Assert.That(filteredItems).Contains("English (Zimbabwe)");
 
 		// Act - Clear the filter
-		comboBox.ClearFilterText();
+		comboBox.ClearFilterTextAnyItemsUsingBackspace();
 		await Task.Delay(300);
 		comboBox.OpenDropdown();
 
-		// Assert - Should show more items than when filtered
-		var unfilteredCount = comboBox.AllDropdownItems.Count;
-		await Assert.That(unfilteredCount).IsGreaterThan(filteredCount);
+		// Assert - Unfiltered list should include the filtered item plus broader set
+		var unfilteredItems = comboBox.AllDropdownItems.ToList();
+		await Assert.That(unfilteredItems.Any(item => item.Equals("Italian (Italy)", StringComparison.OrdinalIgnoreCase))).IsTrue(); // doesn't work as not in first few
+		await Assert.That(unfilteredItems.Any(item => item.Equals("English (United States)", StringComparison.OrdinalIgnoreCase))).IsTrue();
 	}
 
 	[Test]
@@ -150,16 +135,13 @@ public class FilteringTests : UITestBase {
 		var comboBox = _mainPage.MultiSelectComboBox;
 
 		// Act
-		comboBox.SetFilterText(searchText);
+		comboBox.SetFilterTextClearItems(searchText);
 		Thread.Sleep(200);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
-		await Assert.That(visibleItems.Count).IsGreaterThan(0);
-
-		var hasMatch = visibleItems.Any(item =>
-			item.Contains(expectedMatch, StringComparison.OrdinalIgnoreCase));
-		await Assert.That(hasMatch).IsTrue();
+		await Assert.That(visibleItems.Any(item =>
+			item.Contains(expectedMatch, StringComparison.OrdinalIgnoreCase))).IsTrue();
 	}
 
 	[Test]
@@ -174,16 +156,18 @@ public class FilteringTests : UITestBase {
 		var lowerCaseResults = comboBox.VisibleDropdownItems.ToList();
 
 		// Clear and try uppercase
-		comboBox.ClearFilterText();
+		comboBox.ClearFilterTextAnyItemsUsingBackspace();
 		comboBox.TypeFilterText("UNIT");
 		Thread.Sleep(200);
 		Thread.Sleep(300);
 
 		var upperCaseResults = comboBox.VisibleDropdownItems.ToList();
 
-		// Assert - Both should return results
-		await Assert.That(lowerCaseResults.Count).IsGreaterThan(0);
-		await Assert.That(upperCaseResults.Count).IsGreaterThan(0);
+		var lowerOrdered = lowerCaseResults.OrderBy(i => i).ToList();
+		var upperOrdered = upperCaseResults.OrderBy(i => i).ToList();
+
+		await Assert.That(lowerOrdered).IsEquivalentTo(upperOrdered);
+		await Assert.That(lowerCaseResults.Any(item => item.Contains("English (United States)", StringComparison.OrdinalIgnoreCase))).IsTrue();
 	}
 
 	public override void TearDown() {

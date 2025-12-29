@@ -114,12 +114,22 @@ public class MultiSelectComboBoxPage : IDisposable {
 			if (listBox == null) return Array.Empty<string>();
 
 			var items = listBox.Items;
-			return items
-				.Where(item => !item.IsOffscreen)
-				.Select(item => item.Name ?? string.Empty)
-				.Where(name => !string.IsNullOrWhiteSpace(name))
-				.ToList();
+			return items.Where(ItemIsVisible).Select(a => a.Name).ToList();
 		}
+	}
+	private string CollToString<T>(IEnumerable<T> items) {
+		return String.Join(", ", items);
+	}
+	private bool ItemIsVisible(ListBoxItem item) {
+		if (String.IsNullOrWhiteSpace(item?.Name))
+			return false;
+		// so IsOffscreen can throw an error for virtualized items we cant even check if its supported.  But the item only supports the virtualized pattern if it hasnt been realized yet so we know its not visibile if it supports the Virtualized Pattern.
+
+		//var supportedPatterns = CollToString(item.GetSupportedPatterns());
+		if (item.Patterns.VirtualizedItem.IsSupported)
+			return false;
+		return !item.IsOffscreen;
+
 	}
 
 	/// <summary>
@@ -213,15 +223,15 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// <summary>
 	/// Sets filter text directly (clears existing and types new)
 	/// </summary>
-	public void SetFilterText(string text) {
-		ClearFilterText();
+	public void SetFilterTextClearItems(string text) {
+		ClearFilterTextAnyItemsUsingBackspace();
 		TypeFilterText(text);
 	}
 
 	/// <summary>
 	/// Clears the filter text using backspace
 	/// </summary>
-	public void ClearFilterText() {
+	public void ClearFilterTextAnyItemsUsingBackspace() {
 		ClickToFocus();
 		var currentText = FilterText;
 		for (int i = 0; i < currentText.Length + 5; i++) {
@@ -301,6 +311,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 			(i.Name ?? string.Empty).Contains(itemName, StringComparison.OrdinalIgnoreCase));
 
 		if (item == null) {
+
 			throw new InvalidOperationException($"Item containing '{itemName}' not found in dropdown");
 		}
 
@@ -311,7 +322,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// <summary>
 	/// Selects an item using keyboard navigation (arrow down then enter)
 	/// </summary>
-	public void SelectItemByKeyboard(int arrowDownCount) {
+	public void SelectItemByKeyboard(int arrowDownCount, bool leaveOpen = false) {
 		OpenDropdown();
 		Thread.Sleep(200);
 
@@ -319,9 +330,33 @@ public class MultiSelectComboBoxPage : IDisposable {
 			Keyboard.Type(VirtualKeyShort.DOWN);
 			Thread.Sleep(100);
 		}
+		if (leaveOpen)
+			this.PressSpace();
+		else
+			this.PressEnter();
 
-		Keyboard.Type(VirtualKeyShort.ENTER);
-		Thread.Sleep(200);
+	}
+
+	/// <summary>
+	/// Selects one or more items by typing filter text and confirming with keyboard
+	/// </summary>
+	public void SelectItemsByFilter(params string[] filterTexts) {
+		foreach (var filter in filterTexts) {
+			TypeFilterText(filter);
+			Thread.Sleep(200);
+			SelectItemByKeyboard(1);
+			Thread.Sleep(200);
+		}
+	}
+
+	/// <summary>
+	/// Selects items directly by their display names
+	/// </summary>
+	public void SelectItemsByName(params string[] itemNames) {
+		foreach (var name in itemNames) {
+			SelectItemByName(name);
+			Thread.Sleep(200);
+		}
 	}
 
 	/// <summary>
@@ -404,17 +439,28 @@ public class MultiSelectComboBoxPage : IDisposable {
 
 		throw new InvalidOperationException($"Could not find remove button for item '{itemName}'");
 	}
+	public class OurRemovalButton {
+		private Button Button;
 
+		public OurRemovalButton(Button button) {
+			this.Button = button;
+		}
+		public void Click() {
+			Button.Invoke(); //does nothing but does scroll us into view:)
+			Thread.Sleep(50);
+			Button.Click();//perform actual mouse event now that position is correct
+		}
+	}
 	/// <summary>
 	/// Gets all remove buttons (X buttons) for selected items
 	/// </summary>
-	public IReadOnlyList<Button> GetRemoveButtons() {
+	public IReadOnlyList<OurRemovalButton> GetRemoveButtons() {
 		var panel = SelectedItemsPanel;
-		if (panel == null) return Array.Empty<Button>();
+		if (panel == null) return [];
 
 		return panel.FindAllDescendants(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_RemoveItem_Button))
 			.Select(e => e.AsButton())
-			.Where(b => b.IsEnabled)
+			.Where(b => b.IsEnabled).Select(b => new OurRemovalButton(b))
 			.ToList();
 	}
 

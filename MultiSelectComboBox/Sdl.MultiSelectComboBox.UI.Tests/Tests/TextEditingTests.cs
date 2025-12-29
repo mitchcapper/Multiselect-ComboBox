@@ -26,7 +26,7 @@ public class TextEditingTests : UITestBase {
 		Thread.Sleep(200);
 
 		var initialText = comboBox.FilterText;
-		await Assert.That(initialText.Length).IsGreaterThan(0);
+		await Assert.That(initialText).IsEqualTo("United");
 
 		// Act - Press backspace 3 times
 		comboBox.PressBackspace(3);
@@ -34,7 +34,7 @@ public class TextEditingTests : UITestBase {
 
 		// Assert - Filter text should be shorter
 		var newText = comboBox.FilterText;
-		await Assert.That(newText.Length).IsLessThan(initialText.Length);
+		await Assert.That(newText).IsEqualTo("Uni");
 	}
 
 	[Test]
@@ -52,7 +52,7 @@ public class TextEditingTests : UITestBase {
 
 		// Assert - Filter text should be empty
 		var finalText = comboBox.FilterText;
-		await Assert.That(finalText.Length).IsEqualTo(0);
+		await Assert.That(finalText).IsEqualTo(string.Empty);
 	}
 
 	[Test]
@@ -73,6 +73,7 @@ public class TextEditingTests : UITestBase {
 		Thread.Sleep(300);
 
 		// Assert
+		await Assert.That(comboBox.FilterText).IsEqualTo("German");
 		var visibleItems = comboBox.VisibleDropdownItems;
 		var hasGerman = visibleItems.Any(item =>
 			item.Contains("German", StringComparison.OrdinalIgnoreCase));
@@ -118,9 +119,9 @@ public class TextEditingTests : UITestBase {
 		var afterUni = comboBox.FilterText;
 
 		// Assert
-		await Assert.That(afterU.Length).IsGreaterThanOrEqualTo(1);
-		await Assert.That(afterUn.Length).IsGreaterThanOrEqualTo(2);
-		await Assert.That(afterUni.Length).IsGreaterThanOrEqualTo(3);
+		await Assert.That(afterU).IsEqualTo("U");
+		await Assert.That(afterUn).IsEqualTo("Un");
+		await Assert.That(afterUni).IsEqualTo("Uni");
 	}
 
 	[Test]
@@ -131,14 +132,14 @@ public class TextEditingTests : UITestBase {
 		comboBox.TypeFilterText("SomeFilterText");
 		Thread.Sleep(200);
 
-		await Assert.That(comboBox.FilterText.Length).IsGreaterThan(0);
+		await Assert.That(comboBox.FilterText).IsEqualTo("SomeFilterText");
 
 		// Act
-		comboBox.ClearFilterText();
+		comboBox.ClearFilterTextAnyItemsUsingBackspace();
 		Thread.Sleep(200);
 
 		// Assert
-		await Assert.That(comboBox.FilterText.Length).IsEqualTo(0);
+		await Assert.That(comboBox.FilterText).IsEqualTo(string.Empty);
 	}
 
 	[Test]
@@ -164,6 +165,7 @@ public class TextEditingTests : UITestBase {
 		// Assert - Selected items should not be affected by backspace on filter
 		var selectedCountAfter = comboBox.SelectedItemsCount;
 		await Assert.That(selectedCountAfter).IsEqualTo(selectedCountBefore);
+		await Assert.That(comboBox.FilterText).IsEqualTo(string.Empty);
 	}
 
 	public override void TearDown() {
