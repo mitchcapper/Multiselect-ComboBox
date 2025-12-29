@@ -16,7 +16,7 @@ namespace Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
 public class MultiSelectComboBoxPage : IDisposable {
 	private readonly Window _window;
 	private readonly AutomationBase _automation;
-	private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(5);
+	private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(3);
 	private bool _disposed;
 
 	public MultiSelectComboBoxPage(Window window, AutomationBase automation) {
@@ -52,6 +52,13 @@ public class MultiSelectComboBoxPage : IDisposable {
 		get {
 			var control = MultiSelectComboBoxControl;
 			return control?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_ToggleButton))?.AsButton();
+		}
+	}
+
+	private Button? ArrowButton {
+		get {
+			var control = MultiSelectComboBoxControl;
+			return WaitForElement<Button>(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_Dropdown_Button));
 		}
 	}
 
@@ -243,8 +250,10 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void OpenDropdown() {
 		if (!IsDropdownOpen) {
+			ClickToFocus();//must be in it fro the dorpdown to open
+			Thread.Sleep(100);
 			var button = DropdownButton;
-			button?.Click();
+			button!.Click();
 			WaitForDropdownOpen();
 		}
 	}
@@ -340,6 +349,13 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void PressEnter() {
 		Keyboard.Type(VirtualKeyShort.ENTER);
+		Thread.Sleep(200);
+	}
+	/// <summary>
+	/// Presses Space to select the currently focused item and leave open
+	/// </summary>
+	public void PressSpace() {
+		Keyboard.Type(VirtualKeyShort.SPACE);
 		Thread.Sleep(200);
 	}
 

@@ -1,5 +1,7 @@
 Make sure you read CLAUDE.md if you are claude.
 
+For testing and debugging of tests make sure to carefully read TUnitTestGenerationGuidlines.md.
+
 This is a multi-select combo box control that has two parts.  The top pane the user can type in (and it will auto complete entries) and it also shows each item already selected (with an X in the corner to remove it form the selection).   Then there is the drop down menu.  If they click on the top pane or type in it, it shows all the options based on the current filter.  The Example (MultiSelectComboBox.Example) has countries /languages so when the user types "eng" it filters that list to the ones containing that word.  The user can navigate the drop down using arrow keys and enter/space to select.  They can also click on items to select one or more that way (clicking an already selected one unselects it).
 
 
