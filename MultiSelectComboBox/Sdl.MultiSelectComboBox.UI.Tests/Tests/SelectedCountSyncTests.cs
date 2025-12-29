@@ -64,10 +64,11 @@ public class SelectedCountSyncTests : UITestBase {
 	public async Task SelectMultipleItems_CountMatchesActualSelection() {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
-		_mainPage.ClearSelectedItems();
+		var ks2 = GetKnownSearch(KnownSearch.CANA);
+		comboBox.SetFilterTextClearItems(ks2.Term);
 		Thread.Sleep(200);
-
-		comboBox.SelectItemsByName("English (United States)", "French (France)", "Spanish (Spain)");
+		var toSel = ks2.VisibleItemToPosition.Take(3).Select(a=>a.Key).ToArray();
+		comboBox.SelectItemsByName(toSel);
 
 		comboBox.CloseDropdown();
 		Thread.Sleep(200);
@@ -77,7 +78,7 @@ public class SelectedCountSyncTests : UITestBase {
 		var selectedItems = comboBox.SelectedItems;
 
 		await Assert.That(actualCount).IsEqualTo(selectedItems.Count);
-		await Assert.That(selectedItems).IsEquivalentTo(new[] { "English (United States)", "French (France)", "Spanish (Spain)" }, "Expected the three selected languages to be present");
+		await Assert.That(toSel).IsEquivalentTo(selectedItems);
 	}
 
 	[Test]
@@ -87,7 +88,11 @@ public class SelectedCountSyncTests : UITestBase {
 		_mainPage.ClearSelectedItems();
 		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
-		comboBox.SelectItemsByName("English (United States)", "French (France)", "Spanish (Spain)");
+		var ks2 = GetKnownSearch(KnownSearch.CANA);
+		comboBox.SetFilterTextClearItems(ks2.Term);
+		Thread.Sleep(200);
+		var toSel = ks2.VisibleItemToPosition.Take(3).Select(a=>a.Key).ToArray();
+		comboBox.SelectItemsByName(toSel);
 		var actualSelectedItems = comboBox.SelectedItems;
 
 		var displayedCount = _mainPage.DisplayedSelectedCount;
@@ -103,9 +108,10 @@ public class SelectedCountSyncTests : UITestBase {
 		_mainPage.ClearSelectedItems();
 		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
-		comboBox.SelectItemsByName("English (United States)", "Spanish (Spain)");
-		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(2);
-
+		comboBox.TypeFilterText("Spa");
+		comboBox.SelectItemsByName("Catalan (Spain)", "Galician (Spain)", "Spanish (Bolivia)");
+		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(3);
+		comboBox.CloseDropdown();
 		// Act
 		_mainPage.ClearSelectedItems();
 		Thread.Sleep(300);
@@ -118,14 +124,17 @@ public class SelectedCountSyncTests : UITestBase {
 	[Category("SelectedCount")]
 	public async Task ToggleItemOnAndOff_CountReturnsToOriginal() {
 		// Arrange
+		var ks1 = GetKnownSearch(KnownSearch.ata);
+		var ks2 = GetKnownSearch(KnownSearch.CANA);
+		var ks3 = GetKnownSearch(KnownSearch.No);
 		var comboBox = _mainPage.MultiSelectComboBox;
 
 		// Select two items first
-		comboBox.TypeFilterText("English");
+		comboBox.TypeFilterText(ks1.Term);
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
-		comboBox.TypeFilterText("Spanish");
+		comboBox.TypeFilterText(ks2.Term);
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
@@ -134,7 +143,7 @@ public class SelectedCountSyncTests : UITestBase {
 		var originalCount = comboBox.SelectedItemsCount;
 		await Assert.That(originalCount).IsEqualTo(2);
 
-		comboBox.TypeFilterText("French");
+		comboBox.TypeFilterText(ks3.Term);
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1); // Select (count becomes 3)
 		Thread.Sleep(300);
@@ -142,7 +151,7 @@ public class SelectedCountSyncTests : UITestBase {
 		var afterSelect = comboBox.SelectedItemsCount;
 		await Assert.That(afterSelect).IsEqualTo(3);
 
-		comboBox.TypeFilterText("French");
+		comboBox.TypeFilterText(ks3.Term);
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1); // Deselect (count becomes 2)
 		Thread.Sleep(300);
@@ -169,6 +178,7 @@ public class SelectedCountSyncTests : UITestBase {
 		var removeButtons = comboBox.GetRemoveButtons();
 		await Assert.That(removeButtons.Count).IsEqualTo(20);
 		var btn = removeButtons[0];
+		btn.Click();
 		Thread.Sleep(200);
 
 

@@ -43,11 +43,10 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("geria");
-		Thread.Sleep(200);
+		Thread.Sleep(400);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
-		Console.WriteLine($"Visible items: {String.}");
 		await Assert.That(visibleItems.Any(item =>
 			item.Contains("English (Nigeria)", StringComparison.OrdinalIgnoreCase))).IsTrue();
 		await Assert.That(visibleItems.Any(item =>
@@ -105,13 +104,14 @@ public class FilteringTests : UITestBase {
 	[Category("Filtering")]
 	public async Task ClearFilter_ShowsAllItems() {
 		// Arrange
+		var ks = GetKnownSearch(KnownSearch.CANA); // Small result set for predictable filtering
 		var comboBox = _mainPage.MultiSelectComboBox;
 
 		// First filter to a subset
-		comboBox.TypeFilterText("Zim"); //important to be  a small number as the default open is going to only show the frequent/recent item set
+		comboBox.TypeFilterText(ks.Term);
 		Thread.Sleep(200);
 		var filteredItems = comboBox.VisibleDropdownItems.ToList();
-		await Assert.That(filteredItems).Contains("English (Zimbabwe)");
+		await Assert.That(filteredItems).Contains(ks.VisibleItemToPosition.First().Key);
 
 		// Act - Clear the filter
 		comboBox.ClearFilterTextAnyItemsUsingBackspace();

@@ -270,9 +270,13 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void OpenDropdown() {
 		if (!IsDropdownOpen) {
-			ClickToFocus();//must be in it fro the dorpdown to open
+			
+			MultiSelectComboBoxControl.Focus();//must be in it fro the dorpdown to open
+			//Thread.Sleep(20000);
+			DropdownButton.Focus(); //actually supports the kb ofcus
 			Thread.Sleep(100);
 			var button = DropdownButton;
+			
 			button!.Click();
 			WaitForDropdownOpen();
 		}

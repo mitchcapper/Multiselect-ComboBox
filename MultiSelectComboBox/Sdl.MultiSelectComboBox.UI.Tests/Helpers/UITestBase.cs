@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -51,12 +52,16 @@ public class UITestBase : IDisposable {
 	public async Task Delay(int milliseconds) {
 		await Task.Delay(milliseconds);
 	}
-
+	static UITestBase() {
+		// Be very careful adding new test cases they must return the same data for .net 8 and netframework as we test on both
+		AddKnownSearch(KnownSearch.CANA, "English (Canada)", "French (Canada)", "Inuktitut (Latin, Canada)", "Mohawk (Canada)");
+		AddKnownSearch(KnownSearch.No,  "Albanian (North Macedonia)", "Arabic (Lebanon)", "English (Norfolk Island)", "English (Northern Mariana Islands)", "Filipino (Philippines)", "Italian (San Marino)", "Macedonian (North Macedonia)", "North Ndebele (Zimbabwe)", "Norwegian Bokmål (Norway)", "Norwegian Bokmål (Svalbard & Jan Mayen)", "Norwegian Nynorsk (Norway)", "Sami", "Lule (Norway)", "Sami", "Northern (Finland)", "Sami", "Northern (Norway)", "Sami", "Northern (Sweden)", "Sami", "Southern (Norway)");
+		AddKnownSearch(KnownSearch.ata, "Arabic (Qatar)", "Catalan (Andorra)", "Catalan (Catalan)", "Catalan (France)", "Catalan (Italy)", "Luba-Katanga (Congo DRC)");
+	}
 	[Before(HookType.Test)]
 	public virtual void Setup() {
 		// Initialize automation
 		Automation = new UIA3Automation();
-		Automation.ConnectionTimeout = new TimeSpan(0, 0, 4);
 
 
 		// Launch application
@@ -94,6 +99,30 @@ public class UITestBase : IDisposable {
 		// Dispose resources after test completes
 		Dispose();
 	}
+	/// <summary>
+	/// Contains info about known searches that can be used in tests, ExpectedCount should be right (but is not visible count) but the ItemToPosition mapping is not necessarily complete
+	/// </summary>
+	/// <param name="Term"></param>
+	/// <param name="ExpectedCount"></param>
+	/// <param name="VisibleItemToPosition"></param>
+	public record KnownSearchInfo(String Term, int ExpectedCount, params KeyValuePair<string, int>[] VisibleItemToPosition) {
+	}
+	public enum KnownSearch{
+		CANA,
+		No,
+		ata
+	}
+	protected static KnownSearchInfo GetKnownSearch(KnownSearch search) => KnownSearches[search];
+	private static KnownSearchInfo AddKnownSearch(KnownSearch search, params string[] VisibleItems) => AddKnownSearch(search, search.ToString(), VisibleItems.Length, VisibleItems);
+	private static KnownSearchInfo AddKnownSearch(KnownSearch search, int ExpectedCount, params string[] VisibleItems) => AddKnownSearch(search, search.ToString(), ExpectedCount, VisibleItems);
+	private static KnownSearchInfo AddKnownSearch(KnownSearch search, String Term, int ExpectedCount, params string[] VisibleItems) {
+		var add = new KnownSearchInfo(Term, ExpectedCount, VisibleItems.Select((item, index) => new KeyValuePair<string, int>(item, index)).ToArray());
+		KnownSearches[search] = add;
+		return add;
+	}
+	public static ConcurrentDictionary<KnownSearch,KnownSearchInfo> KnownSearches = new();
+
+
 
 	public void Dispose() {
 		Dispose(true);

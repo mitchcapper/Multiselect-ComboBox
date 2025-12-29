@@ -91,6 +91,7 @@ public class TextEditingTests : UITestBase {
 		comboBox.PressBackspace(5);
 		Thread.Sleep(200);
 
+		
 		// Assert - Should not crash and dropdown should still work
 		comboBox.OpenDropdown();
 		Thread.Sleep(200);
@@ -146,10 +147,11 @@ public class TextEditingTests : UITestBase {
 	[Category("TextEditing")]
 	public async Task BackspaceAfterSelection_AffectsFilterNotSelection() {
 		// Arrange
+		var ks = GetKnownSearch(KnownSearch.CANA);
 		var comboBox = _mainPage.MultiSelectComboBox;
 
 		// Select an item first
-		comboBox.TypeFilterText("English");
+		comboBox.TypeFilterText(ks.Term);
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);

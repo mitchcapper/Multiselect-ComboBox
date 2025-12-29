@@ -49,7 +49,7 @@ public class MainWindowPage : IDisposable {
 	public void ClearSelectedItems() {
 		var clearButton = _window.FindFirstDescendant(cf => cf.ByName("Clear selected items"))?.AsButton();
 
-		clearButton?.Click();
+		clearButton!.Click();
 		Thread.Sleep(200);
 	}
 
