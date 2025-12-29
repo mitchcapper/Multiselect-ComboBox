@@ -67,10 +67,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	private ListBox? DropdownListBox {
 		get {
-			// The dropdown is a popup, need to find it from desktop
-			var desktop = _automation.GetDesktop();
-			var popup = desktop.FindFirstDescendant(cf => cf.ByClassName("Popup"));
-			return popup?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_Dropdown_ListBox))?.AsListBox();
+			return _window.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_Dropdown_ListBox))?.AsListBox();
 		}
 	}
 
