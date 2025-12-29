@@ -104,27 +104,40 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// <summary>
 	/// Gets the visible items in the dropdown (when open)
 	/// </summary>
-	public IReadOnlyList<string> VisibleDropdownItems {
-		get {
-			if (!IsDropdownOpen) return Array.Empty<string>();
-			var listBox = DropdownListBox;
-			if (listBox == null) return Array.Empty<string>();
+	public IReadOnlyList<string> VisibleDropdownItems => GetVisibleDropdownItems(6);
 
-			var items = listBox.Items;
-			return items.Where(ItemIsVisible).Select(a => a.Name).ToList();
-		}
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="maxToDevirtualize">if 0 then no devirutalization otherwise up to this many</param>
+	/// <returns></returns>
+	public IReadOnlyList<string> GetVisibleDropdownItems(int maxToDevirtualize = 0) {
+
+		if (!IsDropdownOpen) return Array.Empty<string>();
+		var listBox = DropdownListBox;
+		if (listBox == null) return Array.Empty<string>();
+
+		var items = listBox.Items;
+		return items.Where(i => ItemIsVisible(i, ref maxToDevirtualize)).Select(a => a.Name).ToList();
+
 	}
+
 	private string CollToString<T>(IEnumerable<T> items) {
 		return String.Join(", ", items);
 	}
-	private bool ItemIsVisible(ListBoxItem item) {
+	private bool ItemIsVisible(ListBoxItem item, ref int maxToDevirtualize) {
 		if (String.IsNullOrWhiteSpace(item?.Name))
 			return false;
+		//Console.WriteLine($"Inspecting: {item?.Name} virt: {item.Patterns.VirtualizedItem.IsSupported}");
 		// so IsOffscreen can throw an error for virtualized items we cant even check if its supported.  But the item only supports the virtualized pattern if it hasnt been realized yet so we know its not visibile if it supports the Virtualized Pattern.
 
 		//var supportedPatterns = CollToString(item.GetSupportedPatterns());
-		if (item.Patterns.VirtualizedItem.IsSupported)
-			return false;
+		if (item.Patterns.VirtualizedItem.IsSupported) {
+			if (maxToDevirtualize == 0)
+				return false;
+			item.Patterns.VirtualizedItem.Pattern.Realize();
+			maxToDevirtualize--;
+		}
 		return !item.IsOffscreen;
 
 	}
@@ -355,7 +368,12 @@ public class MultiSelectComboBoxPage : IDisposable {
 			Thread.Sleep(200);
 		}
 	}
-
+	public void Navigate(int offset) {
+		if (offset > 0)
+			NavigateDown(offset);
+		else if (offset < 0)
+			NavigateUp(-offset);
+	}
 	/// <summary>
 	/// Navigates down in the dropdown using arrow key
 	/// </summary>
