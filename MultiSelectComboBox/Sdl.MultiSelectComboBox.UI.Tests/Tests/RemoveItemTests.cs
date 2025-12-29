@@ -23,7 +23,6 @@ public class RemoveItemTests : UITestBase {
 		// Arrange - Select some items
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.TypeFilterText("English");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1); // Select first matching item
 		Thread.Sleep(200);
@@ -50,14 +49,12 @@ public class RemoveItemTests : UITestBase {
 		var comboBox = _mainPage.MultiSelectComboBox;
 
 		comboBox.TypeFilterText("Eng");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
 
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("Span");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
@@ -125,7 +122,6 @@ public class RemoveItemTests : UITestBase {
 
 		// Select first item
 		comboBox.TypeFilterText("Eng");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
@@ -133,7 +129,6 @@ public class RemoveItemTests : UITestBase {
 		// Select second item
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("Span");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
@@ -141,7 +136,6 @@ public class RemoveItemTests : UITestBase {
 		// Select third item
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("French");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);

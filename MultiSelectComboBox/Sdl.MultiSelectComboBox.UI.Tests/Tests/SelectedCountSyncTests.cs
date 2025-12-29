@@ -27,7 +27,6 @@ public class SelectedCountSyncTests : UITestBase {
 
 		// Act - Select an item
 		comboBox.TypeFilterText("English");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(300);
@@ -44,7 +43,6 @@ public class SelectedCountSyncTests : UITestBase {
 		var comboBox = _mainPage.MultiSelectComboBox;
 
 		comboBox.TypeFilterText("English");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(300);
@@ -55,7 +53,6 @@ public class SelectedCountSyncTests : UITestBase {
 		// Act - Click on the same item again to deselect it
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("English");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1); // Toggle selection
 		Thread.Sleep(300);
@@ -73,7 +70,6 @@ public class SelectedCountSyncTests : UITestBase {
 
 		// Select first item
 		comboBox.TypeFilterText("English");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
@@ -81,7 +77,6 @@ public class SelectedCountSyncTests : UITestBase {
 		// Select second item
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("Spanish");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
@@ -89,7 +84,6 @@ public class SelectedCountSyncTests : UITestBase {
 		// Select third item
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("French");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
@@ -149,14 +143,12 @@ public class SelectedCountSyncTests : UITestBase {
 
 		// Select two items first
 		comboBox.TypeFilterText("English");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
 
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("Spanish");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);
@@ -168,7 +160,6 @@ public class SelectedCountSyncTests : UITestBase {
 		// Act - Toggle a third item on and off
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("French");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1); // Select (count becomes 3)
 		Thread.Sleep(300);
@@ -178,7 +169,6 @@ public class SelectedCountSyncTests : UITestBase {
 
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("French");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1); // Deselect (count becomes 2)
 		Thread.Sleep(300);

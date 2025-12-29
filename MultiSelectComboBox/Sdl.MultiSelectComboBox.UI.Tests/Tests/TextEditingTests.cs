@@ -69,7 +69,7 @@ public class TextEditingTests : UITestBase {
 
 		// Type something else
 		comboBox.TypeFilterText("rman"); // Now should be "German"
-		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 		Thread.Sleep(300);
 
 		// Assert
@@ -149,7 +149,6 @@ public class TextEditingTests : UITestBase {
 
 		// Select an item first
 		comboBox.TypeFilterText("English");
-		comboBox.OpenDropdown();
 		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
 		Thread.Sleep(200);

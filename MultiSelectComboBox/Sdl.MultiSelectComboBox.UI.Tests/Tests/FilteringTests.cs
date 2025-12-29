@@ -25,7 +25,7 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("Unit");
-		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -48,7 +48,7 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("geria");
-		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -71,7 +71,7 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("German");
-		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -90,7 +90,7 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("French");
-		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -109,7 +109,7 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("xyznonexistent123");
-		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 		Thread.Sleep(500); // Wait for filter to apply
 
 		// Assert
@@ -125,7 +125,7 @@ public class FilteringTests : UITestBase {
 
 		// First filter to a subset
 		comboBox.TypeFilterText("Zim"); //important to be  a small number as the default open is going to only show the frequent/recent item set
-		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 		var filteredCount = comboBox.VisibleDropdownItems.Count;
 		await Assert.That(filteredCount).IsGreaterThan(0);
 
@@ -151,7 +151,7 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.SetFilterText(searchText);
-		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -170,12 +170,13 @@ public class FilteringTests : UITestBase {
 
 		// Act - Type lowercase
 		comboBox.TypeFilterText("unit");
-		comboBox.OpenDropdown();
+		Thread.Sleep(200);
 		var lowerCaseResults = comboBox.VisibleDropdownItems.ToList();
 
 		// Clear and try uppercase
 		comboBox.ClearFilterText();
 		comboBox.TypeFilterText("UNIT");
+		Thread.Sleep(200);
 		Thread.Sleep(300);
 
 		var upperCaseResults = comboBox.VisibleDropdownItems.ToList();

@@ -238,7 +238,6 @@ public class KeyboardNavigationTests : UITestBase {
 		// Act - Just start typing (dropdown should open automatically)
 		comboBox.TypeFilterText("Eng");
 		Thread.Sleep(300);
-		comboBox.WaitForDropdownOpen();
 		// Assert
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 	}
@@ -252,7 +251,7 @@ public class KeyboardNavigationTests : UITestBase {
 		Thread.Sleep(200);
 
 		// Act - Press Tab to move to next control
-		Keyboard.Press(VirtualKeyShort.TAB);
+		Keyboard.Type(VirtualKeyShort.TAB);
 		Thread.Sleep(200);
 		var focusedElement = Automation?.FocusedElement();
 
