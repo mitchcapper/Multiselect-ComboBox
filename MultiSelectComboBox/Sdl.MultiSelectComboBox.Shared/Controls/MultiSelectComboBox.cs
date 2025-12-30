@@ -2187,7 +2187,8 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 						FilterTextApplied = string.Empty;
 
 						UpdateItems(string.Empty);
-						e.Handled = true;
+						if (e.RoutedEvent != null)
+							e.Handled = true;
 						break;
 					case Key.Escape:
 						if (ClearFilterOnDropdownClosing && DropdownListBox != null && DropdownListBox.IsKeyboardFocusWithin) {
