@@ -30,11 +30,24 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// <summary>
 	/// Gets the main MultiSelectComboBox control (the first one with default style visible)
 	/// </summary>
-	private AutomationElement MultiSelectComboBoxControl =>
-		WaitForElement(cf => cf.ByAutomationId("mainMultiSelectComboxBox"));
+	private AutomationElement MultiSelectComboBoxControl => WaitForMultiSelectComboBoxControl();
 
-	private AutomationElement CustomThemeMultiSelectComboBoxControl =>
-		WaitForElement(cf => cf.ByAutomationId("mainMultiSelectComboxBoxCustom"));
+	private AutomationElement WaitForMultiSelectComboBoxControl(TimeSpan? timeout = null) {
+		timeout ??= _defaultTimeout;
+		return Retry.WhileNull(
+			() => {
+				var defaultCtrl = _window.FindFirstDescendant(cf => cf.ByAutomationId("mainMultiSelectComboxBox"));
+				if (defaultCtrl != null) {
+					return defaultCtrl;
+				}
+
+				return _window.FindFirstDescendant(cf => cf.ByAutomationId("mainMultiSelectComboxBoxCustom"));
+			},
+			timeout: timeout.Value,
+			throwOnTimeout: true,
+			timeoutMessage: "Element not found: MultiSelectComboBox"
+		).Result;
+	}
 
 	/// <summary>
 	/// Gets the filter textbox inside the selected items panel
@@ -112,6 +125,59 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public IReadOnlyList<string> VisibleDropdownItems => GetVisibleDropdownItems(6);
 
+	public bool TryGetFirstVisibleDropdownItem(out string name, out bool isEnabled) {
+		name = string.Empty;
+		isEnabled = false;
+		var items = GetVisibleDropdownItemElements(maxToDevirtualize: 6);
+		var first = items.FirstOrDefault();
+		if (first == null) {
+			return false;
+		}
+
+		name = first.Name ?? string.Empty;
+		isEnabled = first.IsEnabled;
+		return !string.IsNullOrWhiteSpace(name);
+	}
+
+	public bool TryGetDropdownItemByIndex(int index, out string name, out bool isEnabled) {
+		name = string.Empty;
+		isEnabled = false;
+		if (!IsDropdownOpen) {
+			return false;
+		}
+
+		var listBox = DropdownListBox;
+		if (listBox == null) {
+			return false;
+		}
+
+		var items = listBox.Items;
+		if (index < 0 || index >= items.Length) {
+			return false;
+		}
+
+		var item = items[index];
+		name = item.Name ?? string.Empty;
+		isEnabled = item.IsEnabled;
+		return !string.IsNullOrWhiteSpace(name);
+	}
+
+	public void ClickDropdownItemByIndex(int index) {
+		OpenDropdown();
+		var listBox = DropdownListBox;
+		if (listBox == null) {
+			throw new InvalidOperationException("Could not find dropdown listbox");
+		}
+
+		var items = listBox.Items;
+		if (index < 0 || index >= items.Length) {
+			throw new ArgumentOutOfRangeException(nameof(index));
+		}
+
+		items[index].Click();
+		SleepLong();
+	}
+
 	/// <summary>
 	/// 
 	/// </summary>
@@ -126,6 +192,15 @@ public class MultiSelectComboBoxPage : IDisposable {
 		var items = listBox.Items;
 		return items.Where(i => ItemIsVisible(i, ref maxToDevirtualize)).Select(a => a.Name).ToList();
 
+	}
+
+	private IReadOnlyList<ListBoxItem> GetVisibleDropdownItemElements(int maxToDevirtualize = 0) {
+		if (!IsDropdownOpen) return Array.Empty<ListBoxItem>();
+		var listBox = DropdownListBox;
+		if (listBox == null) return Array.Empty<ListBoxItem>();
+
+		var items = listBox.Items;
+		return items.Where(i => ItemIsVisible(i, ref maxToDevirtualize)).ToList();
 	}
 
 	private string CollToString<T>(IEnumerable<T> items) {
@@ -278,25 +353,42 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// Opens the dropdown by clicking the dropdown button
 	/// </summary>
 	public void OpenDropdown() {
-		if (!IsDropdownOpen) {
-			if (!InEditMode)
-				ClickToFocus();
-			SleepShort();
-			ArrowButton!.Click();
-			SleepShort();
-			WaitForDropdownOpen();
-			
+		if (IsDropdownOpen) {
+			return;
 		}
+
+		// Clicking the control can sometimes open the dropdown implicitly.
+		ClickToFocus();
+		SleepShort();
+		if (IsDropdownOpen) {
+			return;
+		}
+
+		ArrowButton!.Click();
+		SleepShort();
+		WaitForDropdownOpen();
+	}
+
+	public void MoveKeyboardFocusToDropdownList() {
+		OpenDropdown();
+		Keyboard.Type(VirtualKeyShort.DOWN);
+		SleepShort();
 	}
 
 	/// <summary>
 	/// Closes the dropdown by pressing Escape
 	/// </summary>
 	public void CloseDropdown() {
-		if (IsDropdownOpen) {
-			Keyboard.Type(VirtualKeyShort.ESCAPE);
-			SleepLong();
+		try {
+			if (!IsDropdownOpen) {
+				return;
+			}
+		} catch {
+			// If we can't reliably query state, still try to close; Escape is safe.
 		}
+
+		Keyboard.Type(VirtualKeyShort.ESCAPE);
+		SleepLong();
 	}
 
 	/// <summary>

@@ -22,36 +22,6 @@ public class UITestBase : IDisposable {
 	protected Window? MainWindow { get; private set; }
 	private bool _disposed;
 
-	// Runs once before the entire test session starts
-	//[Before(TestSession)]
-	//[BeforeEvery(HookType.TestSession)]
-	//public static async Task LogCommitHash() {
-	//	//// Get the commit hash
-	//	//var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-	//	//var infoVersion = assembly.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-
-	//	//// Split to get just the hash if necessary (format is often 1.0.0+hash)
-	//	//var commitHash = infoVersion?.Split('+').LastOrDefault() ?? "Unknown";
-	//	//// Write it to the standard output
-	//	//TestSessionContext.Current.OutputWriter.WriteLine($"---------- BUILD INFO ----------");
-	//	//TestSessionContext.Current.OutputWriter.WriteLine($"Commit Hash: {commitHash}");
-	//	//TestSessionContext.Current.OutputWriter.WriteLine($"--------------------------------");
-	//	var process = new Process {
-	//		StartInfo = new ProcessStartInfo("git", "rev-parse HEAD") {
-	//			RedirectStandardOutput = true,
-	//			UseShellExecute = false
-	//		}
-	//	};
-	//	process.Start();
-	//	var commitId = process.StandardOutput.ReadToEnd().Trim();
-	//	Console.WriteLine($"Commit: {commitId}");
-	//}
-
-	public Task ShortDelay() => Delay(20);
-	public Task LongShortDelay() => Delay(200);
-	public async Task Delay(int milliseconds) {
-		await Task.Delay(milliseconds);
-	}
 	static UITestBase() {
 		// Be very careful adding new test cases they must return the same data for .net 8 and netframework as we test on both
 		AddKnownSearch(KnownSearch.CANA, "English (Canada)", "French (Canada)", "Inuktitut (Latin, Canada)", "Mohawk (Canada)");

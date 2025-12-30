@@ -140,14 +140,14 @@
                                                      sdl:SelectedItemsChangedBehaviour.SelectedItemsChanged="{Binding SelectedItemsChangedCommand}"
                                                      RemoveToolTipString="Delete"/>
 
-                            <Button Command="{Binding ClearItemsCommand}" Style="{StaticResource Custom.Button.Style}"  Width="128" Height="20">
+                            <Button AutomationProperties.AutomationId="btnClearSelectedItems" Command="{Binding ClearItemsCommand}" Style="{StaticResource Custom.Button.Style}"  Width="128" Height="20">
                                 <Underline>Clear selected items</Underline>
                             </Button>
                         </Grid>
 
                         <GridSplitter DockPanel.Dock="Top" Height="2" VerticalContentAlignment="Stretch" Grid.Row="1" Margin="5,0,5,0" HorizontalAlignment="Stretch" IsTabStop="False"/>
 
-                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0,5,0,0">
+                        <ScrollViewer AutomationProperties.AutomationId="demoSettingsScrollViewer" Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0,5,0,0">
                             <Border BorderBrush="LightGray" BorderThickness="1">
                                 <StackPanel Margin="10">
                                     <TextBlock Text ="Demo Settings" Margin="0,0,0,10" FontWeight="DemiBold" />
@@ -155,39 +155,39 @@
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                         <Label Content="Style:" VerticalAlignment="Center"/>
                                         <StackPanel Orientation="Vertical">
-                                            <RadioButton x:Name="RadioButtonDefaultStyle" GroupName="Style" Content="Default control template style" Margin="1" IsChecked="True" Command="{Binding StyleChangedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}"/>
-                                            <RadioButton x:Name="RadioButtonCustomStyle" GroupName="Style" Content="Custom control template style" Margin="1" Command="{Binding StyleChangedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}"/>
+                                            <RadioButton x:Name="RadioButtonDefaultStyle" AutomationProperties.AutomationId="demoStyleDefault" GroupName="Style" Content="Default control template style" Margin="1" IsChecked="True" Command="{Binding StyleChangedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}"/>
+                                            <RadioButton x:Name="RadioButtonCustomStyle" AutomationProperties.AutomationId="demoStyleCustom" GroupName="Style" Content="Custom control template style" Margin="1" Command="{Binding StyleChangedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}"/>
                                         </StackPanel>
                                     </StackPanel>
 
-                                    <Button Content="Select 20 random items" Command="{Binding SelectRandomItemsCommand}" Margin="0,0,0,10" Width="184" HorizontalAlignment="Left"/>
+                                    <Button AutomationProperties.AutomationId="demoSelect20Random" Content="Select 20 random items" Command="{Binding SelectRandomItemsCommand}" Margin="0,0,0,10" Width="184" HorizontalAlignment="Left"/>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                         <Label Content="Selection Mode:" VerticalAlignment="Center"/>
-                                        <ComboBox SelectedItem="{Binding SelectionMode}" ItemsSource="{Binding SelectionModes}" Width="150" VerticalAlignment="Center"/>
+                                        <ComboBox AutomationProperties.AutomationId="demoSelectionMode" SelectedItem="{Binding SelectionMode}" ItemsSource="{Binding SelectionModes}" Width="150" VerticalAlignment="Center"/>
                                     </StackPanel>
 
-                                    <CheckBox Content="Clear Filter Criteria as Dropdown (with Keyboard focus) is closing" IsChecked="{Binding ClearFilterOnDropdownClosing}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoClearFilterOnDropdownClosing" Content="Clear Filter Criteria as Dropdown (with Keyboard focus) is closing" IsChecked="{Binding ClearFilterOnDropdownClosing}" Margin="0,0,0,5"/>
 
-                                    <CheckBox Content="Items in the 'Selected Items Panel' are editable" IsChecked="{Binding IsEditable}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoIsEditable" Content="Items in the 'Selected Items Panel' are editable" IsChecked="{Binding IsEditable}" Margin="0,0,0,5"/>
 
-                                    <CheckBox Content="Enable/disable items (alternate)" IsChecked="{Binding EnableAlternateItems}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoEnableAlternateItems" Content="Enable/disable items (alternate)" IsChecked="{Binding EnableAlternateItems}" Margin="0,0,0,5"/>
 
-                                    <CheckBox Content="Listen to 'Filter Text' changed" IsChecked="{Binding ListenToFilterTextChanged}" Margin="0,0,0,5"/>
-                                    <CheckBox Content="Listen to 'Selected Items' changed" IsChecked="{Binding ListenToSelectedItemsChanged}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoListenToFilterTextChanged" Content="Listen to 'Filter Text' changed" IsChecked="{Binding ListenToFilterTextChanged}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoListenToSelectedItemsChanged" Content="Listen to 'Selected Items' changed" IsChecked="{Binding ListenToSelectedItemsChanged}" Margin="0,0,0,5"/>
 
-                                    <CheckBox Content="Enable Autocomplete" IsChecked="{Binding EnableAutoComplete}" Margin="0,0,0,5"/>
-                                    <CheckBox Content="Enable batch selection (paste support)" IsChecked="{Binding EnableBatchSelection}" IsEnabled="{Binding EnableAutoComplete}" Margin="20,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoEnableAutoComplete" Content="Enable Autocomplete" IsChecked="{Binding EnableAutoComplete}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoEnableBatchSelection" Content="Enable batch selection (paste support)" IsChecked="{Binding EnableBatchSelection}" IsEnabled="{Binding EnableAutoComplete}" Margin="20,0,0,5"/>
 
-                                    <CheckBox Content="Enable grouping" IsChecked="{Binding EnableGrouping}" Margin="0,0,0,5"/>
-                                    <CheckBox Content="Use 'Recently Used' service" IsChecked="{Binding UseRecentlyUsedGroupingService}" IsEnabled="{Binding EnableGrouping}" Margin="20,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoEnableGrouping" Content="Enable grouping" IsChecked="{Binding EnableGrouping}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoUseRecentlyUsedGroupingService" Content="Use 'Recently Used' service" IsChecked="{Binding UseRecentlyUsedGroupingService}" IsEnabled="{Binding EnableGrouping}" Margin="20,0,0,5"/>
 
-                                    <CheckBox Content="Enable filtering" IsChecked="{Binding EnableFiltering}" Margin="0,0,0,5"/>
-                                    <CheckBox Content="Use 'Custom Filter' service" IsChecked="{Binding UseCustomFilterService}" IsEnabled="{Binding EnableFiltering}" Margin="20,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoEnableFiltering" Content="Enable filtering" IsChecked="{Binding EnableFiltering}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoUseCustomFilterService" Content="Use 'Custom Filter' service" IsChecked="{Binding UseCustomFilterService}" IsEnabled="{Binding EnableFiltering}" Margin="20,0,0,5"/>
 
-                                    <CheckBox Content="Clear selection on filter changed (Single selection mode only)" IsChecked="{Binding ClearSelectionOnFilterChanged}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoClearSelectionOnFilterChanged" Content="Clear selection on filter changed (Single selection mode only)" IsChecked="{Binding ClearSelectionOnFilterChanged}" Margin="0,0,0,5"/>
 
-                                    <CheckBox Content="Enable on demand service" IsChecked="{Binding EnableSuggestionProvider}" Margin="0,0,0,5"/>
+                                    <CheckBox AutomationProperties.AutomationId="demoEnableSuggestionProvider" Content="Enable on demand service" IsChecked="{Binding EnableSuggestionProvider}" Margin="0,0,0,5"/>
                                 </StackPanel>
                             </Border>
                         </ScrollViewer>
@@ -201,7 +201,7 @@
                 <Grid DockPanel.Dock="Right" Grid.Column="2" Width="Auto" MinWidth="150" Margin="2,0,0,0" >
                     <TextBlock Text="Events Log" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0,5,0,0" FontWeight="Medium" Height="26" />
                     <TextBox Text="{Binding EventLog}" AutomationProperties.AutomationId="txtEventLog" TextWrapping="NoWrap" IsReadOnly="True" Margin="0,25,0,24" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  TextChanged="TextBoxBase_OnTextChanged"/>
-                    <Button Command="{Binding ClearLogCommand}" Style="{StaticResource Custom.Button.Style}" Width="75" Height="24">
+                    <Button AutomationProperties.AutomationId="btnClearLog" Command="{Binding ClearLogCommand}" Style="{StaticResource Custom.Button.Style}" Width="75" Height="24">
                         <Underline>Clear log</Underline>
                     </Button>
                 </Grid>

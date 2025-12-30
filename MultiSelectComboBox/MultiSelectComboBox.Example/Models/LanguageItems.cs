@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Sdl.MultiSelectComboBox.API;
+using Control = Sdl.MultiSelectComboBox.Themes.Generic.MultiSelectComboBox;
 using Sdl.MultiSelectComboBox.Example.Commands;
 using Sdl.MultiSelectComboBox.Example.Services;
 using Size = System.Drawing.Size;
@@ -35,15 +36,19 @@ namespace Sdl.MultiSelectComboBox.Example.Models
         private bool _isEditable;
 		private bool _clearFilterOnDropdownClosing;
 		private bool _clearSelectionOnFilterChanged;
-		private string _selectionMode;
+		private Control.SelectionModes _selectionMode;
         public List<LanguageItem> _allItems;
+		private static readonly IReadOnlyList<Control.SelectionModes> _selectionModes = new List<Control.SelectionModes> {
+			Control.SelectionModes.Multiple,
+			Control.SelectionModes.Single
+		};
 
         public LanguageItems()
 		{
 			ListenToFilterTextChanged = true;
 			ListenToSelectedItemsChanged = true;
 
-			SelectionMode = "Multiple";
+			SelectionMode = Control.SelectionModes.Multiple;
 			IsEditable = true;
 
 			ClearFilterOnDropdownClosing = true;
@@ -440,21 +445,21 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 			}
 		}
 
-		public List<string> SelectionModes => new List<string> { "Multiple", "Single" };
+		public IReadOnlyList<Control.SelectionModes> SelectionModes => _selectionModes;
 
-		public string SelectionMode
+		public Control.SelectionModes SelectionMode
 		{
 			get => _selectionMode;
 			set
 			{
-				if (string.Compare(_selectionMode, value, StringComparison.InvariantCultureIgnoreCase) == 0)
+				if (_selectionMode == value)
 				{
 					return;
 				}
 
 				_selectionMode = value;
 
-				UpdateEventLog(nameof(SelectionMode), _selectionMode);
+				UpdateEventLog(nameof(SelectionMode), _selectionMode.ToString());
 
 				OnPropertyChanged(nameof(SelectionMode));
 			}

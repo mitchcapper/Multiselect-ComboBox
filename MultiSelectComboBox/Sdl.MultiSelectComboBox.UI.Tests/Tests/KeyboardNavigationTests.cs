@@ -92,7 +92,6 @@ public class KeyboardNavigationTests : UITestBase {
 		// Act - Navigate up
 		comboBox.Navigate(nextItem.Value - firstItem.Value);
 		focused = comboBox.GetFocusedDropdownItem();
-		Console.WriteLine($"firstItem was: {dbgFocused} expected: {firstItem.Key} at pos: {firstItem.Value} then went: {nextItem.Value - firstItem.Value} and got: {focused}");
 		await Assert.That(focused).IsEqualTo(nextItem.Key);
 
 		// Assert - Dropdown should still be open and functional
