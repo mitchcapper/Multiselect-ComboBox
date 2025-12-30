@@ -114,6 +114,12 @@ public class MainWindowPage : IDisposable {
 
 	public void SetDemoOption(string optionCheckboxAutomationId, bool isChecked) {
 		var checkbox = FindDemoOptionCheckboxById(optionCheckboxAutomationId);
+		if (!checkbox.IsEnabled) {
+			if (checkbox.IsChecked == isChecked) {
+				return;
+			}
+			throw new InvalidOperationException($"Checkbox '{optionCheckboxAutomationId}' is disabled and cannot be set to '{isChecked}'.");
+		}
 		if (checkbox.IsChecked != isChecked) {
 			if (checkbox.Patterns.Toggle.IsSupported) {
 				checkbox.Patterns.Toggle.Pattern.Toggle();

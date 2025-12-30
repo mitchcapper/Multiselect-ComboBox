@@ -89,30 +89,24 @@ public class AdditionalBehaviorTests : UITestBase {
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.EnableGrouping, true);
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.UseRecentlyUsedGroupingService, true);
 
-		comboBox.ClearFilterTextAnyItemsUsingBackspace();
+		// Ensure dropdown is open, then ensure filter is empty.
+		// Typing is the most reliable open path in this app.
 		comboBox.OpenDropdown();
-		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 
-		var languageItems = new LanguageItems();
-		var recentCodes = new HashSet<string>(languageItems.RecentlyUsedFilterService.GetItems(), StringComparer.OrdinalIgnoreCase);
-		var recentNames = (languageItems._allItems ?? new List<LanguageItem>())
-			.Where(i => i.CultureInfo != null && recentCodes.Contains(i.CultureInfo.Name))
-			.Select(i => i.Name ?? string.Empty)
-			.Where(n => !string.IsNullOrWhiteSpace(n))
+		// These 4 codes come from the Example app's LanguageItems.RecentlyUsedFilterService initialization.
+		// We intentionally do NOT instantiate LanguageItems here because its item generation depends on image resources.
+		var recentCodes = new[] { "en-US", "it-IT", "de-DE", "fr-FR" };
+		var recentNames = recentCodes
+			.Select(code => System.Globalization.CultureInfo.GetCultureInfo(code).EnglishName)
 			.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
 		// Act
-		var found = comboBox.TryGetFirstSelectableDropdownItem(out var firstSelectableName, out _);
+		var firstFourSelectable = comboBox.GetFirstSelectableDropdownItems(4);
 
 		// Assert
-		await Assert.That(found).IsTrue();
-		if (!recentNames.Contains(firstSelectableName)) {
-			var output = TestContext.Current?.Output?.StandardOutput;
-			output?.WriteLine($"First selectable item: '{firstSelectableName}'");
-			output?.WriteLine($"Recent names: {string.Join(", ", recentNames.OrderBy(a => a))}");
-			output?.WriteLine($"Visible dropdown items: {string.Join(" | ", comboBox.VisibleDropdownItems)}");
-		}
-		await Assert.That(recentNames.Contains(firstSelectableName)).IsTrue();
+		await Assert.That(firstFourSelectable.Count).IsEqualTo(4);
+		await Assert.That(firstFourSelectable).IsEquivalentTo(recentNames.ToArray());
+
 	}
 
 	[Test]
@@ -121,56 +115,46 @@ public class AdditionalBehaviorTests : UITestBase {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		_mainPage.ClearSelectedItems();
+		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.EnableGrouping, false);
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.EnableAlternateItems, true);
-
-		var ks = GetKnownSearch(KnownSearch.No);
-		comboBox.TypeFilterText(ks.Term);
+		comboBox.ClearFilterTextAnyItemsUsingBackspace();
+		comboBox.OpenDropdown();
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 
-		// Find a disabled item in the visible list
-		var disabledIndex = -1;
-		string? disabledName = null;
-		for (var i = 0; i < 20; i++) {
-			if (comboBox.TryGetDropdownItemByIndex(i, out var name, out var enabled) && !enabled) {
-				disabledIndex = i;
-				disabledName = name;
-				break;
-			}
-		}
+		var got0 = comboBox.TryGetDropdownItemByIndex(0, out var item0Name, out _);
+		var got1 = comboBox.TryGetDropdownItemByIndex(1, out var item1Name, out _);
+		await Assert.That(got0).IsTrue();
+		await Assert.That(got1).IsTrue();
+		await Assert.That(item0Name).IsNotNull();
+		await Assert.That(item1Name).IsNotNull();
 
-		await Assert.That(disabledIndex).IsGreaterThanOrEqualTo(0);
-		await Assert.That(disabledName).IsNotNull();
+		// Act + Assert: first dropdown item should behave as disabled (not selectable)
+		comboBox.ClickDropdownItemByIndex(0);
+		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(0);
+		await Assert.That(comboBox.SelectedItems.Contains(item0Name)).IsFalse();
 
-		// Act - try selecting the disabled item
-		var before = comboBox.SelectedItemsCount;
-		try {
-			comboBox.ClickDropdownItemByIndex(disabledIndex);
-		} catch {
-			// If UIA prevents clicking disabled controls, that's fine; the net effect should still be "not selected".
-		}
-		var after = comboBox.SelectedItemsCount;
+		// Act + Assert: second dropdown item should be selectable
+		comboBox.ClickDropdownItemByIndex(1);
+		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(1);
+		await Assert.That(comboBox.SelectedItems.Contains(item1Name)).IsTrue();
 
-		// Assert
-		await Assert.That(after).IsEqualTo(before);
-		await Assert.That(comboBox.SelectedItems.Contains(disabledName!)).IsFalse();
+		// Arrange for keyboard nav assertion
+		_mainPage.ClearSelectedItems();
+		comboBox.ClearFilterTextAnyItemsUsingBackspace();
+		comboBox.OpenDropdown();
+		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 
-		// Act - keyboard navigation should skip disabled items
+		// Act: move focus into list (DOWN)
 		comboBox.MoveKeyboardFocusToDropdownList();
-		for (var step = 0; step < 8; step++) {
-			var ok = comboBox.TryGetFocusedDropdownItem(out var focusedName, out var focusedEnabled);
-			await Assert.That(ok).IsTrue();
-			await Assert.That(focusedName).IsNotNull();
-			await Assert.That(focusedEnabled).IsTrue();
-			comboBox.Navigate(1);
-		}
+		var focused = comboBox.GetFocusedDropdownItem();
+
+		// Assert: focus should skip the first (disabled-behaving) item and land on second
+		await Assert.That(focused).IsEqualTo(item1Name);
 	}
 
 	[Test]
-	[Category("KnownBroken")]
+	[Category("BatchPaste")]
 	public async Task BatchPasteSelection_PastesCommaSeparatedListAndSelectsAllItems() {
-		// NOTE: This is intentionally written to assert the intended behaviour.
-		// It may fail today if paste/batch selection is broken.
-
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		_mainPage.ClearSelectedItems();

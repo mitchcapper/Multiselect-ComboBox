@@ -209,6 +209,46 @@ public class MultiSelectComboBoxPage : IDisposable {
 		return false;
 	}
 
+	public IReadOnlyList<string> GetFirstSelectableDropdownItems(int count, int maxScan = 50) {
+		if (count <= 0) {
+			return Array.Empty<string>();
+		}
+
+		OpenDropdown();
+		var listBox = DropdownListBox;
+		if (listBox == null) {
+			return Array.Empty<string>();
+		}
+
+		var results = new List<string>(capacity: count);
+		var scanned = 0;
+		foreach (var item in listBox.Items) {
+			if (scanned++ >= maxScan) {
+				break;
+			}
+
+			var itemName = item.Name ?? string.Empty;
+			if (string.IsNullOrWhiteSpace(itemName)) {
+				continue;
+			}
+
+			if (!item.IsEnabled) {
+				continue;
+			}
+
+			if (!item.Patterns.SelectionItem.IsSupported) {
+				continue;
+			}
+
+			results.Add(itemName);
+			if (results.Count >= count) {
+				break;
+			}
+		}
+
+		return results;
+	}
+
 	public void ClickDropdownItemByIndex(int index) {
 		OpenDropdown();
 		var listBox = DropdownListBox;
@@ -351,14 +391,9 @@ public class MultiSelectComboBoxPage : IDisposable {
 		ClickToFocus();
 		SleepShort();
 		var filter = FilterTextBox;
-		if (filter != null) {
-			try {
-				filter.Click();
-			} catch {
-				// Some UIA providers can throw on Focus/Click for elements that are mid-layout.
-			}
-			SleepShort();
-		}
+		filter.Click();
+		SleepShort();
+
 	}
 
 	/// <summary>
@@ -557,7 +592,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// Navigates using arrow keys up (negative numbers) or down (positive numbers) in the dropdown list
 	/// </summary>
 	/// <param name="offset"></param>
-	public void Navigate(int offset=1) {
+	public void Navigate(int offset = 1) {
 		if (offset > 0)
 			NavigateDown(offset);
 		else if (offset < 0)

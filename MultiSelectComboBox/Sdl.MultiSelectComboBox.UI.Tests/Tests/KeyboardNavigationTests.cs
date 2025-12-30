@@ -285,7 +285,8 @@ public class KeyboardNavigationTests : UITestBase {
 
 		// Assert - Should not crash, combobox should still be functional
 		var selectedItems = comboBox.SelectedItems;
-		await Assert.That(selectedItems).IsEquivalentTo([ks.VisibleItemToPosition.First().Key]);
+		await Assert.That(selectedItems.Single()).IsEqualTo(ks.VisibleItemToPosition.First().Key);
+
 	}
 
 	public override void TearDown() {

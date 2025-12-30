@@ -8,7 +8,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Sdl.MultiSelectComboBox.API;
+#if WINUI
+using Control = Sdl.MultiSelectComboBox.Controls.MultiSelectComboBox;
+#else
 using Control = Sdl.MultiSelectComboBox.Themes.Generic.MultiSelectComboBox;
+#endif
 using Sdl.MultiSelectComboBox.Example.Commands;
 using Sdl.MultiSelectComboBox.Example.Services;
 using Size = System.Drawing.Size;
