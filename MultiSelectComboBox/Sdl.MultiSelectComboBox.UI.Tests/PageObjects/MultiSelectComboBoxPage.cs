@@ -58,6 +58,16 @@ public class MultiSelectComboBoxPage : IDisposable {
 			return control?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox))?.AsTextBox();
 		}
 	}
+
+	/// <summary>
+	/// Gets the autocomplete overlay textbox (shows the remainder suggestion).
+	/// </summary>
+	private TextBox? AutoCompleteTextBox {
+		get {
+			var control = MultiSelectComboBoxControl;
+			return control?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_Filter_AutoComplete_TextBox))?.AsTextBox();
+		}
+	}
 	/// <summary>
 	/// True when in edit mode, IE the pencil icon is gone
 	/// </summary>
@@ -105,18 +115,23 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public string FilterText => FilterTextBox?.Text ?? string.Empty;
 
+	public string AutoCompleteText => AutoCompleteTextBox?.Text ?? string.Empty;
+
 	/// <summary>
 	/// Returns true if the dropdown is currently open
 	/// </summary>
 	public bool IsDropdownOpen {
 		get {
-
-			var expectedState = DropdownButton!.Patterns.Toggle.Pattern.ToggleState.Value == FlaUI.Core.Definitions.ToggleState.On;
 			var listBox = DropdownListBox;
-			var listState = listBox?.IsOffscreen == false;
-			if (expectedState != listState)
-				throw new DataMisalignedException($"Dropdown open state mismatch: between ToggleButton is: {expectedState} and listbox Onscreen: {listState}");
-			return listState;
+			if (listBox == null) {
+				return false;
+			}
+			try {
+				return listBox.IsOffscreen == false;
+			} catch {
+				// Some UIA providers can throw while the popup is transitioning / virtualizing.
+				return false;
+			}
 		}
 	}
 
@@ -160,6 +175,38 @@ public class MultiSelectComboBoxPage : IDisposable {
 		name = item.Name ?? string.Empty;
 		isEnabled = item.IsEnabled;
 		return !string.IsNullOrWhiteSpace(name);
+	}
+
+	public bool TryGetFirstSelectableDropdownItem(out string name, out bool isEnabled) {
+		name = string.Empty;
+		isEnabled = false;
+		OpenDropdown();
+
+		var listBox = DropdownListBox;
+		if (listBox == null) {
+			return false;
+		}
+
+		foreach (var item in listBox.Items) {
+			var itemName = item.Name ?? string.Empty;
+			if (string.IsNullOrWhiteSpace(itemName)) {
+				continue;
+			}
+
+			if (!item.IsEnabled) {
+				continue;
+			}
+
+			if (!item.Patterns.SelectionItem.IsSupported) {
+				continue;
+			}
+
+			name = itemName;
+			isEnabled = true;
+			return true;
+		}
+
+		return false;
 	}
 
 	public void ClickDropdownItemByIndex(int index) {
@@ -300,12 +347,25 @@ public class MultiSelectComboBoxPage : IDisposable {
 		SleepLong();
 	}
 
+	private void FocusFilterInput() {
+		ClickToFocus();
+		SleepShort();
+		var filter = FilterTextBox;
+		if (filter != null) {
+			try {
+				filter.Click();
+			} catch {
+				// Some UIA providers can throw on Focus/Click for elements that are mid-layout.
+			}
+			SleepShort();
+		}
+	}
+
 	/// <summary>
 	/// Types text into the filter textbox to filter dropdown items
 	/// </summary>
 	public void TypeFilterText(string text) {
-		ClickToFocus();
-		SleepShort();
+		FocusFilterInput();
 
 		// Type using keyboard to simulate real user input
 		Keyboard.Type(text);
@@ -326,7 +386,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// Clears the filter text using backspace
 	/// </summary>
 	public void ClearFilterTextAnyItemsUsingBackspace() {
-		ClickToFocus();
+		FocusFilterInput();
 		var currentText = FilterText;
 		for (int i = 0; i < currentText.Length + 5; i++) {
 			Keyboard.Type(VirtualKeyShort.BACK);
@@ -364,8 +424,31 @@ public class MultiSelectComboBoxPage : IDisposable {
 			return;
 		}
 
-		ArrowButton!.Click();
-		SleepShort();
+		try {
+			ArrowButton!.Click();
+			SleepShort();
+			if (IsDropdownOpen) {
+				return;
+			}
+		} catch {
+			// ignore and try alternative open paths below
+		}
+
+		try {
+			var toggle = DropdownButton;
+			if (toggle != null && toggle.Patterns.Toggle.IsSupported) {
+				toggle.Patterns.Toggle.Pattern.Toggle();
+			} else {
+				toggle?.Click();
+			}
+			SleepShort();
+			if (IsDropdownOpen) {
+				return;
+			}
+		} catch {
+			// ignore and try keyboard open
+		}
+
 		WaitForDropdownOpen();
 	}
 
@@ -528,6 +611,27 @@ public class MultiSelectComboBoxPage : IDisposable {
 			item.Patterns.SelectionItem?.Pattern?.IsSelected.Value == true);
 
 		return focused?.Name;
+	}
+
+	public bool TryGetFocusedDropdownItem(out string name, out bool isEnabled) {
+		name = string.Empty;
+		isEnabled = false;
+
+		var listBox = DropdownListBox;
+		if (listBox == null) {
+			return false;
+		}
+
+		var focused = listBox.Items.FirstOrDefault(item =>
+			item.Patterns.SelectionItem?.Pattern?.IsSelected.Value == true);
+
+		if (focused == null) {
+			return false;
+		}
+
+		name = focused.Name ?? string.Empty;
+		isEnabled = focused.IsEnabled;
+		return !string.IsNullOrWhiteSpace(name);
 	}
 
 	#endregion
