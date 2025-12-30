@@ -27,23 +27,28 @@ public class DemoOptionsTests : UITestBase {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.ClickToFocus();
+		var ksFirst = GetKnownSearch(KnownSearch.dut);
+		var firstItem = ksFirst.VisibleItemToPosition[0].Key;
+		var ksSecond = GetKnownSearch(KnownSearch.CANA);
+		var secondItem = ksSecond.VisibleItemToPosition[0].Key;
 
 		_mainPage.ClearSelectedItems();
 		_mainPage.SetSelectionMode("Single");
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ClearSelectionOnFilterChanged, false);
 
 		// Act
-		comboBox.TypeFilterText("German");
-		comboBox.SelectItemByName("German (Germany)");
+		comboBox.SetFilterTextClearItems(ksFirst.Term);
+		comboBox.SelectItemByName(firstItem);
 		comboBox.CloseDropdown();
 
-		comboBox.TypeFilterText("French");
-		comboBox.SelectItemByName("French (France)");
+		comboBox.SetFilterTextClearItems(ksSecond.Term);
+		comboBox.SelectItemByName(secondItem);
 		comboBox.CloseDropdown();
 
 		// Assert
-		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(1);
-		await Assert.That(comboBox.SelectedItems.Single()).IsEqualTo("French (France)");
+		_mainPage.WaitFor(() => _mainPage.DisplayedSelectedCount == 1, message: "Expected single selection after selecting the second item.");
+		await Assert.That(_mainPage.DisplayedSelectedCount).IsEqualTo(1);
+		await Assert.That(comboBox.SelectedItems.Single()).IsEqualTo(secondItem);
 	}
 
 	[Test]
@@ -52,11 +57,12 @@ public class DemoOptionsTests : UITestBase {
 		// Arrange
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ClearFilterOnDropdownClosing, true);
 		var comboBox = _mainPage.MultiSelectComboBox;
+		var ks = GetKnownSearch(KnownSearch.dut);
 
 		// Act
-		comboBox.TypeFilterText("German");
+		comboBox.TypeFilterText(ks.Term);
 		comboBox.MoveKeyboardFocusToDropdownList();
-		await Assert.That(comboBox.FilterText).IsEqualTo("German");
+		await Assert.That(comboBox.FilterText).IsEqualTo(ks.Term);
 		comboBox.CloseDropdown();
 
 		// Assert
@@ -70,15 +76,16 @@ public class DemoOptionsTests : UITestBase {
 		// Arrange
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ClearFilterOnDropdownClosing, false);
 		var comboBox = _mainPage.MultiSelectComboBox;
+		var ks = GetKnownSearch(KnownSearch.dut);
 
 		// Act
-		comboBox.TypeFilterText("German");
+		comboBox.TypeFilterText(ks.Term);
 		comboBox.MoveKeyboardFocusToDropdownList();
-		await Assert.That(comboBox.FilterText).IsEqualTo("German");
+		await Assert.That(comboBox.FilterText).IsEqualTo(ks.Term);
 		comboBox.CloseDropdown();
 
 		// Assert
-		await Assert.That(comboBox.FilterText).IsEqualTo("German");
+		await Assert.That(comboBox.FilterText).IsEqualTo(ks.Term);
 	}
 
 	[Test]
@@ -120,22 +127,25 @@ public class DemoOptionsTests : UITestBase {
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.EnableSuggestionProvider, false);
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.EnableFiltering, true);
 		var comboBox = _mainPage.MultiSelectComboBox;
+		var ks = GetKnownSearch(KnownSearch.CANA);
+		var displayName = ks.VisibleItemToPosition[0].Key;
+		var cultureCode = GetCultureCodeForDisplayName(displayName);
 
-		// With the default service, filtering is by Name, so "en-US" should not match.
+		// With the default service, filtering is by Name, so a culture code should not match.
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.UseCustomFilterService, false);
-		comboBox.SetFilterTextClearItems("en-US");
+		comboBox.SetFilterTextClearItems(cultureCode);
 		comboBox.OpenDropdown();
 		var defaultServiceItems = comboBox.VisibleDropdownItems;
-		await Assert.That(defaultServiceItems.Any(i => i.Contains("English (United States)", StringComparison.OrdinalIgnoreCase))).IsFalse();
+		await Assert.That(defaultServiceItems.Any(i => i.Contains(displayName, StringComparison.OrdinalIgnoreCase))).IsFalse();
 
 		// Act
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.UseCustomFilterService, true);
-		comboBox.SetFilterTextClearItems("en-US");
+		comboBox.SetFilterTextClearItems(cultureCode);
 		comboBox.OpenDropdown();
 
 		// Assert
 		var customServiceItems = comboBox.VisibleDropdownItems;
-		await Assert.That(customServiceItems.Any(i => i.Contains("English (United States)", StringComparison.OrdinalIgnoreCase))).IsTrue();
+		await Assert.That(customServiceItems.Any(i => i.Contains(displayName, StringComparison.OrdinalIgnoreCase))).IsTrue();
 	}
 
 	[Test]
@@ -144,21 +154,27 @@ public class DemoOptionsTests : UITestBase {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.ClickToFocus();
+		var ksSelected = GetKnownSearch(KnownSearch.dut);
+		var selectedItem = ksSelected.VisibleItemToPosition[0].Key;
+		var ksTrigger = GetKnownSearch(KnownSearch.CANA);
 
 		_mainPage.ClearSelectedItems();
 		_mainPage.SetSelectionMode("Single");
-		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ClearSelectionOnFilterChanged, true);
-		comboBox.TypeFilterText("German");
-		comboBox.SelectItemByName("German (Germany)");
+		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ClearSelectionOnFilterChanged, false);
+		comboBox.SetFilterTextClearItems(ksSelected.Term);
+		comboBox.SelectItemByName(selectedItem);
 		comboBox.CloseDropdown();
-		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(1);
+		_mainPage.WaitFor(() => _mainPage.DisplayedSelectedCount == 1, message: "Expected a single item to be selected before changing the filter.");
+		await Assert.That(_mainPage.DisplayedSelectedCount).IsEqualTo(1);
+
+		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ClearSelectionOnFilterChanged, true);
 
 		// Act
-		comboBox.TypeFilterText("French");
+		comboBox.SetFilterTextClearItems(ksTrigger.Term);
 
 		// Assert
-		_mainPage.WaitFor(() => comboBox.SelectedItemsCount == 0, message: "Selection was not cleared when filter changed in single mode.");
-		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(0);
+		_mainPage.WaitFor(() => _mainPage.DisplayedSelectedCount == 0, message: "Selection was not cleared when filter changed in single mode.");
+		await Assert.That(_mainPage.DisplayedSelectedCount).IsEqualTo(0);
 	}
 
 	[Test]
@@ -168,9 +184,10 @@ public class DemoOptionsTests : UITestBase {
 		_mainPage.ClearEventLog();
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ListenToFilterTextChanged, false);
 		var comboBox = _mainPage.MultiSelectComboBox;
+		var ks = GetKnownSearch(KnownSearch.dut);
 
 		// Act
-		comboBox.TypeFilterText("German");
+		comboBox.TypeFilterText(ks.Term);
 		SleepLong();
 
 		// Assert
@@ -184,9 +201,10 @@ public class DemoOptionsTests : UITestBase {
 		_mainPage.ClearEventLog();
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ListenToFilterTextChanged, true);
 		var comboBox = _mainPage.MultiSelectComboBox;
+		var ks = GetKnownSearch(KnownSearch.dut);
 
 		// Act
-		comboBox.TypeFilterText("German");
+		comboBox.TypeFilterText(ks.Term);
 		_mainPage.WaitFor(() => _mainPage.EventLogText.Contains("Filter Changed", StringComparison.OrdinalIgnoreCase), message: "Expected Filter Changed entry was not written to the event log.");
 
 		// Assert
@@ -201,10 +219,12 @@ public class DemoOptionsTests : UITestBase {
 		_mainPage.ClearEventLog();
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ListenToSelectedItemsChanged, false);
 		var comboBox = _mainPage.MultiSelectComboBox;
+		var ks = GetKnownSearch(KnownSearch.dut);
+		var item = ks.VisibleItemToPosition[0].Key;
 
 		// Act
-		comboBox.TypeFilterText("German");
-		comboBox.SelectItemByName("German (Germany)");
+		comboBox.TypeFilterText(ks.Term);
+		comboBox.SelectItemByName(item);
 		comboBox.CloseDropdown();
 		SleepLong();
 
@@ -220,10 +240,12 @@ public class DemoOptionsTests : UITestBase {
 		_mainPage.ClearEventLog();
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ListenToSelectedItemsChanged, true);
 		var comboBox = _mainPage.MultiSelectComboBox;
+		var ks = GetKnownSearch(KnownSearch.dut);
+		var item = ks.VisibleItemToPosition[0].Key;
 
 		// Act
-		comboBox.TypeFilterText("German");
-		comboBox.SelectItemByName("German (Germany)");
+		comboBox.TypeFilterText(ks.Term);
+		comboBox.SelectItemByName(item);
 		comboBox.CloseDropdown();
 		_mainPage.WaitFor(() => _mainPage.EventLogText.Contains("Selected Changed", StringComparison.OrdinalIgnoreCase), message: "Expected Selected Changed entry was not written to the event log.");
 
@@ -291,19 +313,21 @@ public class DemoOptionsTests : UITestBase {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.EnableFiltering, true);
+		var ks = GetKnownSearch(KnownSearch.dut);
+		var expectedItem = ks.VisibleItemToPosition[0].Key;
 
 		// Act
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.EnableSuggestionProvider, false);
-		comboBox.SetFilterTextClearItems("German");
+		comboBox.SetFilterTextClearItems(ks.Term);
 		var itemsAfterDisable = comboBox.VisibleDropdownItems;
-		await Assert.That(itemsAfterDisable.Any(i => i.Contains("German (Germany)", StringComparison.OrdinalIgnoreCase))).IsTrue();
+		await Assert.That(itemsAfterDisable.Any(i => i.Contains(expectedItem, StringComparison.OrdinalIgnoreCase))).IsTrue();
 
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.EnableSuggestionProvider, true);
-		comboBox.SetFilterTextClearItems("German");
+		comboBox.SetFilterTextClearItems(ks.Term);
 
 		// Assert
 		var itemsAfterEnable = comboBox.VisibleDropdownItems;
-		await Assert.That(itemsAfterEnable.Any(i => i.Contains("German (Germany)", StringComparison.OrdinalIgnoreCase))).IsTrue();
+		await Assert.That(itemsAfterEnable.Any(i => i.Contains(expectedItem, StringComparison.OrdinalIgnoreCase))).IsTrue();
 	}
 
 	public override void TearDown() {

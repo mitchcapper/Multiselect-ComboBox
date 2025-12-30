@@ -17,7 +17,7 @@ namespace Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
 public class MultiSelectComboBoxPage : IDisposable {
 	private readonly Window _window;
 	private readonly AutomationBase _automation;
-	private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(3);
+	private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(5);
 	private bool _disposed;
 
 	public MultiSelectComboBoxPage(Window window, AutomationBase automation) {

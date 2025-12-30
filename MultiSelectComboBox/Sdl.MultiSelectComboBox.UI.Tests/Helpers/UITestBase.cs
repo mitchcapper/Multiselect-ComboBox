@@ -22,11 +22,38 @@ public class UITestBase : IDisposable {
 	protected Window? MainWindow { get; private set; }
 	private bool _disposed;
 
+	private static readonly ConcurrentDictionary<string, string> _displayNameToCultureCode = new(StringComparer.OrdinalIgnoreCase);
+
 	static UITestBase() {
 		// Be very careful adding new test cases they must return the same data for .net 8 and netframework as we test on both
 		AddKnownSearch(KnownSearch.CANA, "English (Canada)", "French (Canada)", "Inuktitut (Latin, Canada)", "Mohawk (Canada)");
 		AddKnownSearch(KnownSearch.No,  "Albanian (North Macedonia)", "Arabic (Lebanon)", "English (Norfolk Island)", "English (Northern Mariana Islands)", "Filipino (Philippines)", "Italian (San Marino)", "Macedonian (North Macedonia)", "North Ndebele (Zimbabwe)", "Norwegian Bokmål (Norway)", "Norwegian Bokmål (Svalbard & Jan Mayen)", "Norwegian Nynorsk (Norway)", "Sami", "Lule (Norway)", "Sami", "Northern (Finland)", "Sami", "Northern (Norway)", "Sami", "Northern (Sweden)", "Sami", "Southern (Norway)");
 		AddKnownSearch(KnownSearch.dut, "Dutch (Aruba)", "Dutch (Belgium)", "Dutch (Bonaire, Sint Eustatius and Saba)", "Dutch (Curaçao)", "Dutch (Netherlands)", "Dutch (Sint Maarten)", "Dutch (Suriname)");
+
+		// Known culture codes for a few commonly used items.
+		// Keep this list small and stable across frameworks.
+		AddCultureCode("English (Canada)", "en-CA");
+		AddCultureCode("French (Canada)", "fr-CA");
+		AddCultureCode("Inuktitut (Latin, Canada)", "iu-Latn-CA");
+		AddCultureCode("Mohawk (Canada)", "moh-CA");
+	}
+
+	private static void AddCultureCode(string displayName, string cultureCode) {
+		if (string.IsNullOrWhiteSpace(displayName)) throw new ArgumentException("Display name must be provided", nameof(displayName));
+		if (string.IsNullOrWhiteSpace(cultureCode)) throw new ArgumentException("Culture code must be provided", nameof(cultureCode));
+		_displayNameToCultureCode[displayName] = cultureCode;
+	}
+
+	protected static string GetCultureCodeForDisplayName(string displayName) {
+		if (string.IsNullOrWhiteSpace(displayName)) {
+			throw new ArgumentException("Display name must be provided", nameof(displayName));
+		}
+
+		if (_displayNameToCultureCode.TryGetValue(displayName, out var code)) {
+			return code;
+		}
+
+		throw new InvalidOperationException($"No culture code mapping found for display name: '{displayName}'. Add it to UITestBase._displayNameToCultureCode.");
 	}
 	[Before(HookType.Test)]
 	public virtual void Setup() {

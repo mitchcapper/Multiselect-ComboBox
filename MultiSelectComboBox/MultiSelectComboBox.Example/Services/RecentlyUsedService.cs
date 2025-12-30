@@ -21,7 +21,7 @@ namespace Sdl.MultiSelectComboBox.Example.Services
 		public int Index { get; set; }
 
 		public string Name { get; }
-
+		public IEnumerable<string> GetItems() => _items;
 		public bool Contains(string item, StringComparison comparer = StringComparison.InvariantCultureIgnoreCase)
 		{
 			return _items.Any(a => string.Compare(a, item, comparer) == 0);
