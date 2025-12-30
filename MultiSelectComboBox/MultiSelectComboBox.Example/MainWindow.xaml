@@ -110,6 +110,8 @@
                                                      SelectedItems="{Binding SelectedItems}"
                                                      SuggestionProvider="{Binding CustomSuggestionProvider}"
 													 ClearSelectionOnFilterChanged="{Binding ClearSelectionOnFilterChanged}"
+													 IsDropDownOpen="{Binding IsDropdownOpen,Mode=OneWayToSource}"
+													 
                                                      sdl:FilterTextChangedBehaviour.FilterTextChanged="{Binding FilterTextChangedCommand}"
                                                      sdl:SelectedItemsChangedBehaviour.SelectedItemsChanged="{Binding SelectedItemsChangedCommand}"
                                                      RemoveToolTipString="Delete"/>
@@ -132,6 +134,7 @@
                                                      ItemsSource="{Binding Items}"
                                                      SelectedItems="{Binding SelectedItems}"
                                                      SuggestionProvider="{Binding CustomSuggestionProvider}"
+													 IsDropDownOpen="{Binding IsDropdownOpen,Mode=OneWayToSource}"
 							                         ClearSelectionOnFilterChanged="{Binding ClearSelectionOnFilterChanged}"
                                                      sdl:FilterTextChangedBehaviour.FilterTextChanged="{Binding FilterTextChangedCommand}"
                                                      sdl:SelectedItemsChangedBehaviour.SelectedItemsChanged="{Binding SelectedItemsChangedCommand}"

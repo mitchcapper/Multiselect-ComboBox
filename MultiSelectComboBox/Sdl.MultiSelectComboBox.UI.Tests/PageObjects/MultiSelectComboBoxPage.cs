@@ -44,6 +44,11 @@ public class MultiSelectComboBoxPage : IDisposable {
 			return control?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox))?.AsTextBox();
 		}
 	}
+	/// <summary>
+	/// True when in edit mode, IE the pencil icon is gone
+	/// </summary>
+	public bool InEditMode => FilterTextBox?.IsEnabled == true; // FilterTextBox?.Patterns?.Value?.Pattern?.IsReadOnly == false works EXCEPt for first run,  for whatever reason it doesnt get set to readonly even though its not enabled in terms of UIA props 
+
 
 	/// <summary>
 	/// Gets the dropdown button
@@ -135,7 +140,8 @@ public class MultiSelectComboBoxPage : IDisposable {
 		if (item.Patterns.VirtualizedItem.IsSupported) {
 			if (maxToDevirtualize == 0)
 				return false;
-			item.Patterns.VirtualizedItem.Pattern.Realize();
+			if (item.Patterns.VirtualizedItem.TryGetPattern(out var pat)) // incase it resolved inbetween
+				pat.Realize();
 			maxToDevirtualize--;
 		}
 		return !item.IsOffscreen;
@@ -270,14 +276,10 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void OpenDropdown() {
 		if (!IsDropdownOpen) {
-			
-			MultiSelectComboBoxControl.Focus();//must be in it fro the dorpdown to open
-			//Thread.Sleep(20000);
-			DropdownButton.Focus(); //actually supports the kb ofcus
-			Thread.Sleep(100);
-			var button = DropdownButton;
-			
-			button!.Click();
+			if (! InEditMode)
+				ClickToFocus();
+			Thread.Sleep(200);
+			ArrowButton!.Click();
 			WaitForDropdownOpen();
 		}
 	}

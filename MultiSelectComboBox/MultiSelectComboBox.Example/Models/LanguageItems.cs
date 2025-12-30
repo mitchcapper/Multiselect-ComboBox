@@ -85,6 +85,13 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 		public IFilterService FilterService { get; set; }
 
 		public RecentlyUsedService RecentlyUsedFilterService { get; }
+		
+		public bool IsDropdownOpen {get;set{
+				if (field == value)
+					return;
+				field = value;
+				UpdateEventLog(nameof(IsDropdownOpen),value.ToString());
+			} }
 
         public ObservableCollection<LanguageItem> Items
         {
