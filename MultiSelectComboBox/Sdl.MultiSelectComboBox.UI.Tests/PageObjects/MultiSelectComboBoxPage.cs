@@ -5,6 +5,7 @@ using FlaUI.Core.Identifiers;
 using FlaUI.Core.Input;
 using FlaUI.Core.Tools;
 using FlaUI.Core.WindowsAPI;
+using static Sdl.MultiSelectComboBox.UI.Tests.Helpers.DelayHelper;
 
 using ControlConsts = Sdl.MultiSelectComboBox.Themes.Generic.MultiSelectComboBox;
 
@@ -201,7 +202,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 					if (int.TryParse(text, out var count)) {
 						if (count > 0) return count;
 					}
-					System.Threading.Thread.Sleep(100);
+					SleepShort();
 				}
 
 				var finalText = countTextBox.AsTextBox().Text;
@@ -221,7 +222,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	public void ClickToFocus() {
 		var control = MultiSelectComboBoxControl;
 		control?.Click();
-		Thread.Sleep(200);
+		SleepLong();
 	}
 
 	/// <summary>
@@ -229,11 +230,13 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void TypeFilterText(string text) {
 		ClickToFocus();
-		Thread.Sleep(100);
+		SleepShort();
 
 		// Type using keyboard to simulate real user input
 		Keyboard.Type(text);
-		Thread.Sleep(300); // Wait for filtering to apply
+		for (var x = 0; x < 3; x++) //yeah 3x sleep for reliability
+			SleepLong();
+
 	}
 
 	/// <summary>
@@ -252,9 +255,9 @@ public class MultiSelectComboBoxPage : IDisposable {
 		var currentText = FilterText;
 		for (int i = 0; i < currentText.Length + 5; i++) {
 			Keyboard.Type(VirtualKeyShort.BACK);
-			Thread.Sleep(50);
+			SleepShort();
 		}
-		Thread.Sleep(200);
+		SleepLong();
 	}
 
 	/// <summary>
@@ -263,7 +266,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	public void PressBackspace(int times = 1) {
 		for (int i = 0; i < times; i++) {
 			Keyboard.Type(VirtualKeyShort.BACK);
-			Thread.Sleep(100);
+			SleepShort();
 		}
 	}
 
@@ -276,11 +279,13 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void OpenDropdown() {
 		if (!IsDropdownOpen) {
-			if (! InEditMode)
+			if (!InEditMode)
 				ClickToFocus();
-			Thread.Sleep(200);
+			SleepShort();
 			ArrowButton!.Click();
+			SleepShort();
 			WaitForDropdownOpen();
+			
 		}
 	}
 
@@ -290,7 +295,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	public void CloseDropdown() {
 		if (IsDropdownOpen) {
 			Keyboard.Type(VirtualKeyShort.ESCAPE);
-			Thread.Sleep(200);
+			SleepLong();
 		}
 	}
 
@@ -316,7 +321,6 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void SelectItemByName(string itemName) {
 		OpenDropdown();
-		Thread.Sleep(200);
 
 		var listBox = DropdownListBox;
 		if (listBox == null) {
@@ -332,7 +336,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 		}
 
 		item.Click();
-		Thread.Sleep(200);
+		SleepLong();
 	}
 
 	/// <summary>
@@ -340,11 +344,11 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void SelectItemByKeyboard(int arrowDownCount, bool leaveOpen = false) {
 		OpenDropdown();
-		Thread.Sleep(200);
+		SleepLong();
 
 		for (int i = 0; i < arrowDownCount; i++) {
 			Keyboard.Type(VirtualKeyShort.DOWN);
-			Thread.Sleep(100);
+			SleepShort();
 		}
 		if (leaveOpen)
 			this.PressSpace();
@@ -359,9 +363,9 @@ public class MultiSelectComboBoxPage : IDisposable {
 	public void SelectItemsByFilter(params string[] filterTexts) {
 		foreach (var filter in filterTexts) {
 			TypeFilterText(filter);
-			Thread.Sleep(200);
+			SleepLong();
 			SelectItemByKeyboard(1);
-			Thread.Sleep(200);
+			SleepLong();
 		}
 	}
 
@@ -371,32 +375,37 @@ public class MultiSelectComboBoxPage : IDisposable {
 	public void SelectItemsByName(params string[] itemNames) {
 		foreach (var name in itemNames) {
 			SelectItemByName(name);
-			Thread.Sleep(200);
+			SleepLong();
 		}
 	}
-	public void Navigate(int offset) {
+	/// <summary>
+	/// Navigates using arrow keys up (negative numbers) or down (positive numbers) in the dropdown list
+	/// </summary>
+	/// <param name="offset"></param>
+	public void Navigate(int offset=1) {
 		if (offset > 0)
 			NavigateDown(offset);
 		else if (offset < 0)
 			NavigateUp(-offset);
+		SleepLong();
 	}
 	/// <summary>
 	/// Navigates down in the dropdown using arrow key
 	/// </summary>
-	public void NavigateDown(int times = 1) {
+	private void NavigateDown(int times = 1) {
 		for (int i = 0; i < times; i++) {
 			Keyboard.Type(VirtualKeyShort.DOWN);
-			Thread.Sleep(100);
+			SleepShort();
 		}
 	}
 
 	/// <summary>
 	/// Navigates up in the dropdown using arrow key
 	/// </summary>
-	public void NavigateUp(int times = 1) {
+	private void NavigateUp(int times = 1) {
 		for (int i = 0; i < times; i++) {
 			Keyboard.Type(VirtualKeyShort.UP);
-			Thread.Sleep(100);
+			SleepShort();
 		}
 	}
 
@@ -405,14 +414,14 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void PressEnter() {
 		Keyboard.Type(VirtualKeyShort.ENTER);
-		Thread.Sleep(200);
+		SleepLong();
 	}
 	/// <summary>
 	/// Presses Space to select the currently focused item and leave open
 	/// </summary>
 	public void PressSpace() {
 		Keyboard.Type(VirtualKeyShort.SPACE);
-		Thread.Sleep(200);
+		SleepLong();
 	}
 
 	/// <summary>
@@ -452,7 +461,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 				var texts = parent.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text));
 				if (texts.Any(t => (t.Name ?? string.Empty).Contains(itemName, StringComparison.OrdinalIgnoreCase))) {
 					button.AsButton().Click();
-					Thread.Sleep(200);
+					SleepLong();
 					return;
 				}
 			}
@@ -468,7 +477,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 		}
 		public void Click() {
 			Button.Invoke(); //does nothing but does scroll us into view:)
-			Thread.Sleep(50);
+			SleepShort();
 			Button.Click();//perform actual mouse event now that position is correct
 		}
 	}

@@ -3,6 +3,7 @@ using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using Sdl.MultiSelectComboBox.UI.Tests.Helpers;
 using Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
+using static Sdl.MultiSelectComboBox.UI.Tests.Helpers.DelayHelper;
 
 namespace Sdl.MultiSelectComboBox.UI.Tests.Tests;
 
@@ -23,14 +24,12 @@ public class TextEditingTests : UITestBase {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.TypeFilterText("United");
-		Thread.Sleep(200);
 
 		var initialText = comboBox.FilterText;
 		await Assert.That(initialText).IsEqualTo("United");
 
 		// Act - Press backspace 3 times
 		comboBox.PressBackspace(3);
-		Thread.Sleep(200);
 
 		// Assert - Filter text should be shorter
 		var newText = comboBox.FilterText;
@@ -44,11 +43,9 @@ public class TextEditingTests : UITestBase {
 		var comboBox = _mainPage.MultiSelectComboBox;
 		var textToType = "Test";
 		comboBox.TypeFilterText(textToType);
-		Thread.Sleep(200);
 
 		// Act - Press backspace for each character plus a few extra
 		comboBox.PressBackspace(textToType.Length + 2);
-		Thread.Sleep(200);
 
 		// Assert - Filter text should be empty
 		var finalText = comboBox.FilterText;
@@ -63,14 +60,10 @@ public class TextEditingTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("Germ");
-		Thread.Sleep(200);
 		comboBox.PressBackspace(2); // Remove "rm"
-		Thread.Sleep(200);
 
 		// Type something else
 		comboBox.TypeFilterText("rman"); // Now should be "German"
-		Thread.Sleep(200);
-		Thread.Sleep(300);
 
 		// Assert
 		await Assert.That(comboBox.FilterText).IsEqualTo("German");
@@ -89,12 +82,10 @@ public class TextEditingTests : UITestBase {
 
 		// Act - Press backspace multiple times on empty filter
 		comboBox.PressBackspace(5);
-		Thread.Sleep(200);
 
 		
 		// Assert - Should not crash and dropdown should still work
 		comboBox.OpenDropdown();
-		Thread.Sleep(200);
 
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 	}
@@ -108,15 +99,12 @@ public class TextEditingTests : UITestBase {
 
 		// Act & Assert - Type character by character and verify filter updates
 		comboBox.TypeFilterText("U");
-		Thread.Sleep(100);
 		var afterU = comboBox.FilterText;
 
 		comboBox.TypeFilterText("n");
-		Thread.Sleep(100);
 		var afterUn = comboBox.FilterText;
 
 		comboBox.TypeFilterText("i");
-		Thread.Sleep(100);
 		var afterUni = comboBox.FilterText;
 
 		// Assert
@@ -131,13 +119,11 @@ public class TextEditingTests : UITestBase {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.TypeFilterText("SomeFilterText");
-		Thread.Sleep(200);
 
 		await Assert.That(comboBox.FilterText).IsEqualTo("SomeFilterText");
 
 		// Act
 		comboBox.ClearFilterTextAnyItemsUsingBackspace();
-		Thread.Sleep(200);
 
 		// Assert
 		await Assert.That(comboBox.FilterText).IsEqualTo(string.Empty);
@@ -152,17 +138,13 @@ public class TextEditingTests : UITestBase {
 
 		// Select an item first
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(200);
 		comboBox.SelectItemByKeyboard(1);
-		Thread.Sleep(200);
 
 		var selectedCountBefore = comboBox.SelectedItemsCount;
 
 		// Now type some filter text and backspace
 		comboBox.TypeFilterText("test");
-		Thread.Sleep(200);
 		comboBox.PressBackspace(4);
-		Thread.Sleep(200);
 
 		// Assert - Selected items should not be affected by backspace on filter
 		var selectedCountAfter = comboBox.SelectedItemsCount;

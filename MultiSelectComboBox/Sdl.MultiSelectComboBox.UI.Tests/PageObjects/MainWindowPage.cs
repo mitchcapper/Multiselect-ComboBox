@@ -4,6 +4,7 @@ using FlaUI.Core.Input;
 using FlaUI.Core.Tools;
 using FlaUI.Core.WindowsAPI;
 using ControlConsts = Sdl.MultiSelectComboBox.Themes.Generic.MultiSelectComboBox;
+using static Sdl.MultiSelectComboBox.UI.Tests.Helpers.DelayHelper;
 
 namespace Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
 
@@ -50,7 +51,7 @@ public class MainWindowPage : IDisposable {
 		var clearButton = _window.FindFirstDescendant(cf => cf.ByName("Clear selected items"))?.AsButton();
 
 		clearButton!.Click();
-		Thread.Sleep(200);
+		SleepLong();
 	}
 
 	/// <summary>
@@ -59,7 +60,7 @@ public class MainWindowPage : IDisposable {
 	public void SelectRandomItems() {
 		var button = _window.FindFirstDescendant(cf => cf.ByName("Select 20 random items"))?.AsButton();
 		button?.Click();
-		Thread.Sleep(500); // Wait for items to be selected
+		SleepLong(); // Wait for items to be selected
 	}
 
 	/// <summary>
@@ -72,7 +73,7 @@ public class MainWindowPage : IDisposable {
 
 		if (checkbox != null && checkbox.IsChecked != isChecked) {
 			checkbox.Click();
-			Thread.Sleep(100);
+			SleepShort();
 		}
 	}
 
@@ -93,7 +94,7 @@ public class MainWindowPage : IDisposable {
 	public void ClearEventLog() {
 		var clearLogButton = _window.FindFirstDescendant(cf => cf.ByName("Clear log"))?.AsButton();
 		clearLogButton?.Click();
-		Thread.Sleep(100);
+		SleepShort();
 	}
 
 	/// <summary>
@@ -104,7 +105,7 @@ public class MainWindowPage : IDisposable {
 		var selectionModeCombo = comboBoxes.FirstOrDefault()?.AsComboBox();
 		if (selectionModeCombo != null) {
 			selectionModeCombo.Select(mode);
-			Thread.Sleep(200);
+			SleepLong();
 		}
 	}
 

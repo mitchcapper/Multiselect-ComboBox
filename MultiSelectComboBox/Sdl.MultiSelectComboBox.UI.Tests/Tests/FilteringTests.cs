@@ -3,6 +3,7 @@ using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using Sdl.MultiSelectComboBox.UI.Tests.Helpers;
 using Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
+using static Sdl.MultiSelectComboBox.UI.Tests.Helpers.DelayHelper;
 
 namespace Sdl.MultiSelectComboBox.UI.Tests.Tests;
 
@@ -25,7 +26,6 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("Unit");
-		Thread.Sleep(200);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -43,7 +43,6 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("geria");
-		Thread.Sleep(400);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -61,7 +60,6 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("German");
-		Thread.Sleep(200);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -92,8 +90,6 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("xyznonexistent123");
-		Thread.Sleep(200);
-		Thread.Sleep(500); // Wait for filter to apply
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -109,13 +105,13 @@ public class FilteringTests : UITestBase {
 
 		// First filter to a subset
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(200);
+
 		var filteredItems = comboBox.VisibleDropdownItems.ToList();
 		await Assert.That(filteredItems).Contains(ks.VisibleItemToPosition.First().Key);
 
 		// Act - Clear the filter
 		comboBox.ClearFilterTextAnyItemsUsingBackspace();
-		await Task.Delay(300);
+		
 		comboBox.OpenDropdown();
 
 		// Assert - Unfiltered list should include the filtered item plus broader set
@@ -136,7 +132,6 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.SetFilterTextClearItems(searchText);
-		Thread.Sleep(200);
 
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
@@ -152,14 +147,11 @@ public class FilteringTests : UITestBase {
 
 		// Act - Type lowercase
 		comboBox.TypeFilterText("unit");
-		Thread.Sleep(200);
 		var lowerCaseResults = comboBox.VisibleDropdownItems.ToList();
 
 		// Clear and try uppercase
 		comboBox.ClearFilterTextAnyItemsUsingBackspace();
 		comboBox.TypeFilterText("UNIT");
-		Thread.Sleep(200);
-		Thread.Sleep(300);
 
 		var upperCaseResults = comboBox.VisibleDropdownItems.ToList();
 

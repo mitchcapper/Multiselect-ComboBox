@@ -6,6 +6,7 @@ using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
 using Sdl.MultiSelectComboBox.UI.Tests.Helpers;
 using Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
+using static Sdl.MultiSelectComboBox.UI.Tests.Helpers.DelayHelper;
 
 namespace Sdl.MultiSelectComboBox.UI.Tests.Tests;
 
@@ -26,11 +27,10 @@ public class KeyboardNavigationTests : UITestBase {
 		var comboBox = _mainPage.MultiSelectComboBox;
 		var ks = GetKnownSearch(KnownSearch.No);
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(300);
 		int[] doItems = [2, 3, 5];
 		int CurPosition = 0;
-		comboBox.NavigateDown();//sets us to the first item
-		List<string> expected=new();
+		comboBox.Navigate();//sets us to the first item
+		List<string> expected = new();
 		foreach (var pos in doItems) {
 			var itemPos = ks.VisibleItemToPosition[pos];
 			expected.Add(itemPos.Key);
@@ -39,7 +39,7 @@ public class KeyboardNavigationTests : UITestBase {
 			if (pos != doItems.Last()) {
 				comboBox.PressSpace();
 				await Assert.That(comboBox.IsDropdownOpen).IsTrue();
-			} else{
+			} else {
 				comboBox.PressEnter();
 				await Assert.That(comboBox.IsDropdownOpen).IsFalse();
 			}
@@ -57,22 +57,18 @@ public class KeyboardNavigationTests : UITestBase {
 		var ks = GetKnownSearch(KnownSearch.CANA);
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(300);
 		var first = ks.VisibleItemToPosition.First();
 		var last = ks.VisibleItemToPosition.Last();
 		comboBox.SelectItemByName(first.Key);
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
-		
-		// Act - Navigate down
-		comboBox.Navigate(last.Value-first.Value);
 
-		Thread.Sleep(100);
+		// Act - Navigate down
+		comboBox.Navigate(last.Value - first.Value);
 		var focusedAfterDown = comboBox.GetFocusedDropdownItem();
 		await Assert.That(focusedAfterDown).IsEqualTo(last.Key);
 		// Assert - Should have focus on an item (dropdown still open)
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 		comboBox.PressEnter();
-		Thread.Sleep(200);
 		var selectedItems = comboBox.SelectedItems;
 		await Assert.That(selectedItems).IsEquivalentTo([first.Key, last.Key]);
 	}
@@ -80,25 +76,24 @@ public class KeyboardNavigationTests : UITestBase {
 	[Test]
 	[Category("KeyboardNavigation")]
 	public async Task ArrowUp_NavigatesToPreviousItem() {
-		var ks = GetKnownSearch(KnownSearch.ata);
+		var ks = GetKnownSearch(KnownSearch.dut);
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(300);
-		comboBox.NavigateDown();//set to first item
+		comboBox.Navigate();//set to first item
 
-		var firstItem =  ks.VisibleItemToPosition.Skip(3).First();
+		var firstItem = ks.VisibleItemToPosition.Skip(3).First();
 		var nextItem = ks.VisibleItemToPosition.Skip(1).First();
 		// Navigate down a few items first
 		comboBox.Navigate(firstItem.Value);
-		Thread.Sleep(200);
-
+		var focused = comboBox.GetFocusedDropdownItem();
+		var dbgFocused = focused;
+		await Assert.That(focused).IsEqualTo(firstItem.Key);
 		// Act - Navigate up
 		comboBox.Navigate(nextItem.Value - firstItem.Value);
-		Thread.Sleep(200);
-		var focusedAfterUp = comboBox.GetFocusedDropdownItem();
-
-		await Assert.That(focusedAfterUp).IsEqualTo(nextItem.Key);
+		focused = comboBox.GetFocusedDropdownItem();
+		Console.WriteLine($"firstItem was: {dbgFocused} expected: {firstItem.Key} at pos: {firstItem.Value} then went: {nextItem.Value - firstItem.Value} and got: {focused}");
+		await Assert.That(focused).IsEqualTo(nextItem.Key);
 
 		// Assert - Dropdown should still be open and functional
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
@@ -111,18 +106,15 @@ public class KeyboardNavigationTests : UITestBase {
 		var comboBox = _mainPage.MultiSelectComboBox;
 		var ks = GetKnownSearch(KnownSearch.No);
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(300);
-		
-		comboBox.NavigateDown();
+
+		comboBox.Navigate();
 		var firstItem = ks.VisibleItemToPosition.Skip(1).First();
 		// Navigate to first item
 		comboBox.Navigate(firstItem.Value);
-		Thread.Sleep(200);
 		var focusedItem = comboBox.GetFocusedDropdownItem();
 		await Assert.That(focusedItem).IsEqualTo(firstItem.Key);
 		// Act - Press Enter to select
 		comboBox.PressEnter();
-		Thread.Sleep(300);
 
 		// Assert
 		var finalCount = comboBox.SelectedItemsCount;
@@ -137,13 +129,12 @@ public class KeyboardNavigationTests : UITestBase {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.OpenDropdown();
-		Thread.Sleep(200);
 
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 
 		// Act
 		Keyboard.Type(VirtualKeyShort.ESCAPE);
-		Thread.Sleep(200);
+		SleepLong();
 
 		// Assert
 		await Assert.That(comboBox.IsDropdownOpen).IsFalse();
@@ -151,21 +142,21 @@ public class KeyboardNavigationTests : UITestBase {
 		comboBox.TypeFilterText("E");
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 		Keyboard.Type(VirtualKeyShort.ESCAPE);
-		Thread.Sleep(200);
+		SleepLong();
 		await Assert.That(comboBox.IsDropdownOpen).IsFalse();
 	}
 
 	[Test]
 	[Category("KeyboardNavigation")]
 	public async Task HittingEnter_SelectsFirstItem() {
-		var ks = GetKnownSearch(KnownSearch.ata);
+		var ks = GetKnownSearch(KnownSearch.dut);
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 
 		// Filter to show specific items
 		comboBox.TypeFilterText(ks.Term);
 		comboBox.PressEnter();
-		Thread.Sleep(300);
+	
 
 		// Assert - Should have selected an English-related item
 		var selectedItems = comboBox.SelectedItems;
@@ -183,14 +174,12 @@ public class KeyboardNavigationTests : UITestBase {
 
 		// Filter to show specific items
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(300);
+
 
 		// Act - Navigate down and select
-		comboBox.NavigateDown(); // Gets us onto the first item
+		comboBox.Navigate(); // Gets us onto the first item
 		comboBox.Navigate(targetItem.Value); // Navigate to position 1 (second item)
-		Thread.Sleep(100);
 		comboBox.PressEnter();
-		Thread.Sleep(300);
 
 		// Assert - Should have selected the second item
 		var selectedItems = comboBox.SelectedItems;
@@ -203,34 +192,28 @@ public class KeyboardNavigationTests : UITestBase {
 	public async Task NavigateAndSelect_MultipleTimes_Works() {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
-		var ksAta = GetKnownSearch(KnownSearch.ata);
+		var ksAta = GetKnownSearch(KnownSearch.dut);
 		var ksSpa = GetKnownSearch(KnownSearch.No);
 		var ksZim = GetKnownSearch(KnownSearch.CANA);
 
 		// First selection - select first item
 		var firstItem = ksAta.VisibleItemToPosition.First();
 		comboBox.TypeFilterText(ksAta.Term);
-		Thread.Sleep(200);
 		comboBox.PressEnter();
-		Thread.Sleep(200);
 
 		// Second selection - navigate to position 2
 		var secondItem = ksSpa.VisibleItemToPosition.Skip(2).First();
 		comboBox.TypeFilterText(ksSpa.Term);
-		Thread.Sleep(200);
-		comboBox.NavigateDown(); // Gets us onto the first item
+		comboBox.Navigate(); // Gets us onto the first item
 		comboBox.Navigate(secondItem.Value);
 		comboBox.PressEnter();
-		Thread.Sleep(200);
 
 		// Third selection - navigate to position 1
 		var thirdItem = ksZim.VisibleItemToPosition.Skip(1).First();
 		comboBox.TypeFilterText(ksZim.Term);
-		Thread.Sleep(200);
-		comboBox.NavigateDown(); // Gets us onto the first item
+		comboBox.Navigate(); // Gets us onto the first item
 		comboBox.Navigate(thirdItem.Value);
 		comboBox.PressEnter();
-		Thread.Sleep(200);
 
 		// Assert
 		var selectedItems = comboBox.SelectedItems;
@@ -244,16 +227,14 @@ public class KeyboardNavigationTests : UITestBase {
 		var ks = GetKnownSearch(KnownSearch.No)!; // Use Spa with 26 items for plenty of room to navigate
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(200);
 
 		var initialCount = comboBox.SelectedItemsCount;
 
 		// Act - Just navigate without pressing Enter
-		comboBox.NavigateDown(); // Gets us onto the first item
+		comboBox.Navigate(); // Gets us onto the first item
 		comboBox.Navigate(5);
-		Thread.Sleep(200);
+		SleepLong();
 		comboBox.Navigate(-2);
-		Thread.Sleep(200);
 
 		// Assert - Selection should not change
 		var finalCount = comboBox.SelectedItemsCount;
@@ -269,8 +250,6 @@ public class KeyboardNavigationTests : UITestBase {
 
 		// Act - Just start typing (dropdown should open automatically)
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(300);
-		// Assert
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 	}
 
@@ -280,11 +259,10 @@ public class KeyboardNavigationTests : UITestBase {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.ClickToFocus();
-		Thread.Sleep(200);
 
 		// Act - Press Tab to move to next control
 		Keyboard.Type(VirtualKeyShort.TAB);
-		Thread.Sleep(200);
+		SleepLong();
 		var focusedElement = Automation?.FocusedElement();
 
 		await Assert.That(focusedElement).IsNotNull();
@@ -299,14 +277,12 @@ public class KeyboardNavigationTests : UITestBase {
 	[Category("KeyboardNavigation")]
 	public async Task EnterWithoutNavigation_DoesNotCrash() {
 		// Arrange
-		var ks = GetKnownSearch(KnownSearch.ata)!;
+		var ks = GetKnownSearch(KnownSearch.dut)!;
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.TypeFilterText(ks.Term);
-		Thread.Sleep(200);
 
 		// Act - Press Enter without first navigating
 		comboBox.PressEnter();
-		Thread.Sleep(200);
 
 		// Assert - Should not crash, combobox should still be functional
 		var selectedItems = comboBox.SelectedItems;

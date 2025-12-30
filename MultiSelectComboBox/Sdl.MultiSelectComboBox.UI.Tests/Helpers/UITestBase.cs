@@ -56,7 +56,7 @@ public class UITestBase : IDisposable {
 		// Be very careful adding new test cases they must return the same data for .net 8 and netframework as we test on both
 		AddKnownSearch(KnownSearch.CANA, "English (Canada)", "French (Canada)", "Inuktitut (Latin, Canada)", "Mohawk (Canada)");
 		AddKnownSearch(KnownSearch.No,  "Albanian (North Macedonia)", "Arabic (Lebanon)", "English (Norfolk Island)", "English (Northern Mariana Islands)", "Filipino (Philippines)", "Italian (San Marino)", "Macedonian (North Macedonia)", "North Ndebele (Zimbabwe)", "Norwegian Bokmål (Norway)", "Norwegian Bokmål (Svalbard & Jan Mayen)", "Norwegian Nynorsk (Norway)", "Sami", "Lule (Norway)", "Sami", "Northern (Finland)", "Sami", "Northern (Norway)", "Sami", "Northern (Sweden)", "Sami", "Southern (Norway)");
-		AddKnownSearch(KnownSearch.ata, "Arabic (Qatar)", "Catalan (Andorra)", "Catalan (Catalan)", "Catalan (France)", "Catalan (Italy)", "Luba-Katanga (Congo DRC)");
+		AddKnownSearch(KnownSearch.dut, "Dutch (Aruba)", "Dutch (Belgium)", "Dutch (Bonaire, Sint Eustatius and Saba)", "Dutch (Curaçao)", "Dutch (Netherlands)", "Dutch (Sint Maarten)", "Dutch (Suriname)");
 	}
 	[Before(HookType.Test)]
 	public virtual void Setup() {
@@ -110,7 +110,7 @@ public class UITestBase : IDisposable {
 	public enum KnownSearch{
 		CANA,
 		No,
-		ata
+		dut
 	}
 	protected static KnownSearchInfo GetKnownSearch(KnownSearch search) => KnownSearches[search];
 	private static KnownSearchInfo AddKnownSearch(KnownSearch search, params string[] VisibleItems) => AddKnownSearch(search, search.ToString(), VisibleItems.Length, VisibleItems);

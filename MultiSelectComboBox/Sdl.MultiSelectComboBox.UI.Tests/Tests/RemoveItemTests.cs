@@ -3,6 +3,7 @@ using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using Sdl.MultiSelectComboBox.UI.Tests.Helpers;
 using Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
+using static Sdl.MultiSelectComboBox.UI.Tests.Helpers.DelayHelper;
 
 namespace Sdl.MultiSelectComboBox.UI.Tests.Tests;
 
@@ -22,7 +23,6 @@ public class RemoveItemTests : UITestBase {
 	public async Task ClickRemoveButton_RemovesSelectedItem() {
 		// Arrange - Select some items
 		_mainPage.ClearSelectedItems();
-		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.SelectItemsByFilter("English");
 
@@ -33,7 +33,7 @@ public class RemoveItemTests : UITestBase {
 
 		// Act - Click the remove button
 		removeButtons[0].Click();
-		Thread.Sleep(200);
+		
 
 		// Assert - Selected count should decrease
 		var finalCount = comboBox.SelectedItemsCount;
@@ -45,7 +45,6 @@ public class RemoveItemTests : UITestBase {
 	public async Task RemoveAllItems_ResultsInEmptySelection() {
 		// Arrange - Select a couple of items
 		_mainPage.ClearSelectedItems();
-		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.SelectItemsByFilter("English", "Spanish");
 		comboBox.CloseDropdown();
@@ -59,7 +58,6 @@ public class RemoveItemTests : UITestBase {
 		while (comboBox.SelectedItemsCount > 0) {
 			var buttons = comboBox.GetRemoveButtons();
 			buttons[0].Click();
-			Thread.Sleep(200);
 		}
 
 		// Assert
@@ -71,7 +69,6 @@ public class RemoveItemTests : UITestBase {
 	public async Task RemoveButton_ExistsForEachSelectedItem() {
 		// Arrange - Select a known set of items
 		_mainPage.ClearSelectedItems();
-		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.SelectItemsByFilter("English", "Spanish", "French");
 		var selectedCount = comboBox.SelectedItemsCount;
@@ -89,14 +86,12 @@ public class RemoveItemTests : UITestBase {
 	public async Task ClearSelectedItemsButton_ClearsAllItems() {
 		// Arrange - Select some items
 		_mainPage.ClearSelectedItems();
-		Thread.Sleep(200);
 		var comboBox = _mainPage.MultiSelectComboBox;
 		comboBox.SelectItemsByFilter("English", "Spanish");
 		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(2);
 
 		// Act - Use the Clear selected items button
 		_mainPage.ClearSelectedItems();
-		Thread.Sleep(300);
 
 		// Assert
 		await Assert.That(comboBox.SelectedItemsCount).IsEqualTo(0);
@@ -108,7 +103,6 @@ public class RemoveItemTests : UITestBase {
 		// Arrange - Select multiple items
 		var comboBox = _mainPage.MultiSelectComboBox;
 		_mainPage.ClearSelectedItems();
-		Thread.Sleep(200);
 
 		// Select first item
 		comboBox.SelectItemsByFilter("English", "Spanish", "French");
@@ -121,7 +115,6 @@ public class RemoveItemTests : UITestBase {
 		var removeButtons = comboBox.GetRemoveButtons();
 		await Assert.That(removeButtons.Count).IsEqualTo(3);
 		removeButtons[0].Click();
-		Thread.Sleep(200);
 
 		// Assert - Should have exactly one less item
 		var finalCount = comboBox.SelectedItemsCount;
