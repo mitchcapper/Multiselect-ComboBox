@@ -1531,6 +1531,8 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			if (itemsAdded.Count > 0 || itemsRemoved.Count > 0) {
 				RaiseSelectedItemsChangedEvent(itemsAdded, itemsRemoved, SelectedItemsInternal.Where(a => a != null).ToList());
 			}
+
+			AddFilterPlaceholderIfNeeded();
 		}
 
 		private void UpdateSelectedItemsContainer(IList comboBoxItems) {
@@ -2616,8 +2618,10 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		#endregion
 
 		#region Edit Mode
+		private CancellationTokenSource _closeEditModeCts;
 
 		private void AssignIsEditMode() {
+			_closeEditModeCts?.Cancel();
 			if (SelectedItemsInternal?.Count == 0)
 				SelectedItemsInternal.Add(null);
 #if WINUI
@@ -2651,6 +2655,9 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 		}
 
 		private void FocusCursorOnFilterTextBox() {
+			// Invalidate cache in case visual tree was rebuilt
+			SelectedItemsFilterTextBox = null;
+
 			if (IsEditMode) {
 #if WINUI
 				DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() => {
@@ -2742,26 +2749,32 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 
 		private void AttemptToCloseEditMode() {
 			if (SelectedItemsControl != null) {
-				var task = Task.Run(
-					delegate {
-						System.Threading.Thread.Sleep(500);
-					});
+                _closeEditModeCts?.Cancel();
+				var cts = _closeEditModeCts = new CancellationTokenSource();
+				
+				var task = Task.Delay(500, cts.Token);
 
 				task.ContinueWith(
-					delegate {
+					t => {
+						if (t.IsCanceled || cts.IsCancellationRequested) {
+							return;
+						}
+
 						if (CanCloseEditMode()) {
 #if WINUI
 							DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() => {
+								if (cts.IsCancellationRequested) return;
 								CloseDropdownMenu(true, true);
 							});
 #else
 							Dispatcher.BeginInvoke(
 								new Action(delegate {
+									if (cts.IsCancellationRequested) return;
 									CloseDropdownMenu(true, true);
 								}));
 #endif
 						}
-					}
+					}, TaskContinuationOptions.NotOnCanceled
 				);
 			}
 		}

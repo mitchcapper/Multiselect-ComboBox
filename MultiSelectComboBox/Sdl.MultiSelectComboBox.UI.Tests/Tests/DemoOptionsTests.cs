@@ -38,14 +38,30 @@ public class DemoOptionsTests : UITestBase {
 		// Act
 		comboBox.SetFilterTextClearItems(ksFirst.Term);
 		comboBox.SelectItemByName(firstItem);
-		
+		comboBox.TypeFilterText(ksSecond.Term);
 		comboBox.SelectItemByName(secondItem);
 
 		// Assert
 		await Assert.That(_mainPage.DisplayedSelectedCount).IsEqualTo(1);
 		await Assert.That(comboBox.SelectedItems.Single()).IsEqualTo(secondItem);
 	}
-	
+		[Test]
+	[Category("DemoOptions")]
+	public async Task SelectMode_Single_AfterClearingFirstSelectionCanTypeNewFilter(){
+		var comboBox = _mainPage.MultiSelectComboBox;
+		var ksFirst = GetKnownSearch(KnownSearch.dut);
+		var ksSecond = GetKnownSearch(KnownSearch.No);
+		var firstItem = ksFirst.VisibleItemToPosition[0].Key;
+		_mainPage.SetSelectionMode("Single");
+		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ClearSelectionOnFilterChanged, false);
+		comboBox.TypeFilterText(ksFirst.Term);
+		comboBox.SelectItemByName(firstItem);
+		_mainPage.ClearSelectedItems();
+
+		var invalid = "InvalidFilter";
+		comboBox.TypeFilterText(ksSecond.Term);
+		await Assert.That( comboBox.FilterText.Contains(ksSecond.Term)).IsEqualTo(true);
+	}
 	[Test]
 	[Category("DemoOptions")]
 	public async Task SelectMode_Single_CanAddFilterTextAfterFirstItem(){
