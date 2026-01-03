@@ -289,6 +289,68 @@ public class KeyboardNavigationTests : UITestBase {
 
 	}
 
+	}
+
+	[Test]
+	[Category("KeyboardNavigation")]
+	public async Task RangeSelection_ShiftClick_SelectsRange() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
+		_mainPage.ClearSelectedItems();
+		_mainPage.SetSelectionMode("Multiple"); // range makes no sense in single
+		
+		var ks = GetKnownSearch(KnownSearch.dut);
+		comboBox.TypeFilterText(ks.Term);
+		
+		var items = comboBox.GetVisibleDropdownItems(); // Should have 7 items: nl-AW, nl-BE, nl-BQ, nl-CW, nl-NL, nl-SX, nl-SR
+		
+		// Act: Click 2nd item, then Shift+Click last item
+		comboBox.ClickDropdownItemByIndex(1); // nl-BE
+		
+		Keyboard.Press(VirtualKeyShort.SHIFT);
+		try {
+			comboBox.ClickDropdownItemByIndex(items.Count - 1); // nl-SR
+		} finally {
+			Keyboard.Release(VirtualKeyShort.SHIFT);
+		}
+		
+		// Assert
+		var selected = comboBox.SelectedItems;
+		
+		await Assert.That(selected).DoesNotContain(items[0]); // First item NOT selected
+		
+		// Verify range 1 to end is selected
+		for (int i = 1; i < items.Count; i++) {
+			await Assert.That(selected).Contains(items[i]);
+		}
+	}
+
+	[Test]
+	[Category("KeyboardNavigation")]
+	public async Task ClickingDropdownItem_UpdatesKeyboardFocus() {
+		// Arrange
+		var comboBox = _mainPage.MultiSelectComboBox;
+		_mainPage.ClearSelectedItems();
+		_mainPage.SetSelectionMode("Multiple");
+		
+		var ks = GetKnownSearch(KnownSearch.dut);
+		comboBox.TypeFilterText(ks.Term);
+		
+		var items = comboBox.GetVisibleDropdownItems(); 
+		// Should have items like nl-AW, nl-BE, nl-BQ, etc.
+		
+		// Act
+		// Click the 3rd item (index 2)
+		comboBox.ClickDropdownItemByIndex(2); 
+		
+		// Assert
+		// The item at index 2 should now have keyboard focus
+		var expectedFocusedItem = items[2];
+		var actualFocusedItem = comboBox.GetKeyboardFocusedDropdownItem();
+		
+		await Assert.That(actualFocusedItem).IsEqualTo(expectedFocusedItem);
+	}
+
 	public override void TearDown() {
 		_mainPage?.Dispose();
 		base.TearDown();

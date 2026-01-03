@@ -614,6 +614,19 @@ public class MultiSelectComboBoxPage : IDisposable {
 		return !string.IsNullOrWhiteSpace(name);
 	}
 
+	/// <summary>
+	/// Gets the name of the dropdown item that currently has keyboard focus
+	/// </summary>
+	public string? GetKeyboardFocusedDropdownItem() {
+		var listBox = DropdownListBox;
+		if (listBox == null) return null;
+
+		var focused = listBox.Items.FirstOrDefault(item => item.Properties.HasKeyboardFocus.Value);
+		return focused?.Name;
+	}
+
+
+
 	#endregion
 
 	#region Actions - Remove Items

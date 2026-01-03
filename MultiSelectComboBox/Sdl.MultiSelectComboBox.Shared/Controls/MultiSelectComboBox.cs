@@ -2157,6 +2157,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 			System.Diagnostics.Debug.WriteLine($"[WINUI] DropdownListBoxItemClick - Item: {e.ClickedItem}");
 			if (e.ClickedItem != null) {
 				ToggleItemSelection(e.ClickedItem);
+				SetKeyBoardFocusOnItem(e.ClickedItem);
 
 				if (SelectionMode == SelectionModes.Single) {
 					IsDropDownOpen = false;
@@ -2258,6 +2259,7 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 				if (ItemsSource != null && ItemsSource.Contains(clickedItem)) {
 					System.Diagnostics.Debug.WriteLine($"[WPF] Mouse click - calling ToggleItemSelection for {clickedItem}");
 					ToggleItemSelection(clickedItem);
+					SetKeyBoardFocusOnItem(clickedItem);
 					if (SelectionMode == SelectionModes.Single) {
 						IsDropDownOpen = false;
 					}

@@ -5,6 +5,9 @@ using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using Sdl.MultiSelectComboBox.UI.Tests.Helpers;
 using Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
+using Sdl.MultiSelectComboBox.UI.Tests.PageObjects;
+using FlaUI.Core.Input;
+using FlaUI.Core.WindowsAPI;
 using static Sdl.MultiSelectComboBox.UI.Tests.Helpers.DelayHelper;
 
 namespace Sdl.MultiSelectComboBox.UI.Tests.Tests;
@@ -61,7 +64,10 @@ public class DemoOptionsTests : UITestBase {
 		var invalid = "InvalidFilter";
 		comboBox.TypeFilterText(ksSecond.Term);
 		await Assert.That( comboBox.FilterText.Contains(ksSecond.Term)).IsEqualTo(true);
+		await Assert.That( comboBox.FilterText.Contains(ksSecond.Term)).IsEqualTo(true);
 	}
+
+
 	[Test]
 	[Category("DemoOptions")]
 	public async Task SelectMode_Single_CanAddFilterTextAfterFirstItem(){
@@ -113,6 +119,8 @@ public class DemoOptionsTests : UITestBase {
 		// Assert
 		await Assert.That(comboBox.FilterText).IsEqualTo(ks.Term);
 	}
+
+
 
 	[Test]
 	[Category("DemoOptions")]
