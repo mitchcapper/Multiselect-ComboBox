@@ -30,24 +30,11 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// <summary>
 	/// Gets the main MultiSelectComboBox control (the first one with default style visible)
 	/// </summary>
-	private AutomationElement MultiSelectComboBoxControl => WaitForMultiSelectComboBoxControl();
+	private AutomationElement MultiSelectComboBoxControl =>
+		WaitForElement(cf => cf.ByAutomationId("mainMultiSelectComboxBox"));
 
-	private AutomationElement WaitForMultiSelectComboBoxControl(TimeSpan? timeout = null) {
-		timeout ??= _defaultTimeout;
-		return Retry.WhileNull(
-			() => {
-				var defaultCtrl = _window.FindFirstDescendant(cf => cf.ByAutomationId("mainMultiSelectComboxBox"));
-				if (defaultCtrl != null) {
-					return defaultCtrl;
-				}
-
-				return _window.FindFirstDescendant(cf => cf.ByAutomationId("mainMultiSelectComboxBoxCustom"));
-			},
-			timeout: timeout.Value,
-			throwOnTimeout: true,
-			timeoutMessage: "Element not found: MultiSelectComboBox"
-		).Result;
-	}
+	private AutomationElement CustomThemeMultiSelectComboBoxControl =>
+		WaitForElement(cf => cf.ByAutomationId("mainMultiSelectComboxBoxCustom"));
 
 	/// <summary>
 	/// Gets the filter textbox inside the selected items panel
@@ -55,7 +42,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	private TextBox? FilterTextBox {
 		get {
 			var control = MultiSelectComboBoxControl;
-			return control?.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox))?.AsTextBox();
+			return control.FindFirstDescendant(cf => cf.ByAutomationId(ControlConsts.PART_MultiSelectComboBox_SelectedItemsPanel_Filter_TextBox))?.AsTextBox();
 		}
 	}
 
@@ -122,16 +109,13 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public bool IsDropdownOpen {
 		get {
+
+			var expectedState = DropdownButton!.Patterns.Toggle.Pattern.ToggleState.Value == FlaUI.Core.Definitions.ToggleState.On;
 			var listBox = DropdownListBox;
-			if (listBox == null) {
-				return false;
-			}
-			try {
-				return listBox.IsOffscreen == false;
-			} catch {
-				// Some UIA providers can throw while the popup is transitioning / virtualizing.
-				return false;
-			}
+			var listState = listBox?.IsOffscreen == false;
+			if (expectedState != listState)
+				throw new DataMisalignedException($"Dropdown open state mismatch: between ToggleButton is: {expectedState} and listbox Onscreen: {listState}");
+			return listState;
 		}
 	}
 
@@ -383,17 +367,18 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void ClickToFocus() {
 		var control = MultiSelectComboBoxControl;
-		control?.Click();
+		control.Click();
 		SleepLong();
 	}
 
 	private void FocusFilterInput() {
 		ClickToFocus();
-		SleepShort();
 		var filter = FilterTextBox;
-		filter.Click();
-		SleepShort();
-
+		if (!InEditMode)
+			throw new Exception("Not in edit mode when should be, likely a combobox or other item was open when Focus was called so click just dismissed it");
+		//filter.Click();
+		SleepLong(); // long is _not_ enough
+		SleepLong();
 	}
 
 	/// <summary>
@@ -401,7 +386,7 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// </summary>
 	public void TypeFilterText(string text) {
 		FocusFilterInput();
-
+		
 		// Type using keyboard to simulate real user input
 		Keyboard.Type(text);
 		for (var x = 0; x < 3; x++) //yeah 3x sleep for reliability
@@ -448,65 +433,25 @@ public class MultiSelectComboBoxPage : IDisposable {
 	/// Opens the dropdown by clicking the dropdown button
 	/// </summary>
 	public void OpenDropdown() {
-		if (IsDropdownOpen) {
-			return;
-		}
-
-		// Clicking the control can sometimes open the dropdown implicitly.
-		ClickToFocus();
-		SleepShort();
-		if (IsDropdownOpen) {
-			return;
-		}
-
-		try {
+		if (!IsDropdownOpen) {
+			if (!InEditMode)
+				ClickToFocus();
+			SleepShort();
 			ArrowButton!.Click();
 			SleepShort();
-			if (IsDropdownOpen) {
-				return;
-			}
-		} catch {
-			// ignore and try alternative open paths below
+			WaitForDropdownOpen();
+			
 		}
-
-		try {
-			var toggle = DropdownButton;
-			if (toggle != null && toggle.Patterns.Toggle.IsSupported) {
-				toggle.Patterns.Toggle.Pattern.Toggle();
-			} else {
-				toggle?.Click();
-			}
-			SleepShort();
-			if (IsDropdownOpen) {
-				return;
-			}
-		} catch {
-			// ignore and try keyboard open
-		}
-
-		WaitForDropdownOpen();
-	}
-
-	public void MoveKeyboardFocusToDropdownList() {
-		OpenDropdown();
-		Keyboard.Type(VirtualKeyShort.DOWN);
-		SleepShort();
 	}
 
 	/// <summary>
 	/// Closes the dropdown by pressing Escape
 	/// </summary>
 	public void CloseDropdown() {
-		try {
-			if (!IsDropdownOpen) {
-				return;
-			}
-		} catch {
-			// If we can't reliably query state, still try to close; Escape is safe.
+		if (IsDropdownOpen) {
+			Keyboard.Type(VirtualKeyShort.ESCAPE);
+			SleepLong();
 		}
-
-		Keyboard.Type(VirtualKeyShort.ESCAPE);
-		SleepLong();
 	}
 
 	/// <summary>

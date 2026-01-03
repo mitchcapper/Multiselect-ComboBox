@@ -1183,9 +1183,16 @@ namespace Sdl.MultiSelectComboBox.Themes.Generic
 #else
 		private static readonly DependencyPropertyKey IsEditModePropertyKey =
 			DependencyProperty.RegisterReadOnly("IsEditMode", typeof(bool),
-				typeof(MultiSelectComboBox), new PropertyMetadata(false));
+				typeof(MultiSelectComboBox), new PropertyMetadata(false,isEditModePropertyChanged));
 
-		public static readonly DependencyProperty IsEditModeProperty = IsEditModePropertyKey.DependencyProperty;
+        private static void isEditModePropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e) {
+			if (!(dependencyObject is MultiSelectComboBox control))
+				return;
+            control.EditModeChanged?.Invoke(control,(bool)e.NewValue);
+        }
+		public event EventHandler<bool> EditModeChanged;
+
+        public static readonly DependencyProperty IsEditModeProperty = IsEditModePropertyKey.DependencyProperty;
 
 		public bool IsEditMode => (bool)GetValue(IsEditModeProperty);
 #endif

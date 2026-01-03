@@ -90,7 +90,6 @@ public class FilteringTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText("xyznonexistent123");
-
 		// Assert
 		var visibleItems = comboBox.VisibleDropdownItems;
 		await Assert.That(visibleItems.Count).IsEqualTo(0);

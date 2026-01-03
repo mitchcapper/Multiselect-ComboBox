@@ -26,7 +26,6 @@ public class DemoOptionsTests : UITestBase {
 	public async Task SelectionMode_Single_SelectingSecondItemReplacesFirst() {
 		// Arrange
 		var comboBox = _mainPage.MultiSelectComboBox;
-		comboBox.ClickToFocus();
 		var ksFirst = GetKnownSearch(KnownSearch.dut);
 		var firstItem = ksFirst.VisibleItemToPosition[0].Key;
 		var ksSecond = GetKnownSearch(KnownSearch.CANA);
@@ -39,16 +38,27 @@ public class DemoOptionsTests : UITestBase {
 		// Act
 		comboBox.SetFilterTextClearItems(ksFirst.Term);
 		comboBox.SelectItemByName(firstItem);
-		comboBox.CloseDropdown();
-
-		comboBox.SetFilterTextClearItems(ksSecond.Term);
+		
 		comboBox.SelectItemByName(secondItem);
-		comboBox.CloseDropdown();
 
 		// Assert
-		_mainPage.WaitFor(() => _mainPage.DisplayedSelectedCount == 1, message: "Expected single selection after selecting the second item.");
 		await Assert.That(_mainPage.DisplayedSelectedCount).IsEqualTo(1);
 		await Assert.That(comboBox.SelectedItems.Single()).IsEqualTo(secondItem);
+	}
+	
+	[Test]
+	[Category("DemoOptions")]
+	public async Task SelectMode_Single_CanAddFilterTextAfterFirstItem(){
+		var comboBox = _mainPage.MultiSelectComboBox;
+		var ksFirst = GetKnownSearch(KnownSearch.dut);
+		var firstItem = ksFirst.VisibleItemToPosition[0].Key;
+		_mainPage.SetSelectionMode("Single");
+		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ClearSelectionOnFilterChanged, false);
+		comboBox.TypeFilterText(ksFirst.Term);
+		comboBox.SelectItemByName(firstItem);
+		var invalid = "InvalidFilter";
+		comboBox.TypeFilterText(invalid);
+		await Assert.That( comboBox.FilterText.Contains(invalid)).IsEqualTo(true);
 	}
 
 	[Test]
@@ -61,12 +71,12 @@ public class DemoOptionsTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText(ks.Term);
-		comboBox.MoveKeyboardFocusToDropdownList();
+		comboBox.Navigate();
 		await Assert.That(comboBox.FilterText).IsEqualTo(ks.Term);
 		comboBox.CloseDropdown();
 
 		// Assert
-		_mainPage.WaitFor(() => string.IsNullOrEmpty(comboBox.FilterText), message: "Filter text was not cleared after dropdown close.");
+		
 		await Assert.That(comboBox.FilterText).IsEqualTo(string.Empty);
 	}
 
@@ -80,7 +90,7 @@ public class DemoOptionsTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText(ks.Term);
-		comboBox.MoveKeyboardFocusToDropdownList();
+		comboBox.Navigate();
 		await Assert.That(comboBox.FilterText).IsEqualTo(ks.Term);
 		comboBox.CloseDropdown();
 
@@ -134,14 +144,12 @@ public class DemoOptionsTests : UITestBase {
 		// With the default service, filtering is by Name, so a culture code should not match.
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.UseCustomFilterService, false);
 		comboBox.SetFilterTextClearItems(cultureCode);
-		comboBox.OpenDropdown();
 		var defaultServiceItems = comboBox.VisibleDropdownItems;
 		await Assert.That(defaultServiceItems.Any(i => i.Contains(displayName, StringComparison.OrdinalIgnoreCase))).IsFalse();
 
 		// Act
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.UseCustomFilterService, true);
 		comboBox.SetFilterTextClearItems(cultureCode);
-		comboBox.OpenDropdown();
 
 		// Assert
 		var customServiceItems = comboBox.VisibleDropdownItems;
@@ -164,16 +172,14 @@ public class DemoOptionsTests : UITestBase {
 		comboBox.SetFilterTextClearItems(ksSelected.Term);
 		comboBox.SelectItemByName(selectedItem);
 		comboBox.CloseDropdown();
-		_mainPage.WaitFor(() => _mainPage.DisplayedSelectedCount == 1, message: "Expected a single item to be selected before changing the filter.");
 		await Assert.That(_mainPage.DisplayedSelectedCount).IsEqualTo(1);
 
 		_mainPage.SetDemoOption(MainWindowPage.DemoOptions.ClearSelectionOnFilterChanged, true);
-
+		
 		// Act
 		comboBox.SetFilterTextClearItems(ksTrigger.Term);
 
 		// Assert
-		_mainPage.WaitFor(() => _mainPage.DisplayedSelectedCount == 0, message: "Selection was not cleared when filter changed in single mode.");
 		await Assert.That(_mainPage.DisplayedSelectedCount).IsEqualTo(0);
 	}
 
@@ -205,8 +211,7 @@ public class DemoOptionsTests : UITestBase {
 
 		// Act
 		comboBox.TypeFilterText(ks.Term);
-		_mainPage.WaitFor(() => _mainPage.EventLogText.Contains("Filter Changed", StringComparison.OrdinalIgnoreCase), message: "Expected Filter Changed entry was not written to the event log.");
-
+		
 		// Assert
 		await Assert.That(_mainPage.EventLogText.Contains("Filter Changed", StringComparison.OrdinalIgnoreCase)).IsTrue();
 	}
@@ -247,8 +252,7 @@ public class DemoOptionsTests : UITestBase {
 		comboBox.TypeFilterText(ks.Term);
 		comboBox.SelectItemByName(item);
 		comboBox.CloseDropdown();
-		_mainPage.WaitFor(() => _mainPage.EventLogText.Contains("Selected Changed", StringComparison.OrdinalIgnoreCase), message: "Expected Selected Changed entry was not written to the event log.");
-
+		
 		// Assert
 		await Assert.That(_mainPage.EventLogText.Contains("Selected Changed", StringComparison.OrdinalIgnoreCase)).IsTrue();
 	}

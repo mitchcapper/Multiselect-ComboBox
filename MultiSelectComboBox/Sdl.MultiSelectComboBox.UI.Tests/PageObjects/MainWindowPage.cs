@@ -16,7 +16,7 @@ public class MainWindowPage : IDisposable {
 	private readonly Window _window;
 	private readonly AutomationBase _automation;
 	private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(5);
-	private bool _disposed;
+	private bool _disposed; 
 
 	public static class DemoOptions {
 		public const string Select20RandomItemsButton = "demoSelect20Random";
@@ -73,12 +73,7 @@ public class MainWindowPage : IDisposable {
 	/// Clicks the "Clear selected items" button
 	/// </summary>
 	public void ClearSelectedItems() {
-		var clearButton = Retry.WhileNull(
-			() => _window.FindFirstDescendant(cf => cf.ByAutomationId(MainWindowAutomationIds.ClearSelectedItemsButton))?.AsButton(),
-			timeout: _defaultTimeout,
-			throwOnTimeout: true,
-			timeoutMessage: $"Button not found: {MainWindowAutomationIds.ClearSelectedItemsButton}"
-		).Result;
+		var clearButton = _window.FindFirstDescendant(cf => cf.ByAutomationId(MainWindowAutomationIds.ClearSelectedItemsButton))?.AsButton();
 
 		clearButton.Click();
 		SleepLong();
@@ -88,13 +83,7 @@ public class MainWindowPage : IDisposable {
 	/// Clicks the "Select 20 random items" button
 	/// </summary>
 	public void SelectRandomItems() {
-		var button = Retry.WhileNull(
-			() => _window.FindFirstDescendant(cf => cf.ByAutomationId(DemoOptions.Select20RandomItemsButton))?.AsButton(),
-			timeout: _defaultTimeout,
-			throwOnTimeout: true,
-			timeoutMessage: $"Button not found: {DemoOptions.Select20RandomItemsButton}"
-		).Result;
-
+		var button = _window.FindFirstDescendant(cf => cf.ByAutomationId(DemoOptions.Select20RandomItemsButton))?.AsButton();
 		button.Click();
 		SleepLong(); // Wait for items to be selected
 	}
@@ -126,7 +115,8 @@ public class MainWindowPage : IDisposable {
 			} else {
 				checkbox.Click();
 			}
-			WaitFor(() => checkbox.IsChecked == isChecked, message: $"Checkbox did not update: {optionCheckboxAutomationId}");
+			if (checkbox.IsChecked != isChecked)
+				throw new InvalidOperationException($"Checkbox '{optionCheckboxAutomationId}' did not get set to the desired state: {isChecked}");
 		}
 	}
 
@@ -158,14 +148,8 @@ public class MainWindowPage : IDisposable {
 	/// Clears the event log
 	/// </summary>
 	public void ClearEventLog() {
-		var clearLogButton = Retry.WhileNull(
-			() => _window.FindFirstDescendant(cf => cf.ByAutomationId(MainWindowAutomationIds.ClearLogButton))?.AsButton(),
-			timeout: _defaultTimeout,
-			throwOnTimeout: true,
-			timeoutMessage: $"Button not found: {MainWindowAutomationIds.ClearLogButton}"
-		).Result;
-
-		clearLogButton.Click();
+		var clearLogButton = _window.FindFirstDescendant(cf => cf.ByAutomationId(MainWindowAutomationIds.ClearLogButton))?.AsButton();
+		clearLogButton?.Click();
 		SleepShort();
 	}
 
@@ -175,6 +159,7 @@ public class MainWindowPage : IDisposable {
 	public void SetSelectionMode(string mode) {
 		var selectionModeCombo = FindSelectionModeComboBoxById();
 		selectionModeCombo.Select(mode);
+		selectionModeCombo.Patterns.ExpandCollapse.Pattern.Collapse(); // not sure why we must manually close but i guess its better than using set value pattern?
 		SleepLong();
 	}
 
@@ -192,7 +177,7 @@ public class MainWindowPage : IDisposable {
 	/// <summary>
 	/// Waits for a condition to be true
 	/// </summary>
-	public void WaitFor(Func<bool> condition, TimeSpan? timeout = null, string? message = null) {
+	public void zWaitFor(Func<bool> condition, TimeSpan? timeout = null, string? message = null) {
 		timeout ??= _defaultTimeout;
 		Retry.WhileTrue(
 			() => !condition(),

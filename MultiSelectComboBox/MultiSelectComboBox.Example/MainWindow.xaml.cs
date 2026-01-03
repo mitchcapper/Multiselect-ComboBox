@@ -10,6 +10,7 @@ using Sdl.MultiSelectComboBox.Example.Models;
 using System.Windows;
 using System.Windows.Controls;
 using Sdl.MultiSelectComboBox.Example.Models;
+using Sdl.MultiSelectComboBox.Themes.Generic;
 
 namespace Sdl.MultiSelectComboBox.Example;
 #endif
@@ -45,9 +46,14 @@ public partial class MainWindow : Window
 		this.Loaded += MainWindow_Loaded;
 		
 #endif
+        
+		//Sdl.MultiSelectComboBox.Themes.Generic.MultiSelectComboBox.IsEditModeProperty.prop
+		//IsEditModeProperty
+		
 	}
 
-	private void MainWindow_Loaded(object sender,
+
+    private void MainWindow_Loaded(object sender,
 
 		RoutedEventArgs e
 
@@ -57,6 +63,7 @@ public partial class MainWindow : Window
 		var model = new LanguageItems();
 #if !WINUI
 		DataContext = model;
+		comboMain.EditModeChanged += (s,e) => model.IsEditMode = e;
 		#else
 		ViewModel = model;
 

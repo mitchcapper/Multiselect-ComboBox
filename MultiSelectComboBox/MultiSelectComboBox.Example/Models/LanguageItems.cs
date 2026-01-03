@@ -38,6 +38,7 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 		private bool _useCustomFilterService;
         private bool _enableSuggestionProvider;
         private bool _isEditable;
+		private bool _isEditMode;
 		private bool _clearFilterOnDropdownClosing;
 		private bool _clearSelectionOnFilterChanged;
 		private Control.SelectionModes _selectionMode;
@@ -413,6 +414,23 @@ namespace Sdl.MultiSelectComboBox.Example.Models
 				UpdateEventLog(nameof(IsEditable), _isEditable.ToString());
 
 				OnPropertyChanged(nameof(IsEditable));
+			}
+		}
+		public bool IsEditMode
+		{
+			get => _isEditMode;
+			set
+			{
+				if (_isEditMode.Equals(value))
+				{
+					return;
+				}
+
+				_isEditMode = value;
+
+				UpdateEventLog(nameof(IsEditMode), _isEditMode.ToString());
+
+				OnPropertyChanged(nameof(IsEditMode));
 			}
 		}
 

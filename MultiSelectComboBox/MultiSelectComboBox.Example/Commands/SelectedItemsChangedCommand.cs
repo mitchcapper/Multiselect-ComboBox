@@ -4,7 +4,9 @@ using System.Linq;
 using System.Windows.Input;
 using Sdl.MultiSelectComboBox.EventArgs;
 using Sdl.MultiSelectComboBox.Example.Models;
-
+#if WINUI
+using Uno.Extensions.Specialized;
+#endif
 namespace Sdl.MultiSelectComboBox.Example.Commands
 {
 	public class SelectedItemsChangedCommand : ICommand
@@ -58,7 +60,7 @@ namespace Sdl.MultiSelectComboBox.Example.Commands
 		private static string GetAggregatedText(IEnumerable items)
 		{
 			var itemsText = string.Empty;
-			return items?.Cast<LanguageItem>().Aggregate(itemsText, (current, item) => current + ((!string.IsNullOrEmpty(current) ? ", " : string.Empty) + item.Id));
+			return items?.Cast<LanguageItem>().Aggregate(itemsText, (current, item) => current + ((!string.IsNullOrEmpty(current) ? ", " : string.Empty) + item?.Id));
 		}
 	}
 }

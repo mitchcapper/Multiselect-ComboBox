@@ -145,7 +145,7 @@ public class AdditionalBehaviorTests : UITestBase {
 		await Assert.That(comboBox.IsDropdownOpen).IsTrue();
 
 		// Act: move focus into list (DOWN)
-		comboBox.MoveKeyboardFocusToDropdownList();
+		comboBox.Navigate();
 		var focused = comboBox.GetFocusedDropdownItem();
 
 		// Assert: focus should skip the first (disabled-behaving) item and land on second
